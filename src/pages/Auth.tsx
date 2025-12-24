@@ -1,9 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate, useSearchParams, Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { BarChart3, Loader2 } from "lucide-react";
 import { z } from "zod";
@@ -135,7 +132,7 @@ export default function Auth() {
         <div className="w-full max-w-sm">
           <Link to="/" className="flex items-center gap-2 mb-8">
             <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary">
-              <BarChart3 className="h-4 w-4 text-primary-foreground" />
+              <BarChart3 className="h-4 w-4 text-primary-content" />
             </div>
             <span className="font-display text-xl font-bold">Metric</span>
           </Link>
@@ -143,7 +140,7 @@ export default function Auth() {
           <h1 className="text-2xl font-bold">
             {isSignUp ? "Create your account" : "Welcome back"}
           </h1>
-          <p className="mt-2 text-muted-foreground">
+          <p className="mt-2 text-base-content/70">
             {isSignUp
               ? "Start tracking your analytics in minutes"
               : "Sign in to access your dashboard"}
@@ -151,66 +148,78 @@ export default function Auth() {
 
           <form onSubmit={handleSubmit} className="mt-8 space-y-4">
             {isSignUp && (
-              <div className="space-y-2">
-                <Label htmlFor="fullName">Full name</Label>
-                <Input
-                  id="fullName"
+              <div className="form-control w-full">
+                <label className="label">
+                  <span className="label-text">Full name</span>
+                </label>
+                <input
                   type="text"
                   placeholder="John Doe"
+                  className={`input input-bordered w-full ${errors.fullName ? "input-error" : ""}`}
                   value={fullName}
                   onChange={(e) => setFullName(e.target.value)}
                   disabled={loading}
                 />
                 {errors.fullName && (
-                  <p className="text-sm text-destructive">{errors.fullName}</p>
+                  <label className="label">
+                    <span className="label-text-alt text-error">{errors.fullName}</span>
+                  </label>
                 )}
               </div>
             )}
 
-            <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
-              <Input
-                id="email"
+            <div className="form-control w-full">
+              <label className="label">
+                <span className="label-text">Email</span>
+              </label>
+              <input
                 type="email"
                 placeholder="you@example.com"
+                className={`input input-bordered w-full ${errors.email ? "input-error" : ""}`}
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 disabled={loading}
                 required
               />
               {errors.email && (
-                <p className="text-sm text-destructive">{errors.email}</p>
+                <label className="label">
+                  <span className="label-text-alt text-error">{errors.email}</span>
+                </label>
               )}
             </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="password">Password</Label>
-              <Input
-                id="password"
+            <div className="form-control w-full">
+              <label className="label">
+                <span className="label-text">Password</span>
+              </label>
+              <input
                 type="password"
                 placeholder="••••••••"
+                className={`input input-bordered w-full ${errors.password ? "input-error" : ""}`}
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 disabled={loading}
                 required
               />
               {errors.password && (
-                <p className="text-sm text-destructive">{errors.password}</p>
+                <label className="label">
+                  <span className="label-text-alt text-error">{errors.password}</span>
+                </label>
               )}
             </div>
 
-            <Button type="submit" className="w-full" disabled={loading}>
+            <button type="submit" className="btn btn-primary w-full" disabled={loading}>
               {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
               {isSignUp ? "Create account" : "Sign in"}
-            </Button>
+            </button>
           </form>
 
-          <p className="mt-6 text-center text-sm text-muted-foreground">
+          <p className="mt-6 text-center text-sm text-base-content/70">
             {isSignUp ? "Already have an account?" : "Don't have an account?"}{" "}
             <button
               type="button"
               onClick={() => setIsSignUp(!isSignUp)}
-              className="text-primary hover:underline font-medium"
+              className="link link-primary font-medium"
             >
               {isSignUp ? "Sign in" : "Sign up"}
             </button>
@@ -222,21 +231,21 @@ export default function Auth() {
       <div className="hidden lg:flex flex-1 bg-primary/5 items-center justify-center p-8">
         <div className="max-w-md text-center">
           <div className="inline-flex h-20 w-20 items-center justify-center rounded-2xl bg-primary mb-8">
-            <BarChart3 className="h-10 w-10 text-primary-foreground" />
+            <BarChart3 className="h-10 w-10 text-primary-content" />
           </div>
           <h2 className="text-2xl font-bold">Privacy-first analytics</h2>
-          <p className="mt-4 text-muted-foreground">
+          <p className="mt-4 text-base-content/70">
             Get powerful insights without compromising your users' privacy. 
             GDPR compliant, no cookies required.
           </p>
-          <div className="mt-8 flex items-center justify-center gap-8 text-sm text-muted-foreground">
-            <div>
-              <div className="text-2xl font-bold text-foreground">10K+</div>
-              <div>Websites tracked</div>
+          <div className="stats stats-vertical sm:stats-horizontal shadow mt-8">
+            <div className="stat">
+              <div className="stat-value">10K+</div>
+              <div className="stat-desc">Websites tracked</div>
             </div>
-            <div>
-              <div className="text-2xl font-bold text-foreground">1B+</div>
-              <div>Events processed</div>
+            <div className="stat">
+              <div className="stat-value">1B+</div>
+              <div className="stat-desc">Events processed</div>
             </div>
           </div>
         </div>

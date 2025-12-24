@@ -1,5 +1,4 @@
 import { Check } from "lucide-react";
-import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 
 const tiers = [
@@ -57,12 +56,12 @@ const tiers = [
 export function Pricing() {
   return (
     <section id="pricing" className="py-24">
-      <div className="container">
+      <div className="container mx-auto px-4">
         <div className="text-center max-w-2xl mx-auto">
           <h2 className="text-3xl font-bold tracking-tight sm:text-4xl">
             Simple, usage-based pricing
           </h2>
-          <p className="mt-4 text-lg text-muted-foreground">
+          <p className="mt-4 text-lg text-base-content/70">
             Start free, scale as you grow. Only pay for what you use.
           </p>
         </div>
@@ -71,56 +70,57 @@ export function Pricing() {
           {tiers.map((tier) => (
             <div 
               key={tier.name}
-              className={`relative rounded-2xl border p-8 ${
+              className={`card border ${
                 tier.highlighted 
-                  ? "border-primary bg-card shadow-xl shadow-primary/10 scale-105" 
-                  : "bg-card"
+                  ? "border-primary bg-base-100 shadow-xl shadow-primary/10 scale-105 z-10" 
+                  : "bg-base-100 border-base-300"
               }`}
             >
               {tier.highlighted && (
                 <div className="absolute -top-4 left-1/2 -translate-x-1/2">
-                  <span className="inline-flex items-center rounded-full bg-primary px-4 py-1 text-xs font-medium text-primary-foreground">
+                  <span className="badge badge-primary">
                     Most Popular
                   </span>
                 </div>
               )}
 
-              <div>
+              <div className="card-body">
                 <h3 className="text-lg font-semibold">{tier.name}</h3>
-                <p className="mt-2 text-sm text-muted-foreground">{tier.description}</p>
+                <p className="text-sm text-base-content/70">{tier.description}</p>
+
+                <div className="mt-4">
+                  <span className="text-4xl font-bold">{tier.price}</span>
+                  {tier.period && (
+                    <span className="text-base-content/70">{tier.period}</span>
+                  )}
+                </div>
+
+                <p className="text-sm font-medium text-primary">{tier.events}</p>
+
+                <ul className="mt-6 space-y-3">
+                  {tier.features.map((feature) => (
+                    <li key={feature} className="flex items-center gap-3 text-sm">
+                      <Check className="h-4 w-4 text-success flex-shrink-0" />
+                      <span>{feature}</span>
+                    </li>
+                  ))}
+                </ul>
+
+                <div className="card-actions mt-6">
+                  <Link 
+                    to="/auth?mode=signup"
+                    className={`btn w-full ${tier.highlighted ? "btn-primary" : "btn-outline"}`}
+                  >
+                    {tier.cta}
+                  </Link>
+                </div>
               </div>
-
-              <div className="mt-6">
-                <span className="text-4xl font-bold">{tier.price}</span>
-                {tier.period && (
-                  <span className="text-muted-foreground">{tier.period}</span>
-                )}
-              </div>
-
-              <p className="mt-2 text-sm font-medium text-primary">{tier.events}</p>
-
-              <ul className="mt-8 space-y-3">
-                {tier.features.map((feature) => (
-                  <li key={feature} className="flex items-center gap-3 text-sm">
-                    <Check className="h-4 w-4 text-success flex-shrink-0" />
-                    <span>{feature}</span>
-                  </li>
-                ))}
-              </ul>
-
-              <Button 
-                className="w-full mt-8" 
-                variant={tier.highlighted ? "default" : "outline"}
-                asChild
-              >
-                <Link to="/auth?mode=signup">{tier.cta}</Link>
-              </Button>
             </div>
           ))}
         </div>
 
-        <p className="mt-12 text-center text-sm text-muted-foreground">
-          Need more than 1M events? <a href="#" className="text-primary hover:underline">Contact us</a> for custom pricing.
+        <p className="mt-12 text-center text-sm text-base-content/70">
+          Need more than 1M events? <a href="#" className="link link-primary">Contact us</a> for custom pricing.
         </p>
       </div>
     </section>

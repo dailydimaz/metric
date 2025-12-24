@@ -54,13 +54,13 @@ const features = [
 
 export function Features() {
   return (
-    <section id="features" className="py-24 bg-muted/30">
-      <div className="container">
+    <section id="features" className="py-24 bg-base-200/30">
+      <div className="container mx-auto px-4">
         <div className="text-center max-w-2xl mx-auto">
           <h2 className="text-3xl font-bold tracking-tight sm:text-4xl">
             Everything you need to understand your users
           </h2>
-          <p className="mt-4 text-lg text-muted-foreground">
+          <p className="mt-4 text-lg text-base-content/70">
             From basic page views to advanced funnel analysis, Metric gives you the insights you need without the complexity.
           </p>
         </div>
@@ -69,16 +69,18 @@ export function Features() {
           {features.map((feature, index) => (
             <div 
               key={feature.title}
-              className="group relative rounded-xl border bg-card p-6 hover:shadow-lg hover:shadow-primary/5 transition-all duration-300"
+              className="card bg-base-100 border border-base-300 hover:shadow-lg transition-all duration-300 group"
               style={{ animationDelay: `${index * 50}ms` }}
             >
-              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10 text-primary group-hover:bg-primary group-hover:text-primary-foreground transition-colors">
-                <feature.icon className="h-5 w-5" />
+              <div className="card-body">
+                <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10 text-primary group-hover:bg-primary group-hover:text-primary-content transition-colors">
+                  <feature.icon className="h-5 w-5" />
+                </div>
+                <h3 className="card-title text-base mt-4">{feature.title}</h3>
+                <p className="text-sm text-base-content/70 leading-relaxed">
+                  {feature.description}
+                </p>
               </div>
-              <h3 className="mt-4 font-semibold">{feature.title}</h3>
-              <p className="mt-2 text-sm text-muted-foreground leading-relaxed">
-                {feature.description}
-              </p>
             </div>
           ))}
         </div>

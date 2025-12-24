@@ -5,7 +5,6 @@ import { useSites } from "@/hooks/useSites";
 import { DashboardLayout } from "@/components/dashboard/DashboardLayout";
 import { SiteCard } from "@/components/dashboard/SiteCard";
 import { CreateSiteDialog } from "@/components/dashboard/CreateSiteDialog";
-import { Button } from "@/components/ui/button";
 import { Plus, BarChart3, Loader2 } from "lucide-react";
 
 export default function Dashboard() {
@@ -23,7 +22,7 @@ export default function Dashboard() {
   if (authLoading || sitesLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+        <span className="loading loading-spinner loading-lg text-primary"></span>
       </div>
     );
   }
@@ -39,14 +38,17 @@ export default function Dashboard() {
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-2xl font-bold tracking-tight">Dashboard</h1>
-            <p className="text-muted-foreground">
+            <p className="text-base-content/70">
               Manage your sites and view analytics
             </p>
           </div>
-          <Button onClick={() => setCreateDialogOpen(true)}>
+          <button 
+            className="btn btn-primary"
+            onClick={() => setCreateDialogOpen(true)}
+          >
             <Plus className="mr-2 h-4 w-4" />
             Add site
-          </Button>
+          </button>
         </div>
 
         {/* Sites Grid */}
@@ -58,18 +60,21 @@ export default function Dashboard() {
           </div>
         ) : (
           /* Empty State */
-          <div className="flex flex-col items-center justify-center rounded-xl border border-dashed bg-muted/30 py-16">
+          <div className="flex flex-col items-center justify-center rounded-xl border border-dashed border-base-300 bg-base-200/30 py-16">
             <div className="flex h-16 w-16 items-center justify-center rounded-full bg-primary/10 text-primary mb-4">
               <BarChart3 className="h-8 w-8" />
             </div>
             <h2 className="text-xl font-semibold">No sites yet</h2>
-            <p className="mt-2 text-muted-foreground text-center max-w-sm">
+            <p className="mt-2 text-base-content/70 text-center max-w-sm">
               Create your first site to start tracking analytics
             </p>
-            <Button className="mt-6" onClick={() => setCreateDialogOpen(true)}>
+            <button 
+              className="btn btn-primary mt-6"
+              onClick={() => setCreateDialogOpen(true)}
+            >
               <Plus className="mr-2 h-4 w-4" />
               Create your first site
-            </Button>
+            </button>
           </div>
         )}
       </div>
