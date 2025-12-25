@@ -11,6 +11,7 @@ import FunnelDetail from "./pages/FunnelDetail";
 import Funnels from "./pages/Funnels";
 import Retention from "./pages/Retention";
 import Settings from "./pages/Settings";
+import Roadmap from "./pages/Roadmap";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -24,6 +25,7 @@ const App = () => (
         <Routes>
           <Route path="/" element={<Landing />} />
           <Route path="/auth" element={<Auth />} />
+          <Route path="/roadmap" element={<Roadmap />} />
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/dashboard/sites/:id" element={<SiteDetail />} />
           <Route path="/dashboard/funnels" element={<Funnels />} />
