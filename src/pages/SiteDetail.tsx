@@ -28,6 +28,7 @@ import {
   ExportButton,
   GoalsCard,
   GoalSetup,
+  FunnelList,
 } from "@/components/analytics";
 import { 
   useAnalyticsStats, 
@@ -338,6 +339,9 @@ export default function SiteDetail() {
             <TopPages pages={topPages} isLoading={pagesLoading} />
             <TopReferrers referrers={topReferrers} isLoading={referrersLoading} />
           </div>
+
+          {/* Funnels */}
+          <FunnelList siteId={site.id} />
 
           {/* Goals & Custom Events */}
           <div className="grid gap-6 lg:grid-cols-2">

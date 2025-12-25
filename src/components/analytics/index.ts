@@ -11,3 +11,6 @@ export { CustomEvents } from "./CustomEvents";
 export { ExportButton } from "./ExportButton";
 export { GoalsCard } from "./GoalsCard";
 export { GoalSetup } from "./GoalSetup";
+export { FunnelBuilder } from "./FunnelBuilder";
+export { FunnelChart } from "./FunnelChart";
+export { FunnelList } from "./FunnelList";
