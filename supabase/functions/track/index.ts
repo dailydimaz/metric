@@ -145,6 +145,9 @@ serve(async (req) => {
       });
     }
 
+    // Note: Usage tracking is handled by the frontend useUsage hook
+    // which counts events directly for simplicity and accuracy
+
     console.log(`Event recorded: ${event_name} for site ${site_id}`);
 
     // Return success with minimal response

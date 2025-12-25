@@ -1,16 +1,19 @@
-import { Check } from "lucide-react";
+import { Check, Server, Infinity } from "lucide-react";
 import { Link } from "react-router-dom";
+import { isSelfHosted, PLANS, formatNumber } from "@/lib/billing";
+import { Badge } from "@/components/ui/badge";
 
 const tiers = [
   {
     name: "Hobby",
+    planKey: "free" as const,
     price: "Free",
     description: "Perfect for personal projects and small sites.",
-    events: "Up to 10K events/mo",
+    events: `Up to ${formatNumber(PLANS.free.eventsLimit)} events/mo`,
     features: [
-      "1 website",
+      `${PLANS.free.sitesLimit} website`,
       "Core web analytics",
-      "7-day data retention",
+      `${PLANS.free.retentionDays}-day data retention`,
       "Email support"
     ],
     cta: "Start Free",
@@ -18,10 +21,11 @@ const tiers = [
   },
   {
     name: "Pro",
+    planKey: "pro" as const,
     price: "$19",
     period: "/month",
     description: "For growing businesses that need more insights.",
-    events: "Up to 100K events/mo",
+    events: `Up to ${formatNumber(PLANS.pro.eventsLimit)} events/mo`,
     features: [
       "Unlimited websites",
       "Custom event tracking",
@@ -35,10 +39,11 @@ const tiers = [
   },
   {
     name: "Business",
+    planKey: "business" as const,
     price: "$79",
     period: "/month",
     description: "For teams that need advanced analytics.",
-    events: "Up to 1M events/mo",
+    events: `Up to ${formatNumber(PLANS.business.eventsLimit)} events/mo`,
     features: [
       "Everything in Pro",
       "Retention cohorts",
@@ -54,6 +59,60 @@ const tiers = [
 ];
 
 export function Pricing() {
+  const selfHosted = isSelfHosted();
+
+  // Show self-hosted banner if no Stripe key
+  if (selfHosted) {
+    return (
+      <section id="pricing" className="py-24">
+        <div className="container mx-auto px-4">
+          <div className="text-center max-w-2xl mx-auto">
+            <h2 className="text-3xl font-bold tracking-tight sm:text-4xl">
+              Self-Hosted Mode
+            </h2>
+            <p className="mt-4 text-lg text-base-content/70">
+              You're running SimpleTrack on your own infrastructure with all features unlocked.
+            </p>
+          </div>
+
+          <div className="mt-16 max-w-lg mx-auto">
+            <div className="card border border-primary bg-base-100 shadow-xl shadow-primary/10">
+              <div className="card-body text-center">
+                <Badge variant="secondary" className="self-center mb-4">
+                  <Server className="w-3 h-3 mr-1" />
+                  Self-Hosted
+                </Badge>
+                
+                <h3 className="text-2xl font-bold">Unlimited Everything</h3>
+                <p className="text-base-content/70 mb-6">
+                  All features are available with no restrictions
+                </p>
+
+                <ul className="space-y-3 text-left mb-6">
+                  {PLANS.selfhosted.features.map((feature) => (
+                    <li key={feature} className="flex items-center gap-3 text-sm">
+                      <Check className="h-4 w-4 text-success flex-shrink-0" />
+                      <span>{feature}</span>
+                    </li>
+                  ))}
+                </ul>
+
+                <div className="flex items-center justify-center gap-2 text-primary">
+                  <Infinity className="w-5 h-5" />
+                  <span className="font-semibold">No limits, no billing</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <p className="mt-12 text-center text-sm text-base-content/70">
+            Want managed hosting? Check out our <a href="https://simpletrack.io" className="link link-primary">cloud offering</a>.
+          </p>
+        </div>
+      </section>
+    );
+  }
+
   return (
     <section id="pricing" className="py-24">
       <div className="container mx-auto px-4">

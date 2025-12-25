@@ -28,6 +28,7 @@ import { SessionManagement } from "@/components/settings/SessionManagement";
 import { EmailPreferences } from "@/components/settings/EmailPreferences";
 import { DataExport } from "@/components/settings/DataExport";
 import { LoginHistory } from "@/components/settings/LoginHistory";
+import { UsageCard, PlanCard } from "@/components/billing";
 
 interface Profile {
   id: string;
@@ -422,6 +423,12 @@ export default function Settings() {
 
         {/* Login History */}
         <LoginHistory />
+
+        {/* Billing & Usage */}
+        <div className="grid gap-6 md:grid-cols-2">
+          <PlanCard />
+          <UsageCard />
+        </div>
 
         {/* Email Preferences */}
         <EmailPreferences />

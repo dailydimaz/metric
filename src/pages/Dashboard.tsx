@@ -2,14 +2,18 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { useSites } from "@/hooks/useSites";
+import { useSubscription } from "@/hooks/useSubscription";
 import { DashboardLayout } from "@/components/dashboard/DashboardLayout";
 import { SiteCard } from "@/components/dashboard/SiteCard";
 import { CreateSiteDialog } from "@/components/dashboard/CreateSiteDialog";
-import { Plus, BarChart3, Loader2 } from "lucide-react";
+import { UsageAlert } from "@/components/billing";
+import { Plus, BarChart3, Lock } from "lucide-react";
+import { isOverLimit } from "@/lib/billing";
 
 export default function Dashboard() {
   const { user, loading: authLoading } = useAuth();
   const { sites, isLoading: sitesLoading } = useSites();
+  const { plan, isSelfHosted } = useSubscription();
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
   const navigate = useNavigate();
 
@@ -31,9 +35,16 @@ export default function Dashboard() {
     return null;
   }
 
+  const sitesCount = sites.length;
+  const sitesLimit = plan.sitesLimit;
+  const canCreateSite = isSelfHosted || sitesLimit < 0 || !isOverLimit(sitesCount, sitesLimit);
+
   return (
     <DashboardLayout>
       <div className="space-y-6">
+        {/* Usage Alert */}
+        <UsageAlert />
+
         {/* Header */}
         <div className="flex items-center justify-between">
           <div>
@@ -45,9 +56,19 @@ export default function Dashboard() {
           <button 
             className="btn btn-primary"
             onClick={() => setCreateDialogOpen(true)}
+            disabled={!canCreateSite}
           >
-            <Plus className="mr-2 h-4 w-4" />
-            Add site
+            {canCreateSite ? (
+              <>
+                <Plus className="mr-2 h-4 w-4" />
+                Add site
+              </>
+            ) : (
+              <>
+                <Lock className="mr-2 h-4 w-4" />
+                Upgrade to add more
+              </>
+            )}
           </button>
         </div>
 
