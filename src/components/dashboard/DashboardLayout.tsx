@@ -1,7 +1,9 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { useSites } from "@/hooks/useSites";
+import { MobileNav } from "@/components/dashboard/MobileNav";
+import { CreateSiteDialog } from "@/components/dashboard/CreateSiteDialog";
 import {
   BarChart3,
   ChevronDown,
@@ -30,11 +32,30 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
   const { user, signOut } = useAuth();
   const { sites } = useSites();
   const navigate = useNavigate();
-  const [selectedSiteId, setSelectedSiteId] = useState<string | null>(null);
+  const [createDialogOpen, setCreateDialogOpen] = useState(false);
+  
+  // Persist selected site in localStorage
+  const [selectedSiteId, setSelectedSiteId] = useState<string | null>(() => {
+    return localStorage.getItem("selectedSiteId");
+  });
+
+  useEffect(() => {
+    if (selectedSiteId) {
+      localStorage.setItem("selectedSiteId", selectedSiteId);
+    }
+  }, [selectedSiteId]);
+
+  // Auto-select first site if none selected
+  useEffect(() => {
+    if (!selectedSiteId && sites.length > 0) {
+      setSelectedSiteId(sites[0].id);
+    }
+  }, [sites, selectedSiteId]);
 
   const selectedSite = sites.find((s) => s.id === selectedSiteId) ?? sites[0];
 
   const handleSignOut = async () => {
+    localStorage.removeItem("selectedSiteId");
     await signOut();
     navigate("/");
   };
@@ -43,6 +64,9 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
     <div className="min-h-screen bg-base-100">
       {/* Top Header */}
       <header className="navbar sticky top-0 z-50 border-b border-base-300 bg-base-100 px-4">
+        {/* Mobile Menu */}
+        <MobileNav />
+        
         {/* Logo & Site Selector */}
         <div className="navbar-start gap-4">
           <Link to="/dashboard" className="flex items-center gap-2">
@@ -52,9 +76,9 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
             <span className="font-display text-lg font-bold hidden sm:inline">Metric</span>
           </Link>
 
-          <div className="divider divider-horizontal mx-0"></div>
+          <div className="divider divider-horizontal mx-0 hidden sm:flex"></div>
 
-          <div className="dropdown">
+          <div className="dropdown hidden sm:block">
             <div tabIndex={0} role="button" className="btn btn-ghost gap-2">
               <span className="max-w-[150px] truncate">
                 {selectedSite?.name ?? "Select site"}
@@ -76,7 +100,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
               ))}
               {sites.length > 0 && <li className="menu-title"><span></span></li>}
               <li>
-                <a onClick={() => navigate("/dashboard/sites/new")}>
+                <a onClick={() => setCreateDialogOpen(true)}>
                   <Plus className="h-4 w-4" />
                   Add new site
                 </a>
@@ -112,10 +136,10 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
                 <span className="text-xs font-normal truncate">{user?.email}</span>
               </li>
               <li>
-                <a onClick={() => navigate("/dashboard/settings")}>
+                <Link to="/dashboard/settings">
                   <Settings className="h-4 w-4" />
                   Settings
-                </a>
+                </Link>
               </li>
               <li>
                 <a onClick={handleSignOut}>
@@ -130,6 +154,12 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
 
       {/* Main Content */}
       <main className="container mx-auto px-4 py-6">{children}</main>
+
+      {/* Create Site Dialog */}
+      <CreateSiteDialog
+        open={createDialogOpen}
+        onOpenChange={setCreateDialogOpen}
+      />
     </div>
   );
 }
