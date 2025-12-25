@@ -12,8 +12,8 @@ import { useState, useEffect } from "react";
 const getNavItems = (siteId: string | null) => [
   { icon: LayoutDashboard, label: "Overview", href: "/dashboard" },
   { icon: MousePointerClick, label: "Analytics", href: siteId ? `/dashboard/sites/${siteId}` : "/dashboard" },
-  { icon: GitBranch, label: "Funnels", href: siteId ? `/dashboard/sites/${siteId}` : "/dashboard" },
-  { icon: Users, label: "Retention", href: siteId ? `/dashboard/retention?siteId=${siteId}` : "/dashboard" },
+  { icon: GitBranch, label: "Funnels", href: siteId ? `/dashboard/funnels?siteId=${siteId}` : "/dashboard/funnels" },
+  { icon: Users, label: "Retention", href: siteId ? `/dashboard/retention?siteId=${siteId}` : "/dashboard/retention" },
 ];
 
 export function MobileNav() {

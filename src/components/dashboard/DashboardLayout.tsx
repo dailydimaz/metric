@@ -21,8 +21,8 @@ import {
 const getNavItems = (siteId: string | null) => [
   { icon: LayoutDashboard, label: "Overview", href: "/dashboard" },
   { icon: MousePointerClick, label: "Analytics", href: siteId ? `/dashboard/sites/${siteId}` : "/dashboard", siteSpecific: true },
-  { icon: GitBranch, label: "Funnels", href: siteId ? `/dashboard/sites/${siteId}` : "/dashboard", siteSpecific: true },
-  { icon: Users, label: "Retention", href: siteId ? `/dashboard/retention?siteId=${siteId}` : "/dashboard", siteSpecific: true },
+  { icon: GitBranch, label: "Funnels", href: siteId ? `/dashboard/funnels?siteId=${siteId}` : "/dashboard/funnels", siteSpecific: true },
+  { icon: Users, label: "Retention", href: siteId ? `/dashboard/retention?siteId=${siteId}` : "/dashboard/retention", siteSpecific: true },
 ];
 
 interface DashboardLayoutProps {
