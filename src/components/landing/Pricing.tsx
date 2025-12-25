@@ -156,7 +156,7 @@ export function Pricing() {
                   </div>
                 </div>
                 <a 
-                  href="https://github.com/user/metric" 
+                  href="https://github.com/dailydimaz/metric" 
                   target="_blank"
                   rel="noopener noreferrer"
                   className="btn btn-outline btn-sm"
