@@ -6,6 +6,7 @@ import { Download, Loader2, FileJson, FileText, Database } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
+import { isBillingEnabled } from "@/lib/billing";
 
 type ExportFormat = "json" | "csv";
 
@@ -54,6 +55,11 @@ export function DataExport() {
   const { toast } = useToast();
   const [exporting, setExporting] = useState(false);
   const [progress, setProgress] = useState(0);
+
+  // Only show data export for cloud users (billing enabled)
+  if (!isBillingEnabled()) {
+    return null;
+  }
   const [currentSection, setCurrentSection] = useState("");
 
   const exportData = async (format: ExportFormat) => {

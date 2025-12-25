@@ -3,6 +3,7 @@ import { Download, FileJson, FileSpreadsheet } from "lucide-react";
 import { DateRange } from "@/hooks/useAnalytics";
 import { fetchExportData, exportToCSV, exportToJSON } from "@/utils/analyticsExport";
 import { useToast } from "@/hooks/use-toast";
+import { isBillingEnabled } from "@/lib/billing";
 
 interface ExportButtonProps {
   siteId: string;
@@ -14,6 +15,11 @@ export function ExportButton({ siteId, siteName, dateRange }: ExportButtonProps)
   const [isExporting, setIsExporting] = useState(false);
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const { toast } = useToast();
+
+  // Only show export for cloud users (billing enabled)
+  if (!isBillingEnabled()) {
+    return null;
+  }
 
   const handleExport = async (format: "csv" | "json") => {
     setIsExporting(true);
