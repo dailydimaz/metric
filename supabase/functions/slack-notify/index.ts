@@ -17,6 +17,23 @@ function isValidSlackWebhookUrl(url: string): boolean {
   return SLACK_WEBHOOK_REGEX.test(url);
 }
 
+// Sanitize user-controlled input for Slack mrkdwn to prevent injection attacks
+function sanitizeForSlackMrkdwn(text: string | null | undefined): string {
+  if (!text) return 'Unknown';
+  
+  // Limit length to prevent message bloat
+  const maxLength = 200;
+  let sanitized = text.substring(0, maxLength);
+  
+  // Escape Slack mrkdwn special characters to prevent formatting/link injection
+  sanitized = sanitized
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;');
+  
+  return sanitized;
+}
+
 // Extract user ID from Authorization header
 async function getUserIdFromRequest(req: Request, supabase: any): Promise<string | null> {
   const authHeader = req.headers.get('Authorization');
@@ -154,18 +171,23 @@ Deno.serve(async (req) => {
       .eq('id', siteId)
       .single();
 
+    // Sanitize user-controlled data before using in Slack messages
+    const safeSiteName = sanitizeForSlackMrkdwn(site?.name);
+    const safeDomain = sanitizeForSlackMrkdwn(site?.domain);
+    const safeGoalName = sanitizeForSlackMrkdwn(data?.goalName);
+
     let message: SlackMessage;
 
     if (test) {
       // Send test message
       message = {
-        text: `🧪 Test notification from ${site?.name || 'your site'}`,
+        text: `🧪 Test notification from ${safeSiteName}`,
         blocks: [
           {
             type: 'section',
             text: {
               type: 'mrkdwn',
-              text: `*🧪 Test Notification*\n\nThis is a test message from your analytics dashboard.\n\n*Site:* ${site?.name || 'Unknown'}\n*Domain:* ${site?.domain || 'Not set'}`,
+              text: `*🧪 Test Notification*\n\nThis is a test message from your analytics dashboard.\n\n*Site:* ${safeSiteName}\n*Domain:* ${site?.domain ? safeDomain : 'Not set'}`,
             },
           },
           {
@@ -181,7 +203,7 @@ Deno.serve(async (req) => {
       };
     } else if (type === 'daily_digest') {
       message = {
-        text: `📊 Daily Analytics Digest for ${site?.name}`,
+        text: `📊 Daily Analytics Digest for ${safeSiteName}`,
         blocks: [
           {
             type: 'header',
@@ -194,7 +216,7 @@ Deno.serve(async (req) => {
             type: 'section',
             text: {
               type: 'mrkdwn',
-              text: `*${site?.name}*\n${site?.domain || 'No domain set'}`,
+              text: `*${safeSiteName}*\n${site?.domain ? safeDomain : 'No domain set'}`,
             },
           },
           {
@@ -210,26 +232,26 @@ Deno.serve(async (req) => {
       };
     } else if (type === 'goal_completed') {
       message = {
-        text: `🎯 Goal Achieved: ${data?.goalName}`,
+        text: `🎯 Goal Achieved: ${safeGoalName}`,
         blocks: [
           {
             type: 'section',
             text: {
               type: 'mrkdwn',
-              text: `*🎯 Goal Achieved!*\n\n*Goal:* ${data?.goalName}\n*Conversions:* ${data?.conversions}\n*Site:* ${site?.name}`,
+              text: `*🎯 Goal Achieved!*\n\n*Goal:* ${safeGoalName}\n*Conversions:* ${data?.conversions}\n*Site:* ${safeSiteName}`,
             },
           },
         ],
       };
     } else if (type === 'traffic_spike') {
       message = {
-        text: `🚀 Traffic Spike Detected on ${site?.name}`,
+        text: `🚀 Traffic Spike Detected on ${safeSiteName}`,
         blocks: [
           {
             type: 'section',
             text: {
               type: 'mrkdwn',
-              text: `*🚀 Traffic Spike Detected!*\n\n*Site:* ${site?.name}\n*Current Visitors:* ${data?.currentVisitors}\n*Normal Average:* ${data?.averageVisitors}\n*Increase:* ${data?.increasePercent}%`,
+              text: `*🚀 Traffic Spike Detected!*\n\n*Site:* ${safeSiteName}\n*Current Visitors:* ${data?.currentVisitors}\n*Normal Average:* ${data?.averageVisitors}\n*Increase:* ${data?.increasePercent}%`,
             },
           },
         ],

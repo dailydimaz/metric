@@ -33,14 +33,20 @@ interface BackupCode {
   created_at: string;
 }
 
-// Generate random backup codes
+// Generate cryptographically secure random backup codes
 const generateCodes = (count: number = 10): string[] => {
   const codes: string[] = [];
+  const charset = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+  
   for (let i = 0; i < count; i++) {
-    const code = Array.from(
-      { length: 8 },
-      () => "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"[Math.floor(Math.random() * 32)]
-    ).join("");
+    // Use crypto.getRandomValues for cryptographically secure randomness
+    const randomBytes = new Uint8Array(8);
+    crypto.getRandomValues(randomBytes);
+    
+    const code = Array.from(randomBytes)
+      .map(byte => charset[byte % charset.length])
+      .join("");
+    
     codes.push(code.slice(0, 4) + "-" + code.slice(4));
   }
   return codes;
