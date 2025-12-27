@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { useNavigate, useSearchParams, Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-import { BarChart3, Loader2, Shield } from "lucide-react";
+import { BarChart3, Loader2, Shield, Mail, ArrowLeft, CheckCircle } from "lucide-react";
 import { z } from "zod";
 
 const authSchema = z.object({
@@ -11,14 +11,23 @@ const authSchema = z.object({
   fullName: z.string().optional(),
 });
 
+const emailSchema = z.object({
+  email: z.string().email("Please enter a valid email address"),
+});
+
+type AuthMode = "signin" | "signup" | "forgot-password" | "check-email";
+
 export default function Auth() {
   const [searchParams] = useSearchParams();
-  const [isSignUp, setIsSignUp] = useState(searchParams.get("mode") === "signup");
+  const [mode, setMode] = useState<AuthMode>(
+    searchParams.get("mode") === "signup" ? "signup" : "signin"
+  );
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [fullName, setFullName] = useState("");
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [emailSentTo, setEmailSentTo] = useState("");
   const navigate = useNavigate();
   const { toast } = useToast();
 
@@ -29,7 +38,6 @@ export default function Auth() {
   const [verifyingMfa, setVerifyingMfa] = useState(false);
 
   useEffect(() => {
-    // Check if user is already logged in
     supabase.auth.getSession().then(({ data: { session } }) => {
       if (session) {
         checkMfaRequired(session);
@@ -101,7 +109,11 @@ export default function Auth() {
 
   const validateForm = () => {
     try {
-      authSchema.parse({ email, password, fullName: isSignUp ? fullName : undefined });
+      if (mode === "forgot-password") {
+        emailSchema.parse({ email });
+      } else {
+        authSchema.parse({ email, password, fullName: mode === "signup" ? fullName : undefined });
+      }
       setErrors({});
       return true;
     } catch (error) {
@@ -118,15 +130,49 @@ export default function Auth() {
     }
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    
+  const handleForgotPassword = async () => {
     if (!validateForm()) return;
     
     setLoading(true);
 
     try {
-      if (isSignUp) {
+      const redirectUrl = `${window.location.origin}/auth/reset-password`;
+      const { error } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: redirectUrl,
+      });
+
+      if (error) throw error;
+
+      setEmailSentTo(email);
+      setMode("check-email");
+      toast({
+        title: "Reset email sent",
+        description: "Check your inbox for the password reset link.",
+      });
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to send reset email",
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (mode === "forgot-password") {
+      return handleForgotPassword();
+    }
+
+    if (!validateForm()) return;
+    
+    setLoading(true);
+
+    try {
+      if (mode === "signup") {
         const redirectUrl = `${window.location.origin}/`;
         const { error } = await supabase.auth.signUp({
           email,
@@ -146,14 +192,16 @@ export default function Auth() {
               description: "This email is already registered. Please sign in instead.",
               variant: "destructive",
             });
-            setIsSignUp(false);
+            setMode("signin");
           } else {
             throw error;
           }
         } else {
+          setEmailSentTo(email);
+          setMode("check-email");
           toast({
             title: "Account created!",
-            description: "Welcome to Metric. Redirecting to dashboard...",
+            description: "Please check your email to verify your account.",
           });
         }
       } else {
@@ -163,7 +211,6 @@ export default function Auth() {
         });
 
         if (error) {
-          // Track failed login attempt
           await trackLogin(false);
           
           if (error.message.includes("Invalid login credentials")) {
@@ -172,11 +219,16 @@ export default function Auth() {
               description: "Please check your email and password and try again.",
               variant: "destructive",
             });
+          } else if (error.message.includes("Email not confirmed")) {
+            toast({
+              title: "Email not verified",
+              description: "Please check your email and click the verification link.",
+              variant: "destructive",
+            });
           } else {
             throw error;
           }
         } else if (data.session) {
-          // Track successful login
           await trackLogin(true);
           await checkMfaRequired(data.session);
         }
@@ -185,6 +237,37 @@ export default function Auth() {
       toast({
         title: "Error",
         description: error.message || "An unexpected error occurred",
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleResendEmail = async () => {
+    if (!emailSentTo) return;
+    
+    setLoading(true);
+    try {
+      const redirectUrl = `${window.location.origin}/`;
+      const { error } = await supabase.auth.resend({
+        type: 'signup',
+        email: emailSentTo,
+        options: {
+          emailRedirectTo: redirectUrl,
+        },
+      });
+
+      if (error) throw error;
+
+      toast({
+        title: "Email resent",
+        description: "Check your inbox for the verification link.",
+      });
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to resend email",
         variant: "destructive",
       });
     } finally {
@@ -229,6 +312,77 @@ export default function Auth() {
       setVerifyingMfa(false);
     }
   };
+
+  // Check email verification / password reset sent screen
+  if (mode === "check-email") {
+    return (
+      <div className="min-h-screen flex">
+        <div className="flex-1 flex items-center justify-center p-8">
+          <div className="w-full max-w-sm text-center">
+            <Link to="/" className="flex items-center gap-2 mb-8 justify-center">
+              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary">
+                <BarChart3 className="h-4 w-4 text-primary-content" />
+              </div>
+              <span className="font-display text-xl font-bold">Metric</span>
+            </Link>
+
+            <div className="inline-flex h-16 w-16 items-center justify-center rounded-full bg-primary/10 mb-6">
+              <Mail className="h-8 w-8 text-primary" />
+            </div>
+
+            <h1 className="text-2xl font-bold">Check your email</h1>
+            <p className="mt-2 text-base-content/70">
+              We've sent a verification link to
+            </p>
+            <p className="font-medium text-base-content mt-1">{emailSentTo}</p>
+
+            <div className="mt-8 p-4 rounded-lg bg-base-200/50 text-left">
+              <h3 className="font-medium text-sm mb-2">Didn't receive the email?</h3>
+              <ul className="text-sm text-base-content/70 space-y-1">
+                <li>• Check your spam folder</li>
+                <li>• Make sure the email address is correct</li>
+                <li>• Wait a few minutes and try again</li>
+              </ul>
+            </div>
+
+            <button
+              type="button"
+              onClick={handleResendEmail}
+              className="btn btn-outline w-full mt-6"
+              disabled={loading}
+            >
+              {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+              Resend email
+            </button>
+
+            <button
+              type="button"
+              onClick={() => {
+                setMode("signin");
+                setEmailSentTo("");
+              }}
+              className="mt-4 flex items-center justify-center gap-2 text-sm text-base-content/70 hover:text-base-content w-full"
+            >
+              <ArrowLeft className="h-4 w-4" />
+              Back to sign in
+            </button>
+          </div>
+        </div>
+
+        <div className="hidden lg:flex flex-1 bg-primary/5 items-center justify-center p-8">
+          <div className="max-w-md text-center">
+            <div className="inline-flex h-20 w-20 items-center justify-center rounded-2xl bg-primary mb-8">
+              <CheckCircle className="h-10 w-10 text-primary-content" />
+            </div>
+            <h2 className="text-2xl font-bold">Almost there!</h2>
+            <p className="mt-4 text-base-content/70">
+              Click the link in your email to verify your account and start tracking your analytics.
+            </p>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   if (showMfaChallenge) {
     return (
@@ -310,6 +464,77 @@ export default function Auth() {
     );
   }
 
+  // Forgot password form
+  if (mode === "forgot-password") {
+    return (
+      <div className="min-h-screen flex">
+        <div className="flex-1 flex items-center justify-center p-8">
+          <div className="w-full max-w-sm">
+            <Link to="/" className="flex items-center gap-2 mb-8">
+              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary">
+                <BarChart3 className="h-4 w-4 text-primary-content" />
+              </div>
+              <span className="font-display text-xl font-bold">Metric</span>
+            </Link>
+
+            <button
+              type="button"
+              onClick={() => setMode("signin")}
+              className="flex items-center gap-2 text-sm text-base-content/70 hover:text-base-content mb-6"
+            >
+              <ArrowLeft className="h-4 w-4" />
+              Back to sign in
+            </button>
+
+            <h1 className="text-2xl font-bold">Reset your password</h1>
+            <p className="mt-2 text-base-content/70">
+              Enter your email and we'll send you a link to reset your password.
+            </p>
+
+            <form onSubmit={handleSubmit} className="mt-8 space-y-4">
+              <div className="form-control w-full">
+                <label className="label">
+                  <span className="label-text">Email</span>
+                </label>
+                <input
+                  type="email"
+                  placeholder="you@example.com"
+                  className={`input input-bordered w-full ${errors.email ? "input-error" : ""}`}
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  disabled={loading}
+                  required
+                />
+                {errors.email && (
+                  <label className="label">
+                    <span className="label-text-alt text-error">{errors.email}</span>
+                  </label>
+                )}
+              </div>
+
+              <button type="submit" className="btn btn-primary w-full" disabled={loading}>
+                {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                Send reset link
+              </button>
+            </form>
+          </div>
+        </div>
+
+        <div className="hidden lg:flex flex-1 bg-primary/5 items-center justify-center p-8">
+          <div className="max-w-md text-center">
+            <div className="inline-flex h-20 w-20 items-center justify-center rounded-2xl bg-primary mb-8">
+              <Mail className="h-10 w-10 text-primary-content" />
+            </div>
+            <h2 className="text-2xl font-bold">Forgot your password?</h2>
+            <p className="mt-4 text-base-content/70">
+              No worries! Enter your email and we'll send you instructions to reset your password securely.
+            </p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen flex">
       <div className="flex-1 flex items-center justify-center p-8">
@@ -322,16 +547,16 @@ export default function Auth() {
           </Link>
 
           <h1 className="text-2xl font-bold">
-            {isSignUp ? "Create your account" : "Welcome back"}
+            {mode === "signup" ? "Create your account" : "Welcome back"}
           </h1>
           <p className="mt-2 text-base-content/70">
-            {isSignUp
+            {mode === "signup"
               ? "Start tracking your analytics in minutes"
               : "Sign in to access your dashboard"}
           </p>
 
           <form onSubmit={handleSubmit} className="mt-8 space-y-4">
-            {isSignUp && (
+            {mode === "signup" && (
               <div className="form-control w-full">
                 <label className="label">
                   <span className="label-text">Full name</span>
@@ -375,6 +600,15 @@ export default function Auth() {
             <div className="form-control w-full">
               <label className="label">
                 <span className="label-text">Password</span>
+                {mode === "signin" && (
+                  <button
+                    type="button"
+                    onClick={() => setMode("forgot-password")}
+                    className="label-text-alt link link-primary"
+                  >
+                    Forgot password?
+                  </button>
+                )}
               </label>
               <input
                 type="password"
@@ -394,18 +628,18 @@ export default function Auth() {
 
             <button type="submit" className="btn btn-primary w-full" disabled={loading}>
               {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              {isSignUp ? "Create account" : "Sign in"}
+              {mode === "signup" ? "Create account" : "Sign in"}
             </button>
           </form>
 
           <p className="mt-6 text-center text-sm text-base-content/70">
-            {isSignUp ? "Already have an account?" : "Don't have an account?"}{" "}
+            {mode === "signup" ? "Already have an account?" : "Don't have an account?"}{" "}
             <button
               type="button"
-              onClick={() => setIsSignUp(!isSignUp)}
+              onClick={() => setMode(mode === "signup" ? "signin" : "signup")}
               className="link link-primary font-medium"
             >
-              {isSignUp ? "Sign in" : "Sign up"}
+              {mode === "signup" ? "Sign in" : "Sign up"}
             </button>
           </p>
         </div>
