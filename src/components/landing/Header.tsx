@@ -7,6 +7,7 @@ export function Header() {
 
   return (
     <header className="navbar fixed top-0 left-0 right-0 z-50 glass px-4 lg:px-8">
+      <script defer src="https://mmmetric.lovable.app/track.js" data-site="st_70965cd97158"></script>
       <div className="navbar-start">
         <Link to="/" className="flex items-center gap-2">
           <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary">
@@ -76,7 +77,6 @@ export function Header() {
           </ul>
         </div>
       )}
-      <script defer src="https://mmmetric.lovable.app/track.js" data-site="st_70965cd97158"></script>
     </header>
   );
 }
