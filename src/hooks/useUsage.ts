@@ -13,19 +13,7 @@ interface UsageData {
 export function useUsage() {
   const { user } = useAuth();
   const currentMonth = format(startOfMonth(new Date()), 'yyyy-MM-dd');
-
-  // If self-hosted, return minimal usage (no limits)
-  if (isSelfHosted()) {
-    return {
-      usage: {
-        events_count: 0,
-        sites_count: 0,
-        month: currentMonth,
-      } as UsageData,
-      isLoading: false,
-      error: null,
-    };
-  }
+  const selfHosted = isSelfHosted();
 
   const usageQuery = useQuery({
     queryKey: ['usage', user?.id, currentMonth],
@@ -49,11 +37,11 @@ export function useUsage() {
       if (userSitesError) throw userSitesError;
 
       let eventsCount = 0;
-      
+
       if (userSites && userSites.length > 0) {
-        const siteIds = userSites.map(s => s.id);
+        const siteIds = userSites.map((s) => s.id);
         const monthStart = `${currentMonth}T00:00:00Z`;
-        
+
         // Count events for all user sites this month
         const { count, error: eventsError } = await supabase
           .from('events')
@@ -71,9 +59,22 @@ export function useUsage() {
         month: currentMonth,
       };
     },
-    enabled: !!user,
-    refetchInterval: 60000, // Refetch every minute
+    enabled: !!user && !selfHosted,
+    refetchInterval: selfHosted ? false : 60000,
   });
+
+  // Self-hosted: no metering
+  if (selfHosted) {
+    return {
+      usage: {
+        events_count: 0,
+        sites_count: 0,
+        month: currentMonth,
+      } as UsageData,
+      isLoading: false,
+      error: null,
+    };
+  }
 
   return {
     usage: usageQuery.data || null,
