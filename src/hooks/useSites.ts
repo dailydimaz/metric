@@ -1,6 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/hooks/useAuth";
 
 export interface Site {
   id: string;
@@ -13,20 +14,25 @@ export interface Site {
 }
 
 export function useSites() {
+  const { user } = useAuth();
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
   const sitesQuery = useQuery({
-    queryKey: ["sites"],
+    queryKey: ["sites", user?.id],
     queryFn: async () => {
+      if (!user) return [] as Site[];
+
       const { data, error } = await supabase
         .from("sites")
         .select("*")
+        .eq("user_id", user.id)
         .order("created_at", { ascending: false });
-      
+
       if (error) throw error;
       return data as Site[];
     },
+    enabled: !!user,
   });
 
   const createSite = useMutation({
