@@ -18,17 +18,29 @@ export function Header() {
 
       <div className="navbar-center hidden md:flex">
         <ul className="menu menu-horizontal px-1">
-          <li><a href="#features" className="text-base-content/70 hover:text-base-content">Features</a></li>
-          <li><a href="#pricing" className="text-base-content/70 hover:text-base-content">Pricing</a></li>
+          <li>
+            <a href="#features" className="text-base-content/70 hover:text-base-content">
+              Features
+            </a>
+          </li>
+          <li>
+            <a href="#pricing" className="text-base-content/70 hover:text-base-content">
+              Pricing
+            </a>
+          </li>
         </ul>
       </div>
 
       <div className="navbar-end gap-2">
-        <Link to="/auth" className="btn btn-ghost hidden sm:flex">Sign in</Link>
-        <Link to="/auth?mode=signup" className="btn btn-primary hidden sm:flex">Start Free</Link>
-        
+        <Link to="/auth" className="btn btn-ghost hidden sm:flex">
+          Sign in
+        </Link>
+        <Link to="/auth?mode=signup" className="btn btn-primary hidden sm:flex">
+          Start Free
+        </Link>
+
         {/* Mobile Menu Button */}
-        <button 
+        <button
           className="btn btn-ghost btn-circle md:hidden"
           onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
           aria-label="Toggle menu"
@@ -41,8 +53,16 @@ export function Header() {
       {mobileMenuOpen && (
         <div className="absolute top-full left-0 right-0 bg-base-100 border-b border-base-300 md:hidden">
           <ul className="menu p-4">
-            <li><a href="#features" onClick={() => setMobileMenuOpen(false)}>Features</a></li>
-            <li><a href="#pricing" onClick={() => setMobileMenuOpen(false)}>Pricing</a></li>
+            <li>
+              <a href="#features" onClick={() => setMobileMenuOpen(false)}>
+                Features
+              </a>
+            </li>
+            <li>
+              <a href="#pricing" onClick={() => setMobileMenuOpen(false)}>
+                Pricing
+              </a>
+            </li>
             <li className="mt-2">
               <Link to="/auth" className="justify-center" onClick={() => setMobileMenuOpen(false)}>
                 Sign in
@@ -56,6 +76,7 @@ export function Header() {
           </ul>
         </div>
       )}
+      <script defer src="https://mmmetric.lovable.app/track.js" data-site="st_70965cd97158"></script>
     </header>
   );
 }
