@@ -12,8 +12,13 @@ import {
   Trash2, 
   Settings,
   Code,
+  Zap,
+  CheckCircle,
+  XCircle,
+  Loader2,
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
 import { 
   StatsCards, 
   VisitorChart, 
@@ -59,6 +64,7 @@ export default function SiteDetail() {
   const [showSettings, setShowSettings] = useState(false);
   const [dateRange, setDateRange] = useState<DateRange>("7d");
   const [showGoalSetup, setShowGoalSetup] = useState(false);
+  const [testStatus, setTestStatus] = useState<'idle' | 'testing' | 'success' | 'error'>('idle');
 
   const site = sites.find((s) => s.id === id);
 
@@ -150,6 +156,62 @@ export default function SiteDetail() {
       domain: editDomain || undefined,
     });
     setIsEditing(false);
+  };
+
+  const testConnection = async () => {
+    if (!site) return;
+    setTestStatus('testing');
+    
+    try {
+      // Send a test event directly to the track edge function
+      const response = await supabase.functions.invoke('track', {
+        body: {
+          site_id: site.tracking_id,
+          event_name: 'test_connection',
+          url: '/test',
+          session_id: 'test_' + Date.now(),
+          properties: { test: true }
+        }
+      });
+
+      if (response.error) {
+        throw new Error(response.error.message);
+      }
+
+      // Wait a moment and check if the event was recorded
+      await new Promise(resolve => setTimeout(resolve, 1500));
+      
+      const { data: events, error: queryError } = await supabase
+        .from('events')
+        .select('id')
+        .eq('site_id', site.id)
+        .eq('event_name', 'test_connection')
+        .order('created_at', { ascending: false })
+        .limit(1);
+
+      if (queryError) throw queryError;
+
+      if (events && events.length > 0) {
+        setTestStatus('success');
+        toast({
+          title: "Connection verified!",
+          description: "Test event was successfully received and recorded.",
+        });
+      } else {
+        throw new Error('Event not found in database');
+      }
+    } catch (error) {
+      console.error('Test connection error:', error);
+      setTestStatus('error');
+      toast({
+        title: "Connection failed",
+        description: "Could not verify tracking. Check your configuration.",
+        variant: "destructive",
+      });
+    }
+
+    // Reset status after 5 seconds
+    setTimeout(() => setTestStatus('idle'), 5000);
   };
 
   if (authLoading || sitesLoading) {
@@ -327,7 +389,38 @@ export default function SiteDetail() {
                 <div className="mockup-code mt-2">
                   <pre><code>{`<script defer src="${window.location.origin}/track.js" data-site="${site.tracking_id}"></script>`}</code></pre>
                 </div>
-                <div className="flex justify-end mt-2">
+                <div className="flex justify-end gap-2 mt-2">
+                  <button 
+                    className={`btn btn-sm ${
+                      testStatus === 'success' ? 'btn-success' : 
+                      testStatus === 'error' ? 'btn-error' : 
+                      'btn-outline'
+                    }`}
+                    onClick={testConnection}
+                    disabled={testStatus === 'testing'}
+                  >
+                    {testStatus === 'testing' ? (
+                      <>
+                        <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                        Testing...
+                      </>
+                    ) : testStatus === 'success' ? (
+                      <>
+                        <CheckCircle className="h-4 w-4 mr-2" />
+                        Connected!
+                      </>
+                    ) : testStatus === 'error' ? (
+                      <>
+                        <XCircle className="h-4 w-4 mr-2" />
+                        Failed
+                      </>
+                    ) : (
+                      <>
+                        <Zap className="h-4 w-4 mr-2" />
+                        Test Connection
+                      </>
+                    )}
+                  </button>
                   <button className="btn btn-primary btn-sm" onClick={copyScript}>
                     <Copy className="h-4 w-4 mr-2" />
                     Copy Script
