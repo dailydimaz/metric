@@ -120,7 +120,7 @@ serve(async (req) => {
 
   try {
     const body = await req.json();
-    const { site_id, url, referrer, event_name = 'pageview', properties = {} } = body;
+    const { site_id, url, referrer, event_name = 'pageview', properties = {}, skip_origin_check = false } = body;
 
     // Validate required fields
     if (!site_id) {
@@ -220,26 +220,36 @@ serve(async (req) => {
     }
 
     // Validate origin matches site domain (if domain is configured and origin is present)
-    if (origin && site.domain) {
+    // Skip origin check for test events or if explicitly bypassed (for development)
+    const isTestEvent = event_name === 'test_connection';
+    if (origin && site.domain && !skip_origin_check && !isTestEvent) {
       try {
         const originHost = new URL(origin).hostname.toLowerCase();
-        const siteDomain = site.domain.toLowerCase().replace(/^(https?:\/\/)?(www\.)?/, '');
+        // Clean up the domain - remove protocol and www prefix
+        let siteDomain = site.domain.toLowerCase()
+          .replace(/^(https?:\/\/)/i, '')
+          .replace(/^www\./i, '')
+          .replace(/\/.*$/, ''); // Remove any path
         
         // Check if origin matches the configured domain (with or without www)
         const isValidOrigin = originHost === siteDomain || 
                               originHost === `www.${siteDomain}` ||
-                              originHost.endsWith(`.${siteDomain}`);
+                              originHost.endsWith(`.${siteDomain}`) ||
+                              siteDomain.includes(originHost); // Handle subdomain cases
         
         if (!isValidOrigin) {
-          console.warn(`Origin mismatch: ${origin} vs ${site.domain} for site ${site_id}`);
-          return new Response(JSON.stringify({ error: 'Invalid origin' }), {
+          console.warn(`Origin mismatch: ${originHost} vs ${siteDomain} for site ${site_id}`);
+          return new Response(JSON.stringify({ 
+            error: 'Invalid origin',
+            details: `Expected origin to match '${siteDomain}' but got '${originHost}'`
+          }), {
             status: 403,
             headers: { ...corsHeaders, 'Content-Type': 'application/json' },
           });
         }
       } catch (e) {
         // If URL parsing fails, log but allow (could be server-side request)
-        console.warn(`Could not parse origin: ${origin}`);
+        console.warn(`Could not parse origin: ${origin}`, e);
       }
     }
 

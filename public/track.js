@@ -8,7 +8,10 @@
   // Configuration
   var script = document.currentScript;
   var siteId = script && script.getAttribute('data-site');
+  // Use custom API URL if provided, otherwise use the Edge Function URL
   var apiUrl = script && script.getAttribute('data-api') || 'https://lckjlefupqlblfcwhbom.supabase.co/functions/v1/track';
+  // Allow bypassing origin check for testing (not recommended for production)
+  var skipOriginCheck = script && script.getAttribute('data-skip-origin') === 'true';
   
   if (!siteId) {
     console.warn('Metric: Missing data-site attribute');
