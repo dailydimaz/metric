@@ -1,3 +1,4 @@
+import * as React from "react";
 import { Link } from "react-router-dom";
 import { BarChart3, Github, Twitter, Mail, ArrowUpRight } from "lucide-react";
 
@@ -25,7 +26,8 @@ const footerLinks = {
   ],
 };
 
-export function Footer() {
+export const Footer = React.forwardRef<HTMLElement, React.HTMLAttributes<HTMLElement>>(
+  (props, ref) => {
   const currentYear = new Date().getFullYear();
 
   return (
@@ -178,4 +180,5 @@ export function Footer() {
       </div>
     </footer>
   );
-}
+});
+Footer.displayName = "Footer";
