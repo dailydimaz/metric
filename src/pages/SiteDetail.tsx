@@ -132,11 +132,17 @@ export default function SiteDetail() {
 
   const copyScript = async () => {
     if (!site) return;
-    const script = `<script defer src="${window.location.origin}/track.js" data-site="${site.tracking_id}"></script>`;
+    // Use the site's domain if configured, otherwise use a placeholder
+    const trackingDomain = site.domain 
+      ? `https://${site.domain.replace(/^(https?:\/\/)/i, '').replace(/^www\./i, '')}`
+      : 'https://YOUR_DOMAIN';
+    const script = `<script defer src="${trackingDomain}/track.js" data-site="${site.tracking_id}"></script>`;
     await navigator.clipboard.writeText(script);
     toast({
       title: "Copied!",
-      description: "Tracking script copied to clipboard",
+      description: site.domain 
+        ? "Tracking script copied to clipboard" 
+        : "Tracking script copied - replace YOUR_DOMAIN with your site's domain",
     });
   };
 
@@ -387,8 +393,13 @@ export default function SiteDetail() {
                   Add this script to your website's <code className="bg-base-300 px-1 rounded">&lt;head&gt;</code> tag:
                 </p>
                 <div className="mockup-code mt-2">
-                  <pre><code>{`<script defer src="${window.location.origin}/track.js" data-site="${site.tracking_id}"></script>`}</code></pre>
+                  <pre><code>{`<script defer src="${site.domain ? `https://${site.domain.replace(/^(https?:\/\/)/i, '').replace(/^www\./i, '')}` : 'https://YOUR_DOMAIN'}/track.js" data-site="${site.tracking_id}"></script>`}</code></pre>
                 </div>
+                {!site.domain && (
+                  <p className="text-warning text-xs mt-1">
+                    ⚠️ Set your domain above to get the correct tracking script URL
+                  </p>
+                )}
                 <div className="flex justify-end gap-2 mt-2">
                   <button 
                     className={`btn btn-sm ${
