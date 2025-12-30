@@ -16,9 +16,9 @@ export function RealtimeStats({ siteId }: RealtimeStatsProps) {
             <Activity className="h-5 w-5 text-success animate-pulse" />
             <h3 className="font-semibold">Real-time</h3>
           </div>
-          <div className="flex items-center gap-1">
+          <div className="flex items-center gap-1" title={isConnected ? "Connected to real-time updates" : "Establishing connection..."}>
             <span 
-              className={`w-2 h-2 rounded-full ${isConnected ? 'bg-success' : 'bg-error'}`} 
+              className={`w-2 h-2 rounded-full transition-colors ${isConnected ? 'bg-success' : 'bg-warning animate-pulse'}`} 
             />
             <span className="text-xs text-base-content/60">
               {isConnected ? 'Live' : 'Connecting...'}
