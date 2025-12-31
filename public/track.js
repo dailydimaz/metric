@@ -29,6 +29,7 @@
 
   // Respect Do Not Track
   if (navigator.doNotTrack === '1' || window.doNotTrack === '1') {
+    console.warn('Metric: Do Not Track is enabled; tracking is disabled in this browser.');
     return;
   }
 
@@ -107,6 +108,21 @@
       var blob = new Blob([JSON.stringify(payload)], { type: 'application/json' });
       var result = navigator.sendBeacon(apiUrl, blob);
       console.log('Metric: sendBeacon result:', result);
+
+      // Some browsers/extensions can cause sendBeacon to return false.
+      // Fall back to fetch to maximize delivery reliability.
+      if (!result) {
+        fetch(apiUrl, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload),
+          keepalive: true
+        }).then(function(res) {
+          console.log('Metric: fetch fallback result:', res.status);
+        }).catch(function(err) {
+          console.error('Metric: fetch fallback error:', err);
+        });
+      }
     } else {
       // Fallback to fetch
       fetch(apiUrl, {
