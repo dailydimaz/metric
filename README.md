@@ -1,8 +1,8 @@
 <p align="center">
-  <img src="public/favicon.ico" alt="Metric Logo" width="80" height="80">
+  <img src="src/assets/mmmetric-logo.png" alt="mmmetric Logo" width="80" height="80">
 </p>
 
-<h1 align="center">Metric</h1>
+<h1 align="center">mmmetric</h1>
 
 <p align="center">
   <strong>Privacy-first, open-source web analytics</strong>
@@ -38,14 +38,14 @@
 
 ### Quick Start (Cloud)
 
-1. Visit [metric.example.com](https://metric.example.com) and sign up
+1. Visit [mmmetric.lovable.app](https://mmmetric.lovable.app) and sign up
 2. Add your first website
 3. Copy the tracking script to your site's `<head>` tag
 4. Start collecting insights!
 
 ### Self-Hosting
 
-Metric can be self-hosted using Supabase as the backend.
+mmmetric can be self-hosted using Supabase as the backend.
 
 #### Prerequisites
 
@@ -101,17 +101,17 @@ Deploy the `dist/` folder to any static hosting provider:
 Add this script to your website's `<head>` tag:
 
 ```html
-<script defer src="https://your-metric-instance.com/track.js" data-site="YOUR_TRACKING_ID"></script>
+<script defer src="https://mmmetric.lovable.app/track.js" data-site="YOUR_TRACKING_ID"></script>
 ```
 
 ### Tracking Custom Events
 
 ```javascript
 // Track a custom event
-metric.track('button_click', { button_id: 'cta-hero' });
+mmmetric.track('button_click', { button_id: 'cta-hero' });
 
 // Track a form submission
-metric.track('form_submit', { form_name: 'newsletter' });
+mmmetric.track('form_submit', { form_name: 'newsletter' });
 ```
 
 ## 🏗️ Tech Stack
@@ -143,7 +143,7 @@ npm run build
 
 ## 📄 License
 
-Metric is open-source software licensed under the [MIT License](LICENSE).
+mmmetric is open-source software licensed under the [MIT License](LICENSE).
 
 ## 🙏 Acknowledgments
 

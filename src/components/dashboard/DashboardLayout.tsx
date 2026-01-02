@@ -4,8 +4,8 @@ import { useAuth } from "@/hooks/useAuth";
 import { useSites } from "@/hooks/useSites";
 import { MobileNav } from "@/components/dashboard/MobileNav";
 import { CreateSiteDialog } from "@/components/dashboard/CreateSiteDialog";
+import mmmetricLogo from "@/assets/mmmetric-logo.png";
 import {
-  BarChart3,
   ChevronDown,
   Plus,
   Settings,
@@ -71,9 +71,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
         {/* Logo & Site Selector */}
         <div className="navbar-start gap-4">
           <Link to="/dashboard" className="flex items-center gap-2">
-            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary">
-              <BarChart3 className="h-4 w-4 text-primary-content" />
-            </div>
+            <img src={mmmetricLogo} alt="mmmetric" className="h-8 w-8 rounded-lg" />
             <span className="font-display text-lg font-bold hidden sm:inline">mmmetric</span>
           </Link>
 

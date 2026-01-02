@@ -2,8 +2,9 @@ import { useState, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-import { BarChart3, Loader2, KeyRound, CheckCircle } from "lucide-react";
+import { Loader2, KeyRound, CheckCircle } from "lucide-react";
 import { z } from "zod";
+import mmmetricLogo from "@/assets/mmmetric-logo.png";
 
 const passwordSchema = z.object({
   password: z.string().min(6, "Password must be at least 6 characters"),
@@ -131,9 +132,7 @@ export default function ResetPassword() {
       <div className="flex-1 flex items-center justify-center p-8">
         <div className="w-full max-w-sm">
           <Link to="/" className="flex items-center gap-2 mb-8">
-            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary">
-              <BarChart3 className="h-4 w-4 text-primary-content" />
-            </div>
+            <img src={mmmetricLogo} alt="mmmetric" className="h-8 w-8 rounded-lg" />
             <span className="font-display text-xl font-bold">mmmetric</span>
           </Link>
 

@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import { BarChart3, Menu, X } from "lucide-react";
+import { Menu, X } from "lucide-react";
+import mmmetricLogo from "@/assets/mmmetric-logo.png";
 
 export function Header() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -9,9 +10,7 @@ export function Header() {
     <header className="navbar fixed top-0 left-0 right-0 z-50 glass px-4 lg:px-8">
       <div className="navbar-start">
         <Link to="/" className="flex items-center gap-2">
-          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary">
-            <BarChart3 className="h-4 w-4 text-primary-content" />
-          </div>
+          <img src={mmmetricLogo} alt="mmmetric" className="h-8 w-8 rounded-lg" />
           <span className="font-display text-xl font-bold">mmmetric</span>
         </Link>
       </div>

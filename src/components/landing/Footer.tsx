@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom";
-import { BarChart3, Github, Twitter, Mail, ArrowUpRight } from "lucide-react";
+import { Github, Twitter, Mail, ArrowUpRight } from "lucide-react";
+import mmmetricLogo from "@/assets/mmmetric-logo.png";
 
 const footerLinks = {
   product: [
@@ -38,9 +39,7 @@ export function Footer() {
           {/* Brand Section */}
           <div className="lg:col-span-5">
             <Link to="/" className="inline-flex items-center gap-3 group">
-              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary shadow-lg shadow-primary/25 transition-transform group-hover:scale-105">
-                <BarChart3 className="h-5 w-5 text-primary-content" />
-              </div>
+              <img src={mmmetricLogo} alt="mmmetric" className="h-10 w-10 rounded-xl shadow-lg shadow-primary/25 transition-transform group-hover:scale-105" />
               <span className="font-display text-2xl font-bold">mmmetric</span>
             </Link>
             
