@@ -323,7 +323,7 @@ export default function Auth() {
               <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary">
                 <BarChart3 className="h-4 w-4 text-primary-content" />
               </div>
-              <span className="font-display text-xl font-bold">Metric</span>
+              <span className="font-display text-xl font-bold">mmmetric</span>
             </Link>
 
             <div className="inline-flex h-16 w-16 items-center justify-center rounded-full bg-primary/10 mb-6">
@@ -393,7 +393,7 @@ export default function Auth() {
               <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary">
                 <BarChart3 className="h-4 w-4 text-primary-content" />
               </div>
-              <span className="font-display text-xl font-bold">Metric</span>
+              <span className="font-display text-xl font-bold">mmmetric</span>
             </Link>
 
             <div className="flex items-center gap-3 mb-6">
@@ -474,7 +474,7 @@ export default function Auth() {
               <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary">
                 <BarChart3 className="h-4 w-4 text-primary-content" />
               </div>
-              <span className="font-display text-xl font-bold">Metric</span>
+              <span className="font-display text-xl font-bold">mmmetric</span>
             </Link>
 
             <button
@@ -543,7 +543,7 @@ export default function Auth() {
             <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary">
               <BarChart3 className="h-4 w-4 text-primary-content" />
             </div>
-            <span className="font-display text-xl font-bold">Metric</span>
+            <span className="font-display text-xl font-bold">mmmetric</span>
           </Link>
 
           <h1 className="text-2xl font-bold">

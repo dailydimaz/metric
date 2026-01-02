@@ -41,7 +41,7 @@ export function Footer() {
               <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary shadow-lg shadow-primary/25 transition-transform group-hover:scale-105">
                 <BarChart3 className="h-5 w-5 text-primary-content" />
               </div>
-              <span className="font-display text-2xl font-bold">Metric</span>
+              <span className="font-display text-2xl font-bold">mmmetric</span>
             </Link>
             
             <p className="mt-6 text-base-content/60 max-w-sm leading-relaxed">
@@ -165,7 +165,7 @@ export function Footer() {
         {/* Bottom Bar */}
         <div className="mt-16 pt-8 border-t border-base-300/50 flex flex-col sm:flex-row items-center justify-between gap-4">
           <p className="text-sm text-base-content/50">
-            © {currentYear} Metric Analytics. All rights reserved.
+            © {currentYear} mmmetric Analytics. All rights reserved.
           </p>
           <div className="flex items-center gap-1 text-sm text-base-content/50">
             <span>Built for</span>

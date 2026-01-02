@@ -17,7 +17,7 @@ export function OpenSource() {
           </h2>
           
           <p className="mt-6 text-lg text-base-content/70 max-w-2xl mx-auto leading-relaxed">
-            Metric is proudly open source and MIT licensed. Thousands of developers 
+            mmmetric is proudly open source and MIT licensed. Thousands of developers 
             worldwide can share and contribute to make analytics better for everyone.
           </p>
 

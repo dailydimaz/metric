@@ -68,7 +68,7 @@ export function Hero() {
               <div className="flex-1 text-center">
                 <div className="badge badge-ghost gap-2">
                   <BarChart3 className="h-3 w-3" />
-                  dashboard.metric.io
+                  dashboard.mmmetric.io
                 </div>
               </div>
             </div>

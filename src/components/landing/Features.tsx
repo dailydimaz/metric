@@ -61,7 +61,7 @@ export function Features() {
             Everything you need to understand your users
           </h2>
           <p className="mt-4 text-lg text-base-content/70">
-            From basic page views to advanced funnel analysis, Metric gives you the insights you need without the complexity.
+            From basic page views to advanced funnel analysis, mmmetric gives you the insights you need without the complexity.
           </p>
         </div>
 

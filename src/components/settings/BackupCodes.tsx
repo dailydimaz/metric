@@ -167,12 +167,12 @@ export function BackupCodes() {
   };
 
   const handleDownload = () => {
-    const content = `Metric Backup Codes\n${"=".repeat(30)}\n\nGenerated: ${new Date().toLocaleString()}\n\nKeep these codes safe. Each code can only be used once.\n\n${generatedCodes.map((code, i) => `${i + 1}. ${code}`).join("\n")}\n`;
+    const content = `mmmetric Backup Codes\n${"=".repeat(30)}\n\nGenerated: ${new Date().toLocaleString()}\n\nKeep these codes safe. Each code can only be used once.\n\n${generatedCodes.map((code, i) => `${i + 1}. ${code}`).join("\n")}\n`;
     const blob = new Blob([content], { type: "text/plain" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    a.download = "metric-backup-codes.txt";
+    a.download = "mmmetric-backup-codes.txt";
     a.click();
     URL.revokeObjectURL(url);
   };

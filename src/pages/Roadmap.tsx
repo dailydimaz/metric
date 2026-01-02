@@ -365,7 +365,7 @@ export default function Roadmap() {
               <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary">
                 <BarChart3 className="h-5 w-5 text-primary-content" />
               </div>
-              <span className="font-display text-xl font-bold">Metric</span>
+              <span className="font-display text-xl font-bold">mmmetric</span>
             </Link>
             <Link to="/" className="btn btn-ghost btn-sm gap-2">
               <ArrowLeft className="h-4 w-4" />
@@ -507,7 +507,7 @@ export default function Roadmap() {
         <div className="mt-16 text-center">
           <h2 className="text-2xl font-bold mb-4">Want to contribute?</h2>
           <p className="text-base-content/70 mb-6 max-w-lg mx-auto">
-            Metric is open source. Help us build the best privacy-first analytics platform.
+            mmmetric is open source. Help us build the best privacy-first analytics platform.
           </p>
           <div className="flex items-center justify-center gap-4">
             <a
@@ -528,7 +528,7 @@ export default function Roadmap() {
       {/* Simple Footer */}
       <footer className="border-t border-base-300 py-8 mt-16">
         <div className="container mx-auto px-4 text-center text-sm text-base-content/50">
-          © {new Date().getFullYear()} Metric Analytics. All rights reserved.
+          © {new Date().getFullYear()} mmmetric Analytics. All rights reserved.
         </div>
       </footer>
     </div>

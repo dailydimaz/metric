@@ -1,5 +1,5 @@
 /**
- * Metric Analytics - Lightweight Tracking Script
+ * mmmetric Analytics - Lightweight Tracking Script
  * Privacy-focused, cookie-less analytics with UTM and outbound tracking
  * 
  * Usage: <script defer src="https://mmmetric.lovable.app/track.js" data-site="YOUR_TRACKING_ID"></script>
@@ -10,26 +10,26 @@
   // Configuration
   var script = document.currentScript || document.querySelector('script[data-site]');
   var siteId = script && script.getAttribute('data-site');
-  // Use custom API URL if provided, otherwise use the Metric Edge Function URL
+  // Use custom API URL if provided, otherwise use the mmmetric Edge Function URL
   var apiUrl = script && script.getAttribute('data-api') || 'https://lckjlefupqlblfcwhbom.supabase.co/functions/v1/track';
   
   // Debug logging (can be removed in production)
-  console.log('Metric: Initializing with site ID:', siteId);
+  console.log('mmmetric: Initializing with site ID:', siteId);
   
   if (!siteId) {
-    console.warn('Metric: Missing data-site attribute. Add data-site="YOUR_TRACKING_ID" to the script tag.');
+    console.warn('mmmetric: Missing data-site attribute. Add data-site="YOUR_TRACKING_ID" to the script tag.');
     return;
   }
 
   // Validate site ID format
   if (typeof siteId !== 'string' || !siteId.startsWith('st_')) {
-    console.warn('Metric: Invalid site ID format. Expected format: st_xxxxxxxxxxxx');
+    console.warn('mmmetric: Invalid site ID format. Expected format: st_xxxxxxxxxxxx');
     return;
   }
 
   // Respect Do Not Track
   if (navigator.doNotTrack === '1' || window.doNotTrack === '1') {
-    console.warn('Metric: Do Not Track is enabled; tracking is disabled in this browser.');
+    console.warn('mmmetric: Do Not Track is enabled; tracking is disabled in this browser.');
     return;
   }
 
@@ -101,13 +101,13 @@
       properties: Object.keys(mergedProperties).length > 0 ? mergedProperties : {}
     };
 
-    console.log('Metric: Sending event:', eventName, 'to', apiUrl);
+    console.log('mmmetric: Sending event:', eventName, 'to', apiUrl);
 
     // Use sendBeacon if available for reliability
     if (navigator.sendBeacon) {
       var blob = new Blob([JSON.stringify(payload)], { type: 'application/json' });
       var result = navigator.sendBeacon(apiUrl, blob);
-      console.log('Metric: sendBeacon result:', result);
+      console.log('mmmetric: sendBeacon result:', result);
 
       // Some browsers/extensions can cause sendBeacon to return false.
       // Fall back to fetch to maximize delivery reliability.
@@ -118,9 +118,9 @@
           body: JSON.stringify(payload),
           keepalive: true
         }).then(function(res) {
-          console.log('Metric: fetch fallback result:', res.status);
+          console.log('mmmetric: fetch fallback result:', res.status);
         }).catch(function(err) {
-          console.error('Metric: fetch fallback error:', err);
+          console.error('mmmetric: fetch fallback error:', err);
         });
       }
     } else {
@@ -131,9 +131,9 @@
         body: JSON.stringify(payload),
         keepalive: true
       }).then(function(res) {
-        console.log('Metric: fetch result:', res.status);
+        console.log('mmmetric: fetch result:', res.status);
       }).catch(function(err) {
-        console.error('Metric: fetch error:', err);
+        console.error('mmmetric: fetch error:', err);
       });
     }
   }
@@ -231,7 +231,7 @@
   }
 
   // Expose track function globally for custom events
-  window.metric = {
+  window.mmmetric = {
     track: function(eventName, properties) {
       track(eventName, properties);
     },
@@ -239,7 +239,7 @@
     identify: function(userId) {
       if (userId) {
         try {
-          sessionStorage.setItem('metric_user_id', userId);
+          sessionStorage.setItem('mmmetric_user_id', userId);
         } catch (e) {}
       }
     }

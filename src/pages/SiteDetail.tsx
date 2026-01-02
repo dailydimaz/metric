@@ -132,7 +132,7 @@ export default function SiteDetail() {
 
   const copyScript = async () => {
     if (!site) return;
-    // Always use Metric's hosted script URL
+    // Always use mmmetric's hosted script URL
     const script = `<script defer src="https://mmmetric.lovable.app/track.js" data-site="${site.tracking_id}"></script>`;
     await navigator.clipboard.writeText(script);
     toast({

@@ -74,7 +74,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
             <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary">
               <BarChart3 className="h-4 w-4 text-primary-content" />
             </div>
-            <span className="font-display text-lg font-bold hidden sm:inline">Metric</span>
+            <span className="font-display text-lg font-bold hidden sm:inline">mmmetric</span>
           </Link>
 
           <div className="divider divider-horizontal mx-0 hidden sm:flex"></div>
