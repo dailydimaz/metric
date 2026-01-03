@@ -104,8 +104,9 @@
     console.log('mmmetric: Sending event:', eventName, 'to', apiUrl);
 
     // Use sendBeacon if available for reliability
+    // Use text/plain to avoid CORS preflight (simple request)
     if (navigator.sendBeacon) {
-      var blob = new Blob([JSON.stringify(payload)], { type: 'application/json' });
+      var blob = new Blob([JSON.stringify(payload)], { type: 'text/plain' });
       var result = navigator.sendBeacon(apiUrl, blob);
       console.log('mmmetric: sendBeacon result:', result);
 
@@ -114,7 +115,6 @@
       if (!result) {
         fetch(apiUrl, {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(payload),
           keepalive: true
         }).then(function(res) {
@@ -124,10 +124,9 @@
         });
       }
     } else {
-      // Fallback to fetch
+      // Fallback to fetch without Content-Type to avoid preflight
       fetch(apiUrl, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload),
         keepalive: true
       }).then(function(res) {
