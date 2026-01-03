@@ -6,6 +6,7 @@ const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
   'Access-Control-Allow-Methods': 'POST, OPTIONS',
+  'Access-Control-Max-Age': '86400', // Cache preflight for 24 hours
 };
 
 // Simple in-memory rate limiter (resets on function cold start)
@@ -90,9 +91,14 @@ async function generateVisitorId(ip: string, ua: string): Promise<string> {
 }
 
 serve(async (req) => {
-  // Handle CORS preflight
+  const origin = req.headers.get('origin') || 'no-origin';
+  const contentType = req.headers.get('content-type') || 'no-content-type';
+  console.log(`Incoming request: ${req.method} from ${origin}, content-type: ${contentType}`);
+
+  // Handle CORS preflight with explicit 204 status
   if (req.method === 'OPTIONS') {
-    return new Response(null, { headers: corsHeaders });
+    console.log('Returning CORS preflight response');
+    return new Response(null, { status: 204, headers: corsHeaders });
   }
 
   // Only accept POST requests
@@ -119,7 +125,20 @@ serve(async (req) => {
   }
 
   try {
-    const body = await req.json();
+    const rawBody = await req.text();
+    console.log(`Body received (${rawBody.length} bytes)`);
+    
+    let body;
+    try {
+      body = JSON.parse(rawBody);
+    } catch (parseError) {
+      console.error('Failed to parse body as JSON:', parseError);
+      return new Response(JSON.stringify({ error: 'Invalid JSON body' }), {
+        status: 400,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+    
     const { site_id, url, referrer, event_name = 'pageview', properties = {}, skip_origin_check = false } = body;
 
     // Validate required fields
