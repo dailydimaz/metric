@@ -6,6 +6,7 @@ const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
   'Access-Control-Allow-Methods': 'POST, OPTIONS',
+  'Access-Control-Max-Age': '86400',
 };
 
 // Simple in-memory rate limiter (resets on function cold start)
@@ -16,16 +17,16 @@ const RATE_WINDOW = 60000; // 1 minute in ms
 function checkRateLimit(ip: string): boolean {
   const now = Date.now();
   const entry = rateLimitMap.get(ip);
-  
+
   if (!entry || now > entry.resetTime) {
     rateLimitMap.set(ip, { count: 1, resetTime: now + RATE_WINDOW });
     return true;
   }
-  
+
   if (entry.count >= RATE_LIMIT) {
     return false;
   }
-  
+
   entry.count++;
   return true;
 }
@@ -104,10 +105,10 @@ serve(async (req) => {
   }
 
   // Get client IP for rate limiting
-  const clientIp = req.headers.get('cf-connecting-ip') || 
-                   req.headers.get('x-forwarded-for')?.split(',')[0]?.trim() || 
-                   req.headers.get('x-real-ip') || 
-                   'unknown';
+  const clientIp = req.headers.get('cf-connecting-ip') ||
+    req.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ||
+    req.headers.get('x-real-ip') ||
+    'unknown';
 
   // Check rate limit
   if (!checkRateLimit(clientIp)) {
@@ -177,7 +178,7 @@ serve(async (req) => {
     const userAgent = req.headers.get('user-agent') || '';
     const cfCountry = req.headers.get('cf-ipcountry') || req.headers.get('x-country') || null;
     const cfCity = req.headers.get('cf-ipcity') || req.headers.get('x-city') || null;
-    
+
     // Get Accept-Language header and extract primary language
     const acceptLanguage = req.headers.get('accept-language') || '';
     const primaryLanguage = acceptLanguage.split(',')[0]?.split('-')[0]?.trim() || null;
@@ -227,7 +228,7 @@ serve(async (req) => {
     // - When no origin header is present (server-side or sendBeacon)
     const isTestEvent = event_name === 'test_connection';
     const shouldValidateOrigin = origin && site.domain && !skip_origin_check && !isTestEvent;
-    
+
     if (shouldValidateOrigin) {
       try {
         const originHost = new URL(origin).hostname.toLowerCase();
@@ -237,15 +238,15 @@ serve(async (req) => {
           .replace(/^www\./i, '')
           .replace(/\/.*$/, '') // Remove any path
           .trim();
-        
+
         // Check if origin matches the configured domain (with or without www)
-        const isValidOrigin = originHost === siteDomain || 
-                              originHost === `www.${siteDomain}` ||
-                              originHost.endsWith(`.${siteDomain}`) ||
-                              siteDomain.includes(originHost) || // Handle subdomain cases
-                              originHost.includes('lovable.app') || // Allow Lovable preview domains
-                              originHost.includes('localhost'); // Allow localhost for development
-        
+        const isValidOrigin = originHost === siteDomain ||
+          originHost === `www.${siteDomain}` ||
+          originHost.endsWith(`.${siteDomain}`) ||
+          siteDomain.includes(originHost) || // Handle subdomain cases
+          originHost.includes('lovable.app') || // Allow Lovable preview domains
+          originHost.includes('localhost'); // Allow localhost for development
+
         if (!isValidOrigin) {
           console.warn(`Origin mismatch: ${originHost} vs ${siteDomain} for site ${site_id}`);
           // Log but allow for now - strict mode can be enabled later
