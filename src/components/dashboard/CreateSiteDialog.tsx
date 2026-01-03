@@ -1,7 +1,18 @@
-import { useState, useRef, useEffect } from "react";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useSites } from "@/hooks/useSites";
 import { Loader2 } from "lucide-react";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 
 interface CreateSiteDialogProps {
   open: boolean;
@@ -13,19 +24,10 @@ export function CreateSiteDialog({ open, onOpenChange }: CreateSiteDialogProps) 
   const [domain, setDomain] = useState("");
   const { createSite } = useSites();
   const navigate = useNavigate();
-  const modalRef = useRef<HTMLDialogElement>(null);
-
-  useEffect(() => {
-    if (open) {
-      modalRef.current?.showModal();
-    } else {
-      modalRef.current?.close();
-    }
-  }, [open]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     try {
       const site = await createSite.mutateAsync({ name, domain });
       onOpenChange(false);
@@ -38,70 +40,60 @@ export function CreateSiteDialog({ open, onOpenChange }: CreateSiteDialogProps) 
   };
 
   return (
-    <dialog ref={modalRef} className="modal" onClose={() => onOpenChange(false)}>
-      <div className="modal-box">
-        <h3 className="font-bold text-lg">Create a new site</h3>
-        <p className="py-2 text-base-content/70">
-          Add a new website or application to track with Metric.
-        </p>
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="sm:max-w-[425px]">
+        <DialogHeader>
+          <DialogTitle>Create a new site</DialogTitle>
+          <DialogDescription>
+            Add a new website or application to track with Metric.
+          </DialogDescription>
+        </DialogHeader>
 
-        <form onSubmit={handleSubmit} className="mt-4">
-          <div className="form-control w-full">
-            <label className="label">
-              <span className="label-text">Site name</span>
-            </label>
-            <input
-              type="text"
+        <form onSubmit={handleSubmit} className="grid gap-4 py-4">
+          <div className="grid gap-2">
+            <Label htmlFor="name">Site name</Label>
+            <Input
+              id="name"
               placeholder="My Website"
-              className="input input-bordered w-full"
               value={name}
               onChange={(e) => setName(e.target.value)}
               required
             />
           </div>
 
-          <div className="form-control w-full mt-4">
-            <label className="label">
-              <span className="label-text">Domain (optional)</span>
-            </label>
-            <input
-              type="text"
+          <div className="grid gap-2">
+            <Label htmlFor="domain">Domain (optional)</Label>
+            <Input
+              id="domain"
               placeholder="example.com"
-              className="input input-bordered w-full"
               value={domain}
               onChange={(e) => setDomain(e.target.value)}
             />
-            <label className="label">
-              <span className="label-text-alt text-base-content/70">
-                The domain where your site is hosted
-              </span>
-            </label>
+            <p className="text-sm text-muted-foreground">
+              The domain where your site is hosted
+            </p>
           </div>
 
-          <div className="modal-action">
-            <button
+          <DialogFooter>
+            <Button
               type="button"
-              className="btn btn-ghost"
+              variant="outline"
               onClick={() => onOpenChange(false)}
             >
               Cancel
-            </button>
-            <button 
-              type="submit" 
-              className="btn btn-primary"
+            </Button>
+            <Button
+              type="submit"
               disabled={!name || createSite.isPending}
             >
               {createSite.isPending && (
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
               )}
               Create site
-            </button>
-          </div>
+            </Button>
+          </DialogFooter>
         </form>
-      </div>
-      <form method="dialog" className="modal-backdrop">
-        <button onClick={() => onOpenChange(false)}>close</button>
-      </form>
-    </dialog>
+      </DialogContent>
+    </Dialog>
   );
 }
