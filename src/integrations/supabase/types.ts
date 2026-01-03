@@ -584,6 +584,10 @@ export type Database = {
           id: string
         }[]
       }
+      has_team_role: {
+        Args: { _min_role: string; _site_id: string }
+        Returns: boolean
+      }
       is_site_owner: { Args: { _site_id: string }; Returns: boolean }
       is_team_member_of_same_site: {
         Args: { _profile_user_id: string }
