@@ -1,13 +1,14 @@
-import { 
-  BarChart3, 
-  MousePointerClick, 
-  GitBranch, 
-  Users, 
-  Zap, 
+import {
+  BarChart3,
+  MousePointerClick,
+  GitBranch,
+  Users,
+  Zap,
   Shield,
   Code2,
   Globe
 } from "lucide-react";
+import { motion } from "framer-motion";
 
 const features = [
   {
@@ -52,11 +53,26 @@ const features = [
   }
 ];
 
+const container = {
+  hidden: { opacity: 0 },
+  show: {
+    opacity: 1,
+    transition: {
+      staggerChildren: 0.1
+    }
+  }
+};
+
+const item = {
+  hidden: { opacity: 0, y: 20 },
+  show: { opacity: 1, y: 0 }
+};
+
 export function Features() {
   return (
-    <section id="features" className="py-24 bg-base-200/30">
+    <section id="features" className="py-24 bg-base-200/50">
       <div className="container mx-auto px-4">
-        <div className="text-center max-w-2xl mx-auto">
+        <div className="text-center max-w-2xl mx-auto mb-16">
           <h2 className="text-3xl font-bold tracking-tight sm:text-4xl">
             Everything you need to understand your users
           </h2>
@@ -65,25 +81,33 @@ export function Features() {
           </p>
         </div>
 
-        <div className="mt-16 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          {features.map((feature, index) => (
-            <div 
+        <motion.div
+          variants={container}
+          initial="hidden"
+          whileInView="show"
+          viewport={{ once: true }}
+          className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6"
+        >
+          {features.map((feature) => (
+            <motion.div
               key={feature.title}
-              className="card bg-base-100 border border-base-300 hover:shadow-lg transition-all duration-300 group"
-              style={{ animationDelay: `${index * 50}ms` }}
+              variants={item}
+              className="group relative p-6 bg-base-100 rounded-2xl border border-base-content/5 hover:border-primary/20 shadow-sm hover:shadow-xl hover:shadow-primary/5 transition-all duration-300"
             >
-              <div className="card-body">
-                <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10 text-primary group-hover:bg-primary group-hover:text-primary-content transition-colors">
-                  <feature.icon className="h-5 w-5" />
+              <div className="absolute inset-0 bg-primary/5 opacity-0 group-hover:opacity-100 rounded-2xl transition-opacity duration-300" />
+
+              <div className="relative z-10">
+                <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-primary/10 text-primary group-hover:scale-110 transition-transform duration-300">
+                  <feature.icon className="h-6 w-6" />
                 </div>
-                <h3 className="card-title text-base mt-4">{feature.title}</h3>
+                <h3 className="text-lg font-semibold mt-4 mb-2">{feature.title}</h3>
                 <p className="text-sm text-base-content/70 leading-relaxed">
                   {feature.description}
                 </p>
               </div>
-            </div>
+            </motion.div>
           ))}
-        </div>
+        </motion.div>
       </div>
     </section>
   );
