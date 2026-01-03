@@ -35,9 +35,8 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
   const location = useLocation();
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
 
-  const params = useParams<{ siteId?: string; id?: string }>();
-  // Prefer siteId from params (new routes), fall back to id (SiteDetail), then localStorage
-  const urlSiteId = params.siteId || params.id;
+  const params = useParams<{ siteId?: string }>();
+  const urlSiteId = params.siteId;
 
   // Persist selected site in localStorage
   const [selectedSiteId, setSelectedSiteId] = useState<string | null>(() => {

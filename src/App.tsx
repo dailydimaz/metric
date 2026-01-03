@@ -29,7 +29,7 @@ const App = () => (
           <Route path="/auth/reset-password" element={<ResetPassword />} />
           <Route path="/roadmap" element={<Roadmap />} />
           <Route path="/dashboard" element={<Dashboard />} />
-          <Route path="/dashboard/sites/:id" element={<SiteDetail />} />
+          <Route path="/dashboard/sites/:siteId" element={<SiteDetail />} />
           <Route path="/dashboard/sites/:siteId/funnels" element={<Funnels />} />
           <Route path="/dashboard/sites/:siteId/funnels/:funnelId" element={<FunnelDetail />} />
           <Route path="/dashboard/sites/:siteId/retention" element={<Retention />} />

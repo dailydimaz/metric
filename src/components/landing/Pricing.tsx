@@ -1,6 +1,7 @@
 import { Check, Server, Infinity } from "lucide-react";
 import { Link } from "react-router-dom";
 import { isSelfHosted, PLANS, formatNumber } from "@/lib/billing";
+import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 
 const tiers = [
@@ -54,6 +55,7 @@ const tiers = [
       "Dedicated support"
     ],
     cta: "Contact Sales",
+    href: "mailto:sales@mmmetric.app",
     highlighted: false
   }
 ];
@@ -78,8 +80,8 @@ export function Pricing() {
             <div
               key={tier.name}
               className={`card border ${tier.highlighted
-                  ? "border-primary bg-base-100 shadow-xl shadow-primary/10 scale-105 z-10"
-                  : "bg-base-100 border-base-300"
+                ? "border-primary bg-base-100 shadow-xl shadow-primary/10 scale-105 z-10"
+                : "bg-base-100 border-base-300"
                 }`}
             >
               {tier.highlighted && (
@@ -113,12 +115,23 @@ export function Pricing() {
                 </ul>
 
                 <div className="card-actions mt-6">
-                  <Link
-                    to="/auth?mode=signup"
-                    className={`btn w-full ${tier.highlighted ? "btn-primary" : "btn-outline"}`}
-                  >
-                    {tier.cta}
-                  </Link>
+                  {tier.href ? (
+                    <Button
+                      asChild
+                      className="w-full"
+                      variant={tier.highlighted ? "default" : "outline"}
+                    >
+                      <a href={tier.href}>{tier.cta}</a>
+                    </Button>
+                  ) : (
+                    <Button
+                      asChild
+                      className="w-full"
+                      variant={tier.highlighted ? "default" : "outline"}
+                    >
+                      <Link to="/auth?mode=signup">{tier.cta}</Link>
+                    </Button>
+                  )}
                 </div>
               </div>
             </div>
@@ -126,7 +139,7 @@ export function Pricing() {
         </div>
 
         <p className="mt-12 text-center text-sm text-base-content/70">
-          Need more than 1M events? <a href="#" className="link link-primary">Contact us</a> for custom pricing.
+          Need more than 1M events? <a href="mailto:sales@mmmetric.app" className="link link-primary">Contact us</a> for custom pricing.
         </p>
 
         {/* Self-hosted option */}

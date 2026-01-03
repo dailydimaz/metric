@@ -38,6 +38,8 @@ import {
   FunnelList,
   RetentionCard,
 } from "@/components/analytics";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import {
   useAnalyticsStats,
   useAnalyticsTimeSeries,
@@ -52,7 +54,7 @@ import {
 } from "@/hooks/useAnalytics";
 
 export default function SiteDetail() {
-  const { id } = useParams<{ id: string }>();
+  const { siteId } = useParams<{ siteId: string }>();
   const { user, loading: authLoading } = useAuth();
   const { sites, isLoading: sitesLoading, deleteSite, updateSite } = useSites();
   const navigate = useNavigate();
@@ -66,43 +68,43 @@ export default function SiteDetail() {
   const [showGoalSetup, setShowGoalSetup] = useState(false);
   const [testStatus, setTestStatus] = useState<'idle' | 'testing' | 'success' | 'error'>('idle');
 
-  const site = sites.find((s) => s.id === id);
+  const site = sites.find((s) => s.id === siteId);
 
   // Analytics hooks
   const { data: stats, isLoading: statsLoading } = useAnalyticsStats({
-    siteId: id || "",
+    siteId: siteId || "",
     dateRange
   });
   const { data: timeSeries, isLoading: timeSeriesLoading } = useAnalyticsTimeSeries({
-    siteId: id || "",
+    siteId: siteId || "",
     dateRange
   });
   const { data: topPages, isLoading: pagesLoading } = useTopPages({
-    siteId: id || "",
+    siteId: siteId || "",
     dateRange
   });
   const { data: topReferrers, isLoading: referrersLoading } = useTopReferrers({
-    siteId: id || "",
+    siteId: siteId || "",
     dateRange
   });
   const { data: deviceStats, isLoading: devicesLoading } = useDeviceStats({
-    siteId: id || "",
+    siteId: siteId || "",
     dateRange
   });
   const { data: geoStats, isLoading: geoLoading } = useGeoStats({
-    siteId: id || "",
+    siteId: siteId || "",
     dateRange
   });
   const { data: cityStats, isLoading: citiesLoading } = useCityStats({
-    siteId: id || "",
+    siteId: siteId || "",
     dateRange
   });
   const { data: languageStats, isLoading: languagesLoading } = useLanguageStats({
-    siteId: id || "",
+    siteId: siteId || "",
     dateRange
   });
   const { data: utmStats, isLoading: utmLoading } = useUTMStats({
-    siteId: id || "",
+    siteId: siteId || "",
     dateRange
   });
 
@@ -247,17 +249,19 @@ export default function SiteDetail() {
         {/* Header */}
         <div className="flex flex-col md:flex-row md:items-center gap-4">
           <div className="flex items-center gap-4 w-full md:w-auto">
-            <button
-              className="btn btn-ghost btn-sm btn-circle"
+            <Button
+              variant="ghost"
+              size="icon"
+              className="rounded-full h-8 w-8"
               onClick={() => navigate("/dashboard")}
             >
               <ArrowLeft className="h-4 w-4" />
-            </button>
+            </Button>
             <div className="flex-1">
               {isEditing ? (
-                <input
+                <Input
                   type="text"
-                  className="input input-bordered text-2xl font-bold w-full max-w-xs"
+                  className="text-2xl font-bold w-full max-w-xs h-auto py-1 px-2"
                   value={editName}
                   onChange={(e) => setEditName(e.target.value)}
                   autoFocus
@@ -265,20 +269,20 @@ export default function SiteDetail() {
               ) : (
                 <h1 className="text-2xl font-bold tracking-tight">{site.name}</h1>
               )}
-              <p className="text-base-content/70 flex items-center gap-2">
+              <div className="text-base-content/70 flex items-center gap-2 mt-1">
                 <Globe className="h-4 w-4" />
                 {isEditing ? (
-                  <input
+                  <Input
                     type="text"
-                    className="input input-bordered input-sm"
+                    className="h-7 text-sm py-1 px-2 w-[200px]"
                     value={editDomain}
                     onChange={(e) => setEditDomain(e.target.value)}
                     placeholder="example.com"
                   />
                 ) : (
-                  site.domain || "No domain set"
+                  <span>{site.domain || "No domain set"}</span>
                 )}
-              </p>
+              </div>
             </div>
           </div>
           <div className="flex gap-2 w-full md:w-auto overflow-x-auto pb-1 md:pb-0">
@@ -286,29 +290,29 @@ export default function SiteDetail() {
             <DateRangePicker value={dateRange} onChange={setDateRange} />
             {isEditing ? (
               <>
-                <button className="btn btn-ghost" onClick={() => setIsEditing(false)}>
+                <Button variant="ghost" onClick={() => setIsEditing(false)}>
                   Cancel
-                </button>
-                <button
-                  className="btn btn-primary"
+                </Button>
+                <Button
                   onClick={handleSave}
                   disabled={updateSite.isPending}
                 >
                   {updateSite.isPending ? (
-                    <span className="loading loading-spinner loading-sm"></span>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                   ) : (
                     "Save"
                   )}
-                </button>
+                </Button>
               </>
             ) : (
               <>
-                <button
-                  className="btn btn-ghost"
+                <Button
+                  variant="ghost"
+                  size="icon"
                   onClick={() => setShowSettings(!showSettings)}
                 >
                   <Settings className="h-4 w-4" />
-                </button>
+                </Button>
               </>
             )}
           </div>
@@ -398,8 +402,8 @@ export default function SiteDetail() {
                 <div className="flex justify-end gap-2 mt-2">
                   <button
                     className={`btn btn-sm ${testStatus === 'success' ? 'btn-success' :
-                        testStatus === 'error' ? 'btn-error' :
-                          'btn-outline'
+                      testStatus === 'error' ? 'btn-error' :
+                        'btn-outline'
                       }`}
                     onClick={testConnection}
                     disabled={testStatus === 'testing'}
