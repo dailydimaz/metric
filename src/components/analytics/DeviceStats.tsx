@@ -1,4 +1,4 @@
-import { Monitor, Smartphone, Tablet, Globe, Chrome } from "lucide-react";
+import { Monitor, Smartphone, Tablet, Globe, Chrome, LayoutGrid } from "lucide-react";
 import { DeviceStat } from "@/hooks/useAnalytics";
 
 interface DeviceStatsProps {
@@ -8,37 +8,28 @@ interface DeviceStatsProps {
   isLoading: boolean;
 }
 
-function getDeviceIcon(type: string) {
-  switch (type.toLowerCase()) {
-    case 'mobile':
-      return <Smartphone className="h-4 w-4" />;
-    case 'tablet':
-      return <Tablet className="h-4 w-4" />;
-    default:
-      return <Monitor className="h-4 w-4" />;
-  }
-}
-
-function StatList({ 
-  title, 
-  items, 
-  icon, 
-  isLoading 
-}: { 
-  title: string; 
-  items: DeviceStat[] | undefined; 
-  icon: React.ReactNode; 
+function StatList({
+  title,
+  items,
+  icon,
+  isLoading
+}: {
+  title: string;
+  items: DeviceStat[] | undefined;
+  icon: React.ReactNode;
   isLoading: boolean;
 }) {
   return (
-    <div>
-      <div className="flex items-center gap-2 mb-3">
-        <span className="text-base-content/70">{icon}</span>
-        <h4 className="text-sm font-medium">{title}</h4>
+    <div className="flex flex-col h-full">
+      <div className="flex items-center gap-2 mb-4">
+        <div className="p-1.5 bg-base-200 rounded-md text-base-content/70">
+          {icon}
+        </div>
+        <h4 className="text-sm font-semibold">{title}</h4>
       </div>
-      
+
       {isLoading ? (
-        <div className="space-y-2">
+        <div className="space-y-3">
           {[...Array(3)].map((_, i) => (
             <div key={i} className="flex justify-between items-center">
               <div className="skeleton h-3 w-20"></div>
@@ -47,24 +38,23 @@ function StatList({
           ))}
         </div>
       ) : items && items.length > 0 ? (
-        <div className="space-y-2">
+        <div className="space-y-3">
           {items.slice(0, 5).map((item, index) => (
-            <div key={index} className="relative">
-              <div 
-                className="absolute inset-0 bg-primary/10 rounded"
-                style={{ width: `${item.percentage}%` }}
-              />
-              <div className="relative flex items-center justify-between py-1.5 px-2">
-                <span className="text-sm">{item.name}</span>
-                <span className="text-xs text-base-content/60">
-                  {item.percentage.toFixed(1)}%
-                </span>
+            <div key={index} className="group">
+              <div className="flex justify-between items-center text-sm mb-1">
+                <span className="font-medium text-base-content/80 group-hover:text-primary transition-colors">{item.name}</span>
+                <span className="text-xs text-base-content/60 font-mono">{item.percentage.toFixed(1)}%</span>
               </div>
+              <progress
+                className="progress progress-primary w-full h-1.5 opacity-40 group-hover:opacity-100 transition-opacity"
+                value={item.percentage}
+                max="100"
+              ></progress>
             </div>
           ))}
         </div>
       ) : (
-        <p className="text-sm text-base-content/50">No data</p>
+        <p className="text-sm text-base-content/50 italic">No data available</p>
       )}
     </div>
   );
@@ -72,11 +62,16 @@ function StatList({
 
 export function DeviceStats({ browsers, operatingSystems, devices, isLoading }: DeviceStatsProps) {
   return (
-    <div className="card bg-base-200">
-      <div className="card-body">
-        <h3 className="card-title text-sm font-medium mb-4">Devices & Browsers</h3>
-        
-        <div className="grid gap-6 md:grid-cols-3">
+    <div className="card bg-base-100 shadow-sm border border-base-200">
+      <div className="card-body p-0">
+        <div className="flex items-center gap-2 p-4 border-b border-base-200">
+          <div className="p-2 bg-accent/10 rounded-lg text-accent">
+            <LayoutGrid className="h-4 w-4" />
+          </div>
+          <h3 className="font-semibold text-base">Tech Specs</h3>
+        </div>
+
+        <div className="grid gap-8 md:grid-cols-3 p-6">
           <StatList
             title="Device Type"
             items={devices}
@@ -100,3 +95,4 @@ export function DeviceStats({ browsers, operatingSystems, devices, isLoading }: 
     </div>
   );
 }
+

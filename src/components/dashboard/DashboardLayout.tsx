@@ -1,23 +1,22 @@
 import { useState, useEffect } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { useSites } from "@/hooks/useSites";
-import { MobileNav } from "@/components/dashboard/MobileNav";
 import { CreateSiteDialog } from "@/components/dashboard/CreateSiteDialog";
 import mmmetricLogo from "@/assets/mmmetric-logo.png";
 import {
+  Menu,
   ChevronDown,
   Plus,
   Settings,
   LogOut,
-  User,
   LayoutDashboard,
   MousePointerClick,
   GitBranch,
   Users,
 } from "lucide-react";
 
-// Nav items - some are site-specific, marked with siteSpecific: true
+// Nav items
 const getNavItems = (siteId: string | null) => [
   { icon: LayoutDashboard, label: "Overview", href: "/dashboard" },
   { icon: MousePointerClick, label: "Analytics", href: siteId ? `/dashboard/sites/${siteId}` : "/dashboard", siteSpecific: true },
@@ -33,8 +32,9 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
   const { user, signOut } = useAuth();
   const { sites } = useSites();
   const navigate = useNavigate();
+  const location = useLocation();
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
-  
+
   // Persist selected site in localStorage
   const [selectedSiteId, setSelectedSiteId] = useState<string | null>(() => {
     return localStorage.getItem("selectedSiteId");
@@ -54,6 +54,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
   }, [sites, selectedSiteId]);
 
   const selectedSite = sites.find((s) => s.id === selectedSiteId) ?? sites[0];
+  const navItems = getNavItems(selectedSiteId);
 
   const handleSignOut = async () => {
     localStorage.removeItem("selectedSiteId");
@@ -62,99 +63,133 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
   };
 
   return (
-    <div className="min-h-screen bg-base-100">
-      {/* Top Header */}
-      <header className="navbar sticky top-0 z-50 border-b border-base-300 bg-base-100 px-4">
-        {/* Mobile Menu */}
-        <MobileNav />
-        
-        {/* Logo & Site Selector */}
-        <div className="navbar-start gap-4">
-          <Link to="/dashboard" className="flex items-center gap-2">
-            <img src={mmmetricLogo} alt="mmmetric" className="h-8 w-8 rounded-lg" />
-            <span className="font-display text-lg font-bold hidden sm:inline">mmmetric</span>
-          </Link>
+    <div className="drawer lg:drawer-open bg-base-100 min-h-screen">
+      <input id="dashboard-drawer" type="checkbox" className="drawer-toggle" />
 
-          <div className="divider divider-horizontal mx-0 hidden sm:flex"></div>
-
-          <div className="dropdown hidden sm:block">
-            <div tabIndex={0} role="button" className="btn btn-ghost gap-2">
-              <span className="max-w-[150px] truncate">
-                {selectedSite?.name ?? "Select site"}
-              </span>
-              <ChevronDown className="h-4 w-4 opacity-70" />
-            </div>
-            <ul tabIndex={0} className="dropdown-content z-[1] menu p-2 shadow-lg bg-base-100 rounded-box w-56 border border-base-300">
-              {sites.map((site) => (
-                <li key={site.id}>
-                  <a onClick={() => setSelectedSiteId(site.id)}>
-                    <div className="flex flex-col">
-                      <span className="font-medium">{site.name}</span>
-                      {site.domain && (
-                        <span className="text-xs opacity-70">{site.domain}</span>
-                      )}
-                    </div>
-                  </a>
-                </li>
-              ))}
-              {sites.length > 0 && <li className="menu-title"><span></span></li>}
-              <li>
-                <a onClick={() => setCreateDialogOpen(true)}>
-                  <Plus className="h-4 w-4" />
-                  Add new site
-                </a>
-              </li>
-            </ul>
+      {/* Page Content */}
+      <div className="drawer-content flex flex-col">
+        {/* Navbar */}
+        <div className="w-full navbar border-b border-base-300 bg-base-100/50 backdrop-blur-md sticky top-0 z-30 lg:hidden">
+          <div className="flex-none lg:hidden">
+            <label htmlFor="dashboard-drawer" aria-label="open sidebar" className="btn btn-square btn-ghost">
+              <Menu className="h-6 w-6" />
+            </label>
+          </div>
+          <div className="flex-1 px-2 mx-2">
+            <span className="font-bold text-lg">mmmetric</span>
           </div>
         </div>
 
-        {/* Nav Items */}
-        <div className="navbar-center hidden md:flex">
-          <ul className="menu menu-horizontal px-1">
-            {getNavItems(selectedSiteId).map((item) => (
-              <li key={item.href}>
-                <Link to={item.href} className="gap-2">
-                  <item.icon className="h-4 w-4" />
-                  {item.label}
-                </Link>
-              </li>
-            ))}
-          </ul>
-        </div>
-
-        {/* User Menu */}
-        <div className="navbar-end">
-          <div className="dropdown dropdown-end">
-            <div tabIndex={0} role="button" className="btn btn-ghost btn-circle avatar">
-              <div className="w-8 h-8 rounded-full bg-primary flex items-center justify-center text-primary-foreground text-sm font-medium">
-                {user?.email?.charAt(0).toUpperCase() || 'U'}
+        {/* Main Content Area */}
+        <main className="flex-1 p-6 md:p-8 overflow-y-auto">
+          {/* Top Bar for Desktop (User Menu & Site Selector) */}
+          <div className="hidden lg:flex justify-between items-center mb-8">
+            <div className="flex items-center gap-4">
+              {/* Site Selector Dropdown */}
+              <div className="dropdown">
+                <div tabIndex={0} role="button" className="btn btn-ghost gap-2 normal-case font-normal text-lg">
+                  <span className="font-semibold">{selectedSite?.name ?? "Select site"}</span>
+                  <ChevronDown className="h-4 w-4 opacity-50" />
+                </div>
+                <ul tabIndex={0} className="dropdown-content z-[1] menu p-2 shadow-xl bg-base-100 rounded-box w-60 border border-base-200">
+                  {sites.map((site) => (
+                    <li key={site.id}>
+                      <a
+                        onClick={() => setSelectedSiteId(site.id)}
+                        className={selectedSiteId === site.id ? "active" : ""}
+                      >
+                        <div className="flex flex-col gap-0.5">
+                          <span className="font-medium">{site.name}</span>
+                          {site.domain && <span className="text-xs opacity-60 font-mono">{site.domain}</span>}
+                        </div>
+                      </a>
+                    </li>
+                  ))}
+                  <div className="divider my-1"></div>
+                  <li>
+                    <a onClick={() => setCreateDialogOpen(true)} className="text-primary">
+                      <Plus className="h-4 w-4" />
+                      Add new site
+                    </a>
+                  </li>
+                </ul>
               </div>
             </div>
-            <ul tabIndex={0} className="dropdown-content z-[1] menu p-2 shadow-lg bg-base-100 rounded-box w-56 border border-base-300">
-              <li className="menu-title">
-                <span className="text-xs font-normal truncate">{user?.email}</span>
-              </li>
-              <li>
-                <Link to="/dashboard/settings">
-                  <Settings className="h-4 w-4" />
-                  Settings
-                </Link>
-              </li>
-              <li>
-                <a onClick={handleSignOut}>
-                  <LogOut className="h-4 w-4" />
-                  Sign out
-                </a>
-              </li>
+
+            {/* User Menu */}
+            <div className="dropdown dropdown-end">
+              <div tabIndex={0} role="button" className="btn btn-ghost btn-circle avatar placeholder border border-base-300">
+                <div className="bg-neutral text-neutral-content rounded-full w-10">
+                  <span className="text-sm font-medium">{user?.email?.charAt(0).toUpperCase()}</span>
+                </div>
+              </div>
+              <ul tabIndex={0} className="dropdown-content z-[1] menu p-2 shadow-xl bg-base-100 rounded-box w-56 border border-base-200 mt-2">
+                <li className="menu-title px-4 py-2">
+                  <span className="text-xs opacity-60 font-normal">{user?.email}</span>
+                </li>
+                <li>
+                  <Link to="/dashboard/settings">
+                    <Settings className="h-4 w-4" />
+                    Settings
+                  </Link>
+                </li>
+                <div className="divider my-1"></div>
+                <li>
+                  <a onClick={handleSignOut} className="text-error">
+                    <LogOut className="h-4 w-4" />
+                    Sign out
+                  </a>
+                </li>
+              </ul>
+            </div>
+          </div>
+
+          {children}
+        </main>
+      </div>
+
+      {/* Sidebar */}
+      <div className="drawer-side z-40">
+        <label htmlFor="dashboard-drawer" aria-label="close sidebar" className="drawer-overlay"></label>
+        <div className="menu p-4 w-72 min-h-full bg-base-50 text-base-content border-r border-base-200 flex flex-col justify-between">
+          {/* Sidebar Top */}
+          <div>
+            <div className="flex items-center gap-3 px-2 mb-8 mt-2">
+              <img src={mmmetricLogo} alt="Logo" className="h-10 w-10 rounded-xl shadow-sm" />
+              <div className="flex flex-col">
+                <span className="font-display font-bold text-xl tracking-tight">mmmetric</span>
+                <span className="text-xs text-base-content/60">Privacy-first analytics</span>
+              </div>
+            </div>
+
+            <ul className="space-y-1">
+              {navItems.map((item) => {
+                const isActive = location.pathname === item.href || location.pathname.startsWith(`${item.href}?`);
+                return (
+                  <li key={item.label}>
+                    <Link
+                      to={item.href}
+                      className={`text-base font-medium gap-3 rounded-lg py-3 ${isActive ? 'active bg-primary text-primary-foreground shadow-md' : 'hover:bg-base-200'}`}
+                    >
+                      <item.icon className="h-5 w-5" />
+                      {item.label}
+                    </Link>
+                  </li>
+                );
+              })}
             </ul>
           </div>
+
+          {/* Sidebar Bottom (Mobile only usually, but good for consistent footer) */}
+          <div className="lg:hidden px-2 py-4 border-t border-base-200">
+            <button onClick={handleSignOut} className="btn btn-ghost btn-sm w-full justify-start text-error">
+              <LogOut className="h-4 w-4 mr-2" />
+              Sign Out
+            </button>
+          </div>
         </div>
-      </header>
+      </div>
 
-      {/* Main Content */}
-      <main className="container mx-auto px-4 py-6">{children}</main>
-
-      {/* Create Site Dialog */}
       <CreateSiteDialog
         open={createDialogOpen}
         onOpenChange={setCreateDialogOpen}

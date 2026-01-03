@@ -11,33 +11,35 @@ interface StatCardProps {
   value: string | number;
   change?: number;
   icon: React.ReactNode;
+  desc?: string;
   isLoading: boolean;
 }
 
-function StatCard({ title, value, change, icon, isLoading }: StatCardProps) {
+function StatCard({ title, value, change, icon, desc, isLoading }: StatCardProps) {
   const isPositive = change && change >= 0;
-  
+
   return (
-    <div className="card bg-base-200">
-      <div className="card-body p-4">
-        <div className="flex items-center justify-between">
-          <span className="text-sm font-medium text-base-content/70">{title}</span>
-          <span className="text-base-content/50">{icon}</span>
-        </div>
-        {isLoading ? (
-          <div className="skeleton h-8 w-24 mt-2"></div>
-        ) : (
-          <div className="mt-2">
-            <span className="text-2xl font-bold">{value}</span>
-            {change !== undefined && (
-              <div className={`flex items-center gap-1 mt-1 text-sm ${isPositive ? 'text-success' : 'text-error'}`}>
-                {isPositive ? <TrendingUp className="h-3 w-3" /> : <TrendingDown className="h-3 w-3" />}
-                <span>{Math.abs(change).toFixed(1)}%</span>
-              </div>
-            )}
-          </div>
-        )}
+    <div className="stat bg-base-100 shadow-sm border border-base-200 rounded-2xl">
+      <div className="stat-figure text-primary bg-primary/10 p-2 rounded-xl">
+        {icon}
       </div>
+      <div className="stat-title font-medium opacity-70">{title}</div>
+      {isLoading ? (
+        <div className="skeleton h-8 w-24 my-1"></div>
+      ) : (
+        <div className="stat-value text-3xl font-bold tracking-tight">{value}</div>
+      )}
+
+      {!isLoading && change !== undefined && (
+        <div className={`stat-desc flex items-center gap-1 font-medium ${isPositive ? 'text-success' : 'text-error'}`}>
+          {isPositive ? <TrendingUp className="h-3 w-3" /> : <TrendingDown className="h-3 w-3" />}
+          <span>{Math.abs(change).toFixed(1)}%</span>
+          <span className="text-base-content/40 font-normal ml-1">vs last period</span>
+        </div>
+      )}
+      {!isLoading && desc && (
+        <div className="stat-desc text-base-content/40">{desc}</div>
+      )}
     </div>
   );
 }
@@ -50,33 +52,36 @@ function formatNumber(num: number): string {
 
 export function StatsCards({ stats, isLoading }: StatsCardsProps) {
   return (
-    <div className="grid gap-4 grid-cols-2 lg:grid-cols-4">
+    <div className="grid gap-4 grid-cols-1 md:grid-cols-2 lg:grid-cols-4">
       <StatCard
-        title="Pageviews"
+        title="Total Views"
         value={formatNumber(stats?.totalPageviews || 0)}
         change={stats?.pageviewsChange}
-        icon={<Eye className="h-4 w-4" />}
+        icon={<Eye className="h-6 w-6" />}
         isLoading={isLoading}
       />
       <StatCard
         title="Unique Visitors"
         value={formatNumber(stats?.uniqueVisitors || 0)}
         change={stats?.visitorsChange}
-        icon={<Users className="h-4 w-4" />}
+        icon={<Users className="h-6 w-6" />}
         isLoading={isLoading}
       />
       <StatCard
         title="Bounce Rate"
         value={`${(stats?.bounceRate || 0).toFixed(1)}%`}
-        icon={<MousePointerClick className="h-4 w-4" />}
+        desc="Single page sessions"
+        icon={<MousePointerClick className="h-6 w-6" />}
         isLoading={isLoading}
       />
       <StatCard
         title="Avg. Session"
         value={stats?.avgSessionDuration ? `${Math.round(stats.avgSessionDuration)}s` : "—"}
-        icon={<Clock className="h-4 w-4" />}
+        desc="Time spent on site"
+        icon={<Clock className="h-6 w-6" />}
         isLoading={isLoading}
       />
     </div>
   );
 }
+
