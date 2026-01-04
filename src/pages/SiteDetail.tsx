@@ -247,30 +247,32 @@ export default function SiteDetail() {
     <DashboardLayout>
       <div className="space-y-6">
         {/* Header */}
-        <div className="flex flex-col md:flex-row md:items-center gap-4">
-          <div className="flex items-center gap-4 w-full md:w-auto">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+          <div className="flex items-center gap-4 min-w-0">
             <Button
               variant="ghost"
               size="icon"
-              className="rounded-full h-8 w-8"
+              className="rounded-full h-8 w-8 shrink-0"
               onClick={() => navigate("/dashboard")}
             >
               <ArrowLeft className="h-4 w-4" />
             </Button>
-            <div className="flex-1">
+            <div className="min-w-0 flex-1">
               {isEditing ? (
-                <Input
-                  type="text"
-                  className="text-2xl font-bold w-full max-w-xs h-auto py-1 px-2"
-                  value={editName}
-                  onChange={(e) => setEditName(e.target.value)}
-                  autoFocus
-                />
+                <div className="flex items-center gap-2">
+                  <Input
+                    type="text"
+                    className="text-2xl font-bold w-full max-w-xs h-auto py-1 px-2"
+                    value={editName}
+                    onChange={(e) => setEditName(e.target.value)}
+                    autoFocus
+                  />
+                </div>
               ) : (
-                <h1 className="text-2xl font-bold tracking-tight">{site.name}</h1>
+                <h1 className="text-2xl font-bold tracking-tight truncate">{site.name}</h1>
               )}
               <div className="text-base-content/70 flex items-center gap-2 mt-1">
-                <Globe className="h-4 w-4" />
+                <Globe className="h-4 w-4 shrink-0" />
                 {isEditing ? (
                   <Input
                     type="text"
@@ -280,12 +282,13 @@ export default function SiteDetail() {
                     placeholder="example.com"
                   />
                 ) : (
-                  <span>{site.domain || "No domain set"}</span>
+                  <span className="truncate">{site.domain || "No domain set"}</span>
                 )}
               </div>
             </div>
           </div>
-          <div className="flex gap-2 w-full md:w-auto overflow-x-auto pb-1 md:pb-0">
+
+          <div className="flex items-center gap-2 shrink-0 overflow-x-auto pb-1 sm:pb-0">
             <ExportButton siteId={site.id} siteName={site.name} dateRange={dateRange} />
             <DateRangePicker value={dateRange} onChange={setDateRange} />
             {isEditing ? (
@@ -305,15 +308,13 @@ export default function SiteDetail() {
                 </Button>
               </>
             ) : (
-              <>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={() => setShowSettings(!showSettings)}
-                >
-                  <Settings className="h-4 w-4" />
-                </Button>
-              </>
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => setShowSettings(!showSettings)}
+              >
+                <Settings className="h-4 w-4" />
+              </Button>
             )}
           </div>
         </div>
