@@ -4,6 +4,9 @@ import { useState } from "react";
 import { useEventGroups, useCustomEvents, CustomEvent, EventGroup } from "@/hooks/useCustomEvents";
 import { DateRange } from "@/hooks/useAnalytics";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useSubscription } from "@/hooks/useSubscription";
+import { UpgradeState } from "@/components/billing/UpgradeState";
+import { isSelfHosted } from "@/lib/billing";
 
 interface CustomEventsProps {
   siteId: string;
@@ -16,7 +19,7 @@ function EventDetails({ event }: { event: CustomEvent }) {
 
   return (
     <div className="border-t border-base-300 py-2 first:border-t-0">
-      <div 
+      <div
         className={`flex items-center justify-between ${hasProperties ? 'cursor-pointer' : ''}`}
         onClick={() => hasProperties && setExpanded(!expanded)}
       >
@@ -69,6 +72,28 @@ export function CustomEvents({ siteId, dateRange }: CustomEventsProps) {
   const { data: groups, isLoading: groupsLoading } = useEventGroups({ siteId, dateRange });
   const { data: events, isLoading: eventsLoading } = useCustomEvents({ siteId, dateRange });
 
+  const { subscription } = useSubscription();
+  const isLocked = subscription?.plan === 'free' && !isSelfHosted();
+
+  if (isLocked) {
+    return (
+      <div className="card bg-base-100 border border-base-300">
+        <div className="card-body p-4">
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center gap-2">
+              <Zap className="h-5 w-5 text-secondary" />
+              <h3 className="font-semibold">Custom Events</h3>
+            </div>
+          </div>
+          <UpgradeState
+            title="Unlock Custom Events"
+            description="Upgrade to the Pro plan to track custom user actions and detailed event properties."
+          />
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="card bg-base-100 border border-base-300">
       <div className="card-body p-4">
@@ -78,13 +103,13 @@ export function CustomEvents({ siteId, dateRange }: CustomEventsProps) {
             <h3 className="font-semibold">Custom Events</h3>
           </div>
           <div className="tabs tabs-boxed tabs-sm">
-            <button 
+            <button
               className={`tab ${!showEvents ? 'tab-active' : ''}`}
               onClick={() => setShowEvents(false)}
             >
               Summary
             </button>
-            <button 
+            <button
               className={`tab ${showEvents ? 'tab-active' : ''}`}
               onClick={() => setShowEvents(true)}
             >

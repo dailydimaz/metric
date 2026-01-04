@@ -10,6 +10,8 @@ import { useRetentionCohorts, useRetentionTrend } from "@/hooks/useRetention";
 import { useSites } from "@/hooks/useSites";
 import { ArrowLeft, Users, TrendingUp, Calendar } from "lucide-react";
 import { DateRange } from "@/hooks/useAnalytics";
+import { useSubscription } from "@/hooks/useSubscription";
+import { UpgradeState } from "@/components/billing/UpgradeState";
 
 export default function Retention() {
   const navigate = useNavigate();
@@ -24,6 +26,8 @@ export default function Retention() {
 
   const { data: cohortData, isLoading: cohortsLoading } = useRetentionCohorts(siteId, dateRange);
   const { data: trendData, isLoading: trendLoading } = useRetentionTrend(siteId, dateRange);
+
+  const { plan: subscriptionPlan, isSelfHosted } = useSubscription();
 
   // Redirect if no site ID
   if (!siteIdParam && sites.length > 0) {
@@ -44,6 +48,39 @@ export default function Retention() {
             <ArrowLeft className="h-4 w-4 mr-2" />
             Back to Dashboard
           </Button>
+        </div>
+      </DashboardLayout>
+    );
+  }
+
+  const hasAccess = subscriptionPlan?.features?.includes('Retention cohorts') || isSelfHosted;
+
+  if (!hasAccess) {
+    return (
+      <DashboardLayout>
+        <div className="space-y-6">
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+            <div className="flex items-center gap-4">
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => navigate(`/dashboard/sites/${siteId}`)}
+              >
+                <ArrowLeft className="h-4 w-4" />
+              </Button>
+              <div>
+                <h1 className="text-2xl font-bold text-foreground">Retention Cohorts</h1>
+                <p className="text-muted-foreground">{site.name}</p>
+              </div>
+            </div>
+          </div>
+
+          <div className="card bg-base-100 border border-base-300 h-[60vh] flex items-center justify-center">
+            <UpgradeState
+              title="Unlock Retention Cohorts"
+              description="Visualize how well you retain users over time with detailed cohort analysis. Upgrade to the Business plan to access this feature."
+            />
+          </div>
         </div>
       </DashboardLayout>
     );

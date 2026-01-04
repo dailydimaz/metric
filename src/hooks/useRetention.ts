@@ -1,6 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { DateRange } from "@/hooks/useAnalytics";
+import { useSubscription } from "@/hooks/useSubscription";
 
 export interface CohortData {
   cohort_date: string;
@@ -42,12 +43,24 @@ const getDateRangeFilter = (dateRange: DateRange) => {
 };
 
 export function useRetentionCohorts(siteId: string | undefined, dateRange: DateRange = "30d") {
+  const { plan } = useSubscription();
+
   return useQuery({
-    queryKey: ["retention-cohorts", siteId, dateRange],
+    queryKey: ["retention-cohorts", siteId, dateRange, plan.retentionDays],
     queryFn: async () => {
       if (!siteId) return null;
 
-      const { startDate, endDate } = getDateRangeFilter(dateRange);
+      const { startDate: requestedStartDate, endDate } = getDateRangeFilter(dateRange);
+      let startDate = requestedStartDate;
+
+      // Enforce retention limit
+      if (plan.retentionDays > 0) {
+        const minStartDate = new Date(Date.now() - plan.retentionDays * 24 * 60 * 60 * 1000);
+        if (startDate < minStartDate) {
+          startDate = minStartDate;
+        }
+      }
+
       const retentionDays = [1, 3, 7, 14, 30];
 
       // Get all events for the site within the date range
@@ -68,7 +81,7 @@ export function useRetentionCohorts(siteId: string | undefined, dateRange: DateR
 
       events.forEach(event => {
         if (!event.visitor_id) return;
-        
+
         const eventDate = new Date(event.created_at);
         const dateStr = eventDate.toISOString().split('T')[0];
 
@@ -84,7 +97,7 @@ export function useRetentionCohorts(siteId: string | undefined, dateRange: DateR
 
       // Group visitors by cohort (first visit date)
       const cohortVisitors = new Map<string, string[]>();
-      
+
       visitorFirstVisit.forEach((firstVisit, visitorId) => {
         const cohortDate = firstVisit.toISOString().split('T')[0];
         if (!cohortVisitors.has(cohortDate)) {
@@ -139,7 +152,7 @@ export function useRetentionCohorts(siteId: string | undefined, dateRange: DateR
         const validRates = cohorts
           .map(c => c.retention.find(r => r.day === day)?.rate || 0)
           .filter(r => r >= 0);
-        
+
         const average = validRates.length > 0
           ? Math.round(validRates.reduce((a, b) => a + b, 0) / validRates.length)
           : 0;
@@ -154,12 +167,23 @@ export function useRetentionCohorts(siteId: string | undefined, dateRange: DateR
 }
 
 export function useRetentionTrend(siteId: string | undefined, dateRange: DateRange = "30d") {
+  const { plan } = useSubscription();
+
   return useQuery({
-    queryKey: ["retention-trend", siteId, dateRange],
+    queryKey: ["retention-trend", siteId, dateRange, plan.retentionDays],
     queryFn: async () => {
       if (!siteId) return null;
 
-      const { startDate, endDate } = getDateRangeFilter(dateRange);
+      const { startDate: requestedStartDate, endDate } = getDateRangeFilter(dateRange);
+      let startDate = requestedStartDate;
+
+      // Enforce retention limit
+      if (plan.retentionDays > 0) {
+        const minStartDate = new Date(Date.now() - plan.retentionDays * 24 * 60 * 60 * 1000);
+        if (startDate < minStartDate) {
+          startDate = minStartDate;
+        }
+      }
 
       // Get all events
       const { data: events, error } = await supabase
@@ -179,7 +203,7 @@ export function useRetentionTrend(siteId: string | undefined, dateRange: DateRan
 
       events.forEach(event => {
         if (!event.visitor_id) return;
-        
+
         const eventDate = new Date(event.created_at);
 
         if (!visitorFirstVisit.has(event.visitor_id)) {

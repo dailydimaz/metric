@@ -17,11 +17,14 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { Plus, MoreVertical, Pencil, Trash2, GitBranch, ChevronRight } from "lucide-react";
+import { Plus, MoreVertical, Pencil, Trash2, GitBranch, ChevronRight, Lock } from "lucide-react";
 import { useFunnels, useDeleteFunnel, Funnel } from "@/hooks/useFunnels";
 import { FunnelBuilder } from "./FunnelBuilder";
 import { format } from "date-fns";
 import { Link } from "react-router-dom";
+import { useSubscription } from "@/hooks/useSubscription";
+import { UpgradeState } from "@/components/billing/UpgradeState";
+import { isSelfHosted } from "@/lib/billing";
 
 interface FunnelListProps {
   siteId: string;
@@ -30,6 +33,10 @@ interface FunnelListProps {
 export function FunnelList({ siteId }: FunnelListProps) {
   const { data: funnels, isLoading } = useFunnels(siteId);
   const deleteFunnel = useDeleteFunnel();
+  const { plan: subscriptionPlan, subscription } = useSubscription();
+
+  const isLocked = subscription?.plan === 'free' && !isSelfHosted();
+
 
   const [showBuilder, setShowBuilder] = useState(false);
   const [editingFunnel, setEditingFunnel] = useState<Funnel | undefined>();
@@ -82,21 +89,32 @@ export function FunnelList({ siteId }: FunnelListProps) {
             <GitBranch className="h-5 w-5" />
             Funnels
           </CardTitle>
-          <Button size="sm" onClick={() => setShowBuilder(true)}>
-            <Plus className="h-4 w-4 mr-2" />
+          <Button
+            size="sm"
+            onClick={() => setShowBuilder(true)}
+            disabled={isLocked}
+          >
+            {isLocked ? <Lock className="h-4 w-4 mr-2" /> : <Plus className="h-4 w-4 mr-2" />}
             Create Funnel
           </Button>
         </CardHeader>
         <CardContent>
           {!funnels || funnels.length === 0 ? (
-            <div className="text-center py-8">
-              <GitBranch className="h-12 w-12 mx-auto text-muted-foreground/50 mb-3" />
-              <p className="text-muted-foreground mb-4">No funnels created yet</p>
-              <Button variant="outline" onClick={() => setShowBuilder(true)}>
-                <Plus className="h-4 w-4 mr-2" />
-                Create Your First Funnel
-              </Button>
-            </div>
+            isLocked ? (
+              <UpgradeState
+                title="Unlock Funnel Analysis"
+                description="Upgrade to the Pro plan to create conversion funnels and track user journeys across your site."
+              />
+            ) : (
+              <div className="text-center py-8">
+                <GitBranch className="h-12 w-12 mx-auto text-muted-foreground/50 mb-3" />
+                <p className="text-muted-foreground mb-4">No funnels created yet</p>
+                <Button variant="outline" onClick={() => setShowBuilder(true)}>
+                  <Plus className="h-4 w-4 mr-2" />
+                  Create Your First Funnel
+                </Button>
+              </div>
+            )
           ) : (
             <div className="space-y-3">
               {funnels.map((funnel) => (
