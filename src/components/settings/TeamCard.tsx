@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Users, Plus, UserMinus, Mail, Crown, Edit2, Loader2 } from "lucide-react";
+import { Users, Plus, UserMinus, Mail, Loader2, Copy, Link } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -38,6 +38,7 @@ export function TeamCard() {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [inviteEmail, setInviteEmail] = useState("");
   const [inviteRole, setInviteRole] = useState<"viewer" | "editor" | "admin">("viewer");
+  const [generatedLink, setGeneratedLink] = useState<string | null>(null);
 
   // Only show for cloud users with Business plan
   if (!isBillingEnabled() || isSelfHosted) {
@@ -84,23 +85,48 @@ export function TeamCard() {
     }
 
     try {
-      await inviteMember.mutateAsync({
+      const result = await inviteMember.mutateAsync({
         email: inviteEmail,
         role: inviteRole,
       });
+      
+      // Generate the invite link with the token
+      const inviteLink = `${window.location.origin}/invite/${result.token}`;
+      setGeneratedLink(inviteLink);
+      
       toast({
-        title: "Invitation sent",
-        description: `Invitation sent to ${inviteEmail}`,
+        title: "Invitation created",
+        description: "Copy the link below to share with your team member",
       });
-      setInviteEmail("");
-      setDialogOpen(false);
     } catch (error: any) {
       toast({
         title: "Error",
-        description: error.message || "Failed to send invitation",
+        description: error.message || "Failed to create invitation",
         variant: "destructive",
       });
     }
+  };
+
+  const handleCopyLink = async (link: string) => {
+    try {
+      await navigator.clipboard.writeText(link);
+      toast({
+        title: "Copied!",
+        description: "Invite link copied to clipboard",
+      });
+    } catch {
+      toast({
+        title: "Failed to copy",
+        description: "Please copy the link manually",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleCloseDialog = () => {
+    setDialogOpen(false);
+    setGeneratedLink(null);
+    setInviteEmail("");
   };
 
   const handleRemoveMember = async (memberId: string) => {
@@ -159,7 +185,7 @@ export function TeamCard() {
               Manage team members who can access your analytics
             </CardDescription>
           </div>
-          <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+          <Dialog open={dialogOpen} onOpenChange={handleCloseDialog}>
             <DialogTrigger asChild>
               <Button size="sm">
                 <Plus className="h-4 w-4 mr-2" />
@@ -170,42 +196,70 @@ export function TeamCard() {
               <DialogHeader>
                 <DialogTitle>Invite Team Member</DialogTitle>
                 <DialogDescription>
-                  Send an invitation to join your analytics team
+                  {generatedLink 
+                    ? "Share this link with your team member"
+                    : "Create an invitation link to share"
+                  }
                 </DialogDescription>
               </DialogHeader>
-              <div className="space-y-4">
-                <div className="space-y-2">
-                  <Label htmlFor="email">Email Address</Label>
-                  <Input
-                    id="email"
-                    type="email"
-                    value={inviteEmail}
-                    onChange={(e) => setInviteEmail(e.target.value)}
-                    placeholder="colleague@company.com"
-                  />
+              
+              {generatedLink ? (
+                <div className="space-y-4">
+                  <div className="flex items-center gap-2 p-3 bg-muted rounded-lg">
+                    <Link className="h-4 w-4 text-muted-foreground shrink-0" />
+                    <code className="text-sm break-all flex-1">{generatedLink}</code>
+                  </div>
+                  <Button 
+                    onClick={() => handleCopyLink(generatedLink)} 
+                    className="w-full"
+                  >
+                    <Copy className="h-4 w-4 mr-2" />
+                    Copy Invite Link
+                  </Button>
+                  <p className="text-sm text-muted-foreground text-center">
+                    This link expires in 7 days
+                  </p>
                 </div>
-                <div className="space-y-2">
-                  <Label htmlFor="role">Role</Label>
-                  <Select value={inviteRole} onValueChange={(v: any) => setInviteRole(v)}>
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="viewer">Viewer - Can view analytics</SelectItem>
-                      <SelectItem value="editor">Editor - Can manage goals & funnels</SelectItem>
-                      <SelectItem value="admin">Admin - Full access</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
-              <DialogFooter>
-                <Button variant="outline" onClick={() => setDialogOpen(false)}>
-                  Cancel
-                </Button>
-                <Button onClick={handleInvite} disabled={inviteMember.isPending}>
-                  {inviteMember.isPending ? "Sending..." : "Send Invitation"}
-                </Button>
-              </DialogFooter>
+              ) : (
+                <>
+                  <div className="space-y-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="email">Email Address</Label>
+                      <Input
+                        id="email"
+                        type="email"
+                        value={inviteEmail}
+                        onChange={(e) => setInviteEmail(e.target.value)}
+                        placeholder="colleague@company.com"
+                      />
+                      <p className="text-xs text-muted-foreground">
+                        Used to identify the invitation (no email will be sent)
+                      </p>
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="role">Role</Label>
+                      <Select value={inviteRole} onValueChange={(v: any) => setInviteRole(v)}>
+                        <SelectTrigger>
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="viewer">Viewer - Can view analytics</SelectItem>
+                          <SelectItem value="editor">Editor - Can manage goals & funnels</SelectItem>
+                          <SelectItem value="admin">Admin - Full access</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+                  <DialogFooter>
+                    <Button variant="outline" onClick={handleCloseDialog}>
+                      Cancel
+                    </Button>
+                    <Button onClick={handleInvite} disabled={inviteMember.isPending}>
+                      {inviteMember.isPending ? "Creating..." : "Create Invite Link"}
+                    </Button>
+                  </DialogFooter>
+                </>
+              )}
             </DialogContent>
           </Dialog>
         </div>
@@ -281,6 +335,14 @@ export function TeamCard() {
                     </div>
                     <div className="flex items-center gap-2">
                       <Badge variant="outline">{invitation.role}</Badge>
+                      <Button
+                        size="icon"
+                        variant="ghost"
+                        onClick={() => handleCopyLink(`${window.location.origin}/invite/${invitation.token}`)}
+                        title="Copy invite link"
+                      >
+                        <Copy className="h-4 w-4" />
+                      </Button>
                       <Button
                         size="sm"
                         variant="ghost"
