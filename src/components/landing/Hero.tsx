@@ -53,7 +53,7 @@ export function Hero() {
                 Start Free Trial
                 <ArrowRight className="ml-2 h-4 w-4" />
               </Link>
-              <Link to="#demo" className="btn btn-ghost btn-lg w-full sm:w-auto hover:bg-base-200/50">
+              <Link to="/live" className="btn btn-ghost btn-lg w-full sm:w-auto hover:bg-base-200/50">
                 View Live Demo
               </Link>
             </div>
