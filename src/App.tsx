@@ -14,7 +14,16 @@ import Retention from "./pages/Retention";
 import Settings from "./pages/Settings";
 import Roadmap from "./pages/Roadmap";
 import InviteAccept from "./pages/InviteAccept";
+
 import NotFound from "./pages/NotFound";
+import CompareGA from "./pages/CompareGA";
+import LiveDemo from "./pages/LiveDemo";
+import SelfHosting from "./pages/SelfHosting";
+import Privacy from "./pages/Privacy";
+import Lightweight from "./pages/Lightweight";
+
+
+
 
 const queryClient = new QueryClient();
 
@@ -29,6 +38,14 @@ const App = () => (
           <Route path="/auth" element={<Auth />} />
           <Route path="/auth/reset-password" element={<ResetPassword />} />
           <Route path="/roadmap" element={<Roadmap />} />
+          <Route path="/compare/google-analytics" element={<CompareGA />} />
+          <Route path="/live" element={<LiveDemo />} />
+          <Route path="/resources/self-hosting" element={<SelfHosting />} />
+          <Route path="/resources/privacy" element={<Privacy />} />
+          <Route path="/resources/lightweight" element={<Lightweight />} />
+
+
+
           <Route path="/invite/:token" element={<InviteAccept />} />
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/dashboard/sites/:siteId" element={<SiteDetail />} />

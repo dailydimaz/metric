@@ -7,11 +7,17 @@ const footerLinks = {
     { label: "Features", href: "#features" },
     { label: "Pricing", href: "#pricing" },
     { label: "Roadmap", href: "/roadmap" },
+    { label: "Live Demo", href: "/live" },
+    { label: "vs Google Analytics", href: "/compare/google-analytics" },
     { label: "Changelog", href: "#" },
   ],
   resources: [
+    { label: "Self-Hosting", href: "/resources/self-hosting" },
+    { label: "Privacy Guide", href: "/resources/privacy" },
+    { label: "Lightweight Analytics", href: "/resources/lightweight" },
     { label: "Documentation", href: "#" },
     { label: "API Reference", href: "#" },
+
     { label: "GitHub", href: "https://github.com/dailydimaz/mmmetric", external: true },
   ],
   community: [

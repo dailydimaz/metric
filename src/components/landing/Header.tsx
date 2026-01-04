@@ -27,6 +27,16 @@ export function Header() {
               Pricing
             </a>
           </li>
+          <li>
+            <Link to="/live" className="text-base-content/70 hover:text-base-content flex items-center gap-2">
+              <span className="relative flex h-2 w-2">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-success opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-2 w-2 bg-success"></span>
+              </span>
+              Live Demo
+            </Link>
+          </li>
+
         </ul>
       </div>
 
@@ -62,6 +72,12 @@ export function Header() {
                 Pricing
               </a>
             </li>
+            <li>
+              <Link to="/live" onClick={() => setMobileMenuOpen(false)}>
+                Live Demo
+              </Link>
+            </li>
+
             <li className="mt-2">
               <Link to="/auth" className="justify-center" onClick={() => setMobileMenuOpen(false)}>
                 Sign in

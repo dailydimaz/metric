@@ -39,6 +39,8 @@ import {
   Twitter,
   Code2,
   Globe2,
+  LayoutTemplate,
+  Bell,
 } from "lucide-react";
 
 interface Feature {
@@ -212,13 +214,14 @@ const features: Feature[] = [
   },
 
   // NOT IMPLEMENTED - Medium
+
   {
-    name: "Sharing",
+    name: "Public Dashboards",
     description: "Share stats via secure unique URL",
     icon: Share2,
     implemented: false,
     difficulty: "medium",
-    category: "analytics",
+    category: "insights",
   },
   {
     name: "Segments",
@@ -365,6 +368,30 @@ const features: Feature[] = [
     implemented: false,
     difficulty: "hard",
     category: "analytics",
+  },
+  {
+    name: "White Labeling",
+    description: "Custom branding and logo for your dashboard",
+    icon: LayoutTemplate,
+    implemented: false,
+    difficulty: "medium",
+    category: "cloud",
+  },
+  {
+    name: "Webhooks",
+    description: "Slack/Discord notifications for traffic spikes",
+    icon: Bell,
+    implemented: false,
+    difficulty: "medium",
+    category: "cloud",
+  },
+  {
+    name: "GA Import",
+    description: "Import historical data from Google Analytics",
+    icon: Database,
+    implemented: false,
+    difficulty: "hard",
+    category: "cloud",
   },
 ];
 
