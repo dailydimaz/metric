@@ -68,6 +68,14 @@ export default function Auth() {
       }
     }
     
+    // Check for pending invite token and redirect there
+    const pendingInviteToken = sessionStorage.getItem("pendingInviteToken");
+    if (pendingInviteToken) {
+      sessionStorage.removeItem("pendingInviteToken");
+      navigate(`/invite/${pendingInviteToken}`);
+      return;
+    }
+    
     navigate("/dashboard");
   };
 

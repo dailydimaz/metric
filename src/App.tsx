@@ -13,6 +13,7 @@ import Funnels from "./pages/Funnels";
 import Retention from "./pages/Retention";
 import Settings from "./pages/Settings";
 import Roadmap from "./pages/Roadmap";
+import InviteAccept from "./pages/InviteAccept";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -28,6 +29,7 @@ const App = () => (
           <Route path="/auth" element={<Auth />} />
           <Route path="/auth/reset-password" element={<ResetPassword />} />
           <Route path="/roadmap" element={<Roadmap />} />
+          <Route path="/invite/:token" element={<InviteAccept />} />
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/dashboard/sites/:siteId" element={<SiteDetail />} />
           <Route path="/dashboard/sites/:siteId/funnels" element={<Funnels />} />
