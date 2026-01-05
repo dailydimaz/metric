@@ -285,12 +285,47 @@ export function ApiKeysCard() {
             ))}
           </div>
         )}
-        
-        <div className="mt-4 p-3 bg-muted rounded-lg">
-          <p className="text-sm font-medium">API Endpoint</p>
-          <code className="text-xs text-muted-foreground">
-            GET /api/v1/sites/:site_id/stats
-          </code>
+
+        <div className="mt-6 p-4 bg-muted/50 rounded-lg space-y-3">
+          <div className="flex items-center justify-between">
+            <h4 className="font-medium text-sm">API Documentation</h4>
+            <Badge variant="outline">v1</Badge>
+          </div>
+          <p className="text-sm text-muted-foreground">
+            Fetch analytics data programmatically using your API key.
+          </p>
+
+          <div className="space-y-2">
+            <Label className="text-xs">Example Request</Label>
+            <div className="relative group">
+              <div className="bg-background border rounded-md p-3 text-xs font-mono overflow-x-auto whitespace-pre">
+                {`curl -X GET "https://[PROJECT_REF].supabase.co/functions/v1/stats?site_id=SITE_ID&range=7d" \\
+  -H "Authorization: Bearer mk_..."`}
+              </div>
+              <Button
+                size="icon"
+                variant="ghost"
+                className="absolute top-1 right-1 h-6 w-6 opacity-0 group-hover:opacity-100 transition-opacity"
+                onClick={() => {
+                  navigator.clipboard.writeText('curl -X GET "https://[PROJECT_REF].supabase.co/functions/v1/stats?site_id=SITE_ID&range=7d" -H "Authorization: Bearer <YOUR_KEY>"');
+                  toast({ description: "Copied to clipboard" });
+                }}
+              >
+                <Copy className="h-3 w-3" />
+              </Button>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-2 gap-2 text-xs">
+            <div>
+              <span className="font-semibold">site_id</span>
+              <span className="text-muted-foreground ml-1">(Required) UUID</span>
+            </div>
+            <div>
+              <span className="font-semibold">range</span>
+              <span className="text-muted-foreground ml-1">24h, 7d, 30d, 90d</span>
+            </div>
+          </div>
         </div>
       </CardContent>
     </Card>

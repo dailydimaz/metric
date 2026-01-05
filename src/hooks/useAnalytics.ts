@@ -10,6 +10,7 @@ export interface AnalyticsFilter {
   url?: string;
   os?: string;
   device?: string;
+  referrerPattern?: string;
 }
 
 interface AnalyticsParams {
@@ -51,6 +52,12 @@ function applyFilters(query: any, filters?: AnalyticsFilter) {
   if (filters.os) query = query.eq('os', filters.os);
   if (filters.device) query = query.eq('device_type', filters.device);
 
+  if (filters.referrerPattern) {
+    const patterns = filters.referrerPattern.split('|');
+    const orClause = patterns.map(p => `referrer.ilike.%${p}%`).join(',');
+    query = query.or(orClause);
+  }
+
   return query;
 }
 
@@ -67,6 +74,8 @@ export interface TimeSeriesData {
   date: string;
   pageviews: number;
   visitors: number;
+  prevPageviews?: number;
+  prevVisitors?: number;
 }
 
 export interface TopPage {
@@ -216,7 +225,6 @@ export function useAnalyticsTimeSeries({ siteId, dateRange, filters }: Analytics
 
       // Group by date
       const byDate = new Map<string, { pageviews: number; visitors: Set<string> }>();
-
       events?.forEach(event => {
         const date = format(new Date(event.created_at), "yyyy-MM-dd");
         if (!byDate.has(date)) {
@@ -227,18 +235,57 @@ export function useAnalyticsTimeSeries({ siteId, dateRange, filters }: Analytics
         if (event.visitor_id) dayData.visitors.add(event.visitor_id);
       });
 
+      // Fetch previous period data
+      const periodLength = Math.ceil((end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24));
+      const prevStart = subDays(start, periodLength);
+      const prevEnd = subDays(end, periodLength);
+
+      const { data: prevEvents, error: prevError } = await applyFilters(
+        supabase
+          .from("events")
+          .select("created_at, visitor_id")
+          .eq("site_id", siteId)
+          .eq("event_name", "pageview")
+          .gte("created_at", prevStart.toISOString())
+          .lte("created_at", prevEnd.toISOString()),
+        filters
+      );
+
+      if (prevError) throw prevError;
+
+      const prevByDate = new Map<string, { pageviews: number; visitors: Set<string> }>();
+      prevEvents?.forEach(event => {
+        const date = format(new Date(event.created_at), "yyyy-MM-dd");
+        if (!prevByDate.has(date)) {
+          prevByDate.set(date, { pageviews: 0, visitors: new Set() });
+        }
+        const dayData = prevByDate.get(date)!;
+        dayData.pageviews++;
+        if (event.visitor_id) dayData.visitors.add(event.visitor_id);
+      });
+
       // Fill in missing dates
       const result: TimeSeriesData[] = [];
       const current = new Date(start);
+      // Need to iterate same number of days for prev period
+      let prevCurrent = new Date(prevStart);
+
       while (current <= end) {
         const dateStr = format(current, "yyyy-MM-dd");
+        const prevDateStr = format(prevCurrent, "yyyy-MM-dd");
+
         const dayData = byDate.get(dateStr);
+        const prevDayData = prevByDate.get(prevDateStr);
+
         result.push({
           date: dateStr,
           pageviews: dayData?.pageviews || 0,
           visitors: dayData?.visitors.size || 0,
+          prevPageviews: prevDayData?.pageviews || 0,
+          prevVisitors: prevDayData?.visitors.size || 0,
         });
         current.setDate(current.getDate() + 1);
+        prevCurrent.setDate(prevCurrent.getDate() + 1);
       }
 
       return result;

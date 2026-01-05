@@ -16,6 +16,7 @@ import {
   CheckCircle,
   XCircle,
   Loader2,
+  Image as ImageIcon,
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
@@ -38,7 +39,9 @@ import {
   FunnelList,
   RetentionCard,
   FilterBar,
+  TwitterStats,
 } from "@/components/analytics";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -451,68 +454,93 @@ export default function SiteDetail() {
                   </button>
                 </div>
               </div>
+
+              {/* Tracking Pixel */}
+              <div className="mt-4 pt-4 border-t border-base-300">
+                <div className="flex items-center gap-2 mb-2">
+                  <ImageIcon className="h-4 w-4" />
+                  <h4 className="text-sm font-medium">Tracking Pixel</h4>
+                </div>
+                <p className="text-base-content/70 text-sm">
+                  Use this 1x1 image for tracking in emails or non-JS environments:
+                </p>
+                <div className="mockup-code mt-2">
+                  <pre><code>{`<img src="https://[PROJECT_REF].supabase.co/functions/v1/pixel?site_id=${site.tracking_id}" alt="" />`}</code></pre>
+                </div>
+              </div>
             </div>
           </div>
         )}
 
         {/* Analytics Dashboard */}
-        <div className="space-y-6">
-          {/* Real-time Section */}
-          <div className="grid gap-6 lg:grid-cols-2">
-            <RealtimeStats siteId={site.id} />
-            <RealtimeActivityFeed siteId={site.id} />
-          </div>
+        <Tabs defaultValue="overview" className="space-y-6">
+          <TabsList>
+            <TabsTrigger value="overview">Overview</TabsTrigger>
+            <TabsTrigger value="twitter">X / Twitter</TabsTrigger>
+          </TabsList>
 
-          {/* Stats Overview */}
-          <StatsCards stats={stats} isLoading={statsLoading} />
+          <TabsContent value="overview" className="space-y-6">
+            {/* Real-time Section */}
+            <div className="grid gap-6 lg:grid-cols-2">
+              <RealtimeStats siteId={site.id} />
+              <RealtimeActivityFeed siteId={site.id} />
+            </div>
 
-          {/* Visitor Chart */}
-          <VisitorChart data={timeSeries} isLoading={timeSeriesLoading} />
+            {/* Stats Overview */}
+            <StatsCards stats={stats} isLoading={statsLoading} />
 
-          {/* Two Column Layout */}
-          <div className="grid gap-6 lg:grid-cols-2">
-            <TopPages pages={topPages} isLoading={pagesLoading} />
-            <TopReferrers referrers={topReferrers} isLoading={referrersLoading} />
-          </div>
+            {/* Visitor Chart */}
+            <VisitorChart data={timeSeries} isLoading={timeSeriesLoading} />
 
-          {/* Funnels */}
-          <FunnelList siteId={site.id} />
+            {/* Two Column Layout */}
+            <div className="grid gap-6 lg:grid-cols-2">
+              <TopPages pages={topPages} isLoading={pagesLoading} />
+              <TopReferrers referrers={topReferrers} isLoading={referrersLoading} />
+            </div>
 
-          {/* Goals, Retention & Custom Events */}
-          <div className="grid gap-6 lg:grid-cols-3">
-            <GoalsCard
-              siteId={site.id}
-              dateRange={dateRange}
-              onCreateGoal={() => setShowGoalSetup(true)}
+            {/* Funnels */}
+            <FunnelList siteId={site.id} />
+
+            {/* Goals, Retention & Custom Events */}
+            <div className="grid gap-6 lg:grid-cols-3">
+              <GoalsCard
+                siteId={site.id}
+                dateRange={dateRange}
+                onCreateGoal={() => setShowGoalSetup(true)}
+              />
+              <RetentionCard siteId={site.id} dateRange={dateRange} />
+              <CustomEvents siteId={site.id} dateRange={dateRange} />
+            </div>
+
+            {/* Device Stats */}
+            <DeviceStats
+              browsers={deviceStats?.browsers}
+              operatingSystems={deviceStats?.operatingSystems}
+              devices={deviceStats?.devices}
+              isLoading={devicesLoading}
             />
-            <RetentionCard siteId={site.id} dateRange={dateRange} />
-            <CustomEvents siteId={site.id} dateRange={dateRange} />
-          </div>
 
-          {/* Device Stats */}
-          <DeviceStats
-            browsers={deviceStats?.browsers}
-            operatingSystems={deviceStats?.operatingSystems}
-            devices={deviceStats?.devices}
-            isLoading={devicesLoading}
-          />
+            {/* UTM Campaign Stats */}
+            <UTMStats utmStats={utmStats} isLoading={utmLoading} />
 
-          {/* UTM Campaign Stats */}
-          <UTMStats utmStats={utmStats} isLoading={utmLoading} />
+            {/* Geo & Language Stats */}
+            <div className="grid gap-6 lg:grid-cols-2">
+              <GeoStats
+                countries={geoStats}
+                cities={cityStats}
+                isLoading={geoLoading || citiesLoading}
+              />
+              <LanguageStats
+                languages={languageStats}
+                isLoading={languagesLoading}
+              />
+            </div>
+          </TabsContent>
 
-          {/* Geo & Language Stats */}
-          <div className="grid gap-6 lg:grid-cols-2">
-            <GeoStats
-              countries={geoStats}
-              cities={cityStats}
-              isLoading={geoLoading || citiesLoading}
-            />
-            <LanguageStats
-              languages={languageStats}
-              isLoading={languagesLoading}
-            />
-          </div>
-        </div>
+          <TabsContent value="twitter">
+            <TwitterStats siteId={site.id} dateRange={dateRange} />
+          </TabsContent>
+        </Tabs>
       </div>
 
       {/* Goal Setup Modal */}

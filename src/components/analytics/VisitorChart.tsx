@@ -98,6 +98,17 @@ export function VisitorChart({ data, isLoading }: VisitorChartProps) {
               />
               <Area
                 type="monotone"
+                dataKey="prevPageviews"
+                name="Previous Pageviews"
+                stroke="hsl(var(--primary))"
+                strokeDasharray="4 4"
+                fillOpacity={0}
+                strokeWidth={2}
+                strokeOpacity={0.3}
+                animationDuration={1000}
+              />
+              <Area
+                type="monotone"
                 dataKey="visitors"
                 name="Unique Visitors"
                 stroke="hsl(var(--secondary))"

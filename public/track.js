@@ -4,18 +4,20 @@
  * 
  * Usage: <script defer src="https://mmmetric.lovable.app/track.js" data-site="YOUR_TRACKING_ID"></script>
  */
-(function() {
+(function () {
   'use strict';
 
   // Configuration
   var script = document.currentScript || document.querySelector('script[data-site]');
   var siteId = script && script.getAttribute('data-site');
+  var crossDomains = (script && script.getAttribute('data-cross-domain') || '').split(',').map(function (d) { return d.trim(); }).filter(Boolean);
+
   // Use custom API URL if provided, otherwise use the mmmetric Edge Function URL
   var apiUrl = script && script.getAttribute('data-api') || 'https://lckjlefupqlblfcwhbom.supabase.co/functions/v1/track';
-  
+
   // Debug logging (can be removed in production)
   console.log('mmmetric: Initializing with site ID:', siteId);
-  
+
   if (!siteId) {
     console.warn('mmmetric: Missing data-site attribute. Add data-site="YOUR_TRACKING_ID" to the script tag.');
     return;
@@ -40,6 +42,16 @@
 
   function getSessionId() {
     var now = Date.now();
+
+    // Check for session in URL params (Cross-domain tracking)
+    var params = new URLSearchParams(window.location.search);
+    var urlSessionId = params.get('_mm_sid');
+
+    if (urlSessionId && !sessionId) {
+      sessionId = urlSessionId;
+      lastActivity = now;
+    }
+
     if (!sessionId || (now - lastActivity) > SESSION_TIMEOUT) {
       sessionId = Math.random().toString(36).substring(2) + now.toString(36);
     }
@@ -52,14 +64,14 @@
     var params = new URLSearchParams(window.location.search);
     var utm = {};
     var utmKeys = ['utm_source', 'utm_medium', 'utm_campaign', 'utm_term', 'utm_content'];
-    
-    utmKeys.forEach(function(key) {
+
+    utmKeys.forEach(function (key) {
       var value = params.get(key);
       if (value) {
         utm[key] = value;
       }
     });
-    
+
     return Object.keys(utm).length > 0 ? utm : null;
   }
 
@@ -77,8 +89,9 @@
     }
   }
 
-  // Get current URL (without query params for privacy)
+  // Get current URL (without query params for privacy, unless needed)
   function getCurrentUrl() {
+    // We strip query params to protect PII, but we could optionally keep them
     return window.location.pathname;
   }
 
@@ -86,7 +99,7 @@
   function track(eventName, properties) {
     var utm = getUtmParams();
     var mergedProperties = Object.assign({}, properties || {});
-    
+
     // Include UTM params in properties if present
     if (utm) {
       mergedProperties.utm = utm;
@@ -97,7 +110,7 @@
       event_name: eventName || 'pageview',
       url: getCurrentUrl(),
       referrer: getReferrer(),
-      session_id: getSessionId(),
+      session_id: getSessionId(), // Ensure session ID is active/generated
       properties: Object.keys(mergedProperties).length > 0 ? mergedProperties : {}
     };
 
@@ -117,9 +130,9 @@
           method: 'POST',
           body: JSON.stringify(payload),
           keepalive: true
-        }).then(function(res) {
+        }).then(function (res) {
           console.log('mmmetric: fetch fallback result:', res.status);
-        }).catch(function(err) {
+        }).catch(function (err) {
           console.error('mmmetric: fetch fallback error:', err);
         });
       }
@@ -129,9 +142,9 @@
         method: 'POST',
         body: JSON.stringify(payload),
         keepalive: true
-      }).then(function(res) {
+      }).then(function (res) {
         console.log('mmmetric: fetch result:', res.status);
-      }).catch(function(err) {
+      }).catch(function (err) {
         console.error('mmmetric: fetch error:', err);
       });
     }
@@ -144,28 +157,37 @@
 
   // Track outbound links automatically
   function setupOutboundTracking() {
-    document.addEventListener('click', function(e) {
+    document.addEventListener('click', function (e) {
       var target = e.target;
-      
+
       // Find closest anchor element
       while (target && target.tagName !== 'A') {
         target = target.parentElement;
       }
-      
+
       if (!target || target.tagName !== 'A') return;
-      
+
       var href = target.getAttribute('href');
       if (!href) return;
-      
+
       try {
         var url = new URL(href, window.location.origin);
-        
+
         // Check if it's an outbound link
         if (url.hostname !== window.location.hostname) {
+          // Track the click
           track('outbound', {
             href: href,
             text: target.innerText.substring(0, 100)
           });
+
+          // Cross-domain linking
+          if (crossDomains.length > 0 && crossDomains.some(function (d) { return url.hostname.includes(d); })) {
+            // Append session ID to the URL
+            // We use separator based on existing query params
+            var separator = href.includes('?') ? '&' : '?';
+            target.setAttribute('href', href + separator + '_mm_sid=' + getSessionId());
+          }
         }
       } catch (e) {
         // Invalid URL, ignore
@@ -176,8 +198,8 @@
   // Track 404 errors
   function track404() {
     // Check if page might be a 404
-    if (document.title.toLowerCase().includes('404') || 
-        document.title.toLowerCase().includes('not found')) {
+    if (document.title.toLowerCase().includes('404') ||
+      document.title.toLowerCase().includes('not found')) {
       track('404', {
         url: window.location.href,
         referrer: document.referrer
@@ -187,7 +209,7 @@
 
   // Handle SPA navigation
   var lastPath = window.location.pathname;
-  
+
   function handleNavigation() {
     var currentPath = window.location.pathname;
     if (currentPath !== lastPath) {
@@ -199,13 +221,13 @@
   // Listen for history changes (SPA support)
   if (window.history && window.history.pushState) {
     var originalPushState = window.history.pushState;
-    window.history.pushState = function() {
+    window.history.pushState = function () {
       originalPushState.apply(this, arguments);
       handleNavigation();
     };
 
     var originalReplaceState = window.history.replaceState;
-    window.history.replaceState = function() {
+    window.history.replaceState = function () {
       originalReplaceState.apply(this, arguments);
       handleNavigation();
     };
@@ -217,7 +239,7 @@
   function init() {
     trackPageview();
     setupOutboundTracking();
-    
+
     // Delay 404 check to allow page to fully load
     setTimeout(track404, 1000);
   }
@@ -231,15 +253,15 @@
 
   // Expose track function globally for custom events
   window.mmmetric = {
-    track: function(eventName, properties) {
+    track: function (eventName, properties) {
       track(eventName, properties);
     },
     // Optional: identify users (stores in sessionStorage)
-    identify: function(userId) {
+    identify: function (userId) {
       if (userId) {
         try {
           sessionStorage.setItem('mmmetric_user_id', userId);
-        } catch (e) {}
+        } catch (e) { }
       }
     }
   };
