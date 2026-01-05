@@ -19,3 +19,4 @@ export { FunnelList } from "./FunnelList";
 export { RetentionMatrix } from "./RetentionMatrix";
 export { RetentionChart } from "./RetentionChart";
 export { RetentionCard } from "./RetentionCard";
+export { FilterBar } from "./FilterBar";

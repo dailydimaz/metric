@@ -37,6 +37,7 @@ import {
   GoalSetup,
   FunnelList,
   RetentionCard,
+  FilterBar,
 } from "@/components/analytics";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -50,7 +51,8 @@ import {
   useCityStats,
   useLanguageStats,
   useUTMStats,
-  DateRange
+  DateRange,
+  AnalyticsFilter
 } from "@/hooks/useAnalytics";
 
 export default function SiteDetail() {
@@ -68,44 +70,55 @@ export default function SiteDetail() {
   const [showGoalSetup, setShowGoalSetup] = useState(false);
   const [testStatus, setTestStatus] = useState<'idle' | 'testing' | 'success' | 'error'>('idle');
 
+  const [filters, setFilters] = useState<AnalyticsFilter>({});
+
   const site = sites.find((s) => s.id === siteId);
 
   // Analytics hooks
   const { data: stats, isLoading: statsLoading } = useAnalyticsStats({
     siteId: siteId || "",
-    dateRange
+    dateRange,
+    filters
   });
   const { data: timeSeries, isLoading: timeSeriesLoading } = useAnalyticsTimeSeries({
     siteId: siteId || "",
-    dateRange
+    dateRange,
+    filters
   });
   const { data: topPages, isLoading: pagesLoading } = useTopPages({
     siteId: siteId || "",
-    dateRange
+    dateRange,
+    filters
   });
   const { data: topReferrers, isLoading: referrersLoading } = useTopReferrers({
     siteId: siteId || "",
-    dateRange
+    dateRange,
+    filters
   });
   const { data: deviceStats, isLoading: devicesLoading } = useDeviceStats({
     siteId: siteId || "",
-    dateRange
+    dateRange,
+    filters
   });
   const { data: geoStats, isLoading: geoLoading } = useGeoStats({
     siteId: siteId || "",
-    dateRange
+    dateRange,
+    filters
   });
   const { data: cityStats, isLoading: citiesLoading } = useCityStats({
     siteId: siteId || "",
-    dateRange
+    dateRange,
+    filters
   });
   const { data: languageStats, isLoading: languagesLoading } = useLanguageStats({
     siteId: siteId || "",
-    dateRange
+    dateRange,
+    filters
   });
   const { data: utmStats, isLoading: utmLoading } = useUTMStats({
     siteId: siteId || "",
-    dateRange
+    dateRange,
+    filters
   });
 
   useEffect(() => {
@@ -290,6 +303,7 @@ export default function SiteDetail() {
 
           <div className="flex items-center gap-2 shrink-0 overflow-x-auto pb-1 sm:pb-0">
             <ExportButton siteId={site.id} siteName={site.name} dateRange={dateRange} />
+            <FilterBar filters={filters} onFilterChange={setFilters} />
             <DateRangePicker value={dateRange} onChange={setDateRange} />
             {isEditing ? (
               <>

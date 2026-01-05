@@ -4,15 +4,24 @@ import { subDays, startOfDay, endOfDay, format } from "date-fns";
 
 export type DateRange = "today" | "7d" | "30d" | "90d";
 
+export interface AnalyticsFilter {
+  country?: string;
+  browser?: string;
+  url?: string;
+  os?: string;
+  device?: string;
+}
+
 interface AnalyticsParams {
   siteId: string;
   dateRange: DateRange;
+  filters?: AnalyticsFilter;
 }
 
 function getDateRangeFilter(dateRange: DateRange): { start: Date; end: Date } {
   const end = endOfDay(new Date());
   let start: Date;
-  
+
   switch (dateRange) {
     case "today":
       start = startOfDay(new Date());
@@ -29,8 +38,20 @@ function getDateRangeFilter(dateRange: DateRange): { start: Date; end: Date } {
     default:
       start = startOfDay(subDays(new Date(), 7));
   }
-  
+
   return { start, end };
+}
+
+function applyFilters(query: any, filters?: AnalyticsFilter) {
+  if (!filters) return query;
+
+  if (filters.country) query = query.eq('country', filters.country);
+  if (filters.browser) query = query.eq('browser', filters.browser);
+  if (filters.url) query = query.eq('url', filters.url);
+  if (filters.os) query = query.eq('os', filters.os);
+  if (filters.device) query = query.eq('device_type', filters.device);
+
+  return query;
 }
 
 export interface StatsData {
@@ -98,14 +119,14 @@ export interface UTMStats {
 }
 
 // Fetch overall stats
-export function useAnalyticsStats({ siteId, dateRange }: AnalyticsParams) {
+export function useAnalyticsStats({ siteId, dateRange, filters }: AnalyticsParams) {
   const { start, end } = getDateRangeFilter(dateRange);
-  
+
   return useQuery({
-    queryKey: ["analytics-stats", siteId, dateRange],
+    queryKey: ["analytics-stats", siteId, dateRange, filters],
     queryFn: async (): Promise<StatsData> => {
       // Get current period data
-      const { data: events, error } = await supabase
+      let query = supabase
         .from("events")
         .select("id, visitor_id, session_id, created_at")
         .eq("site_id", siteId)
@@ -113,11 +134,15 @@ export function useAnalyticsStats({ siteId, dateRange }: AnalyticsParams) {
         .gte("created_at", start.toISOString())
         .lte("created_at", end.toISOString());
 
+      query = applyFilters(query, filters);
+
+      const { data: events, error } = await query;
+
       if (error) throw error;
 
       const totalPageviews = events?.length || 0;
       const uniqueVisitors = new Set(events?.map(e => e.visitor_id)).size;
-      
+
       // Calculate sessions and bounce rate
       const sessions = new Map<string, number>();
       events?.forEach(e => {
@@ -125,31 +150,34 @@ export function useAnalyticsStats({ siteId, dateRange }: AnalyticsParams) {
           sessions.set(e.session_id, (sessions.get(e.session_id) || 0) + 1);
         }
       });
-      
+
       const singlePageSessions = Array.from(sessions.values()).filter(count => count === 1).length;
       const bounceRate = sessions.size > 0 ? (singlePageSessions / sessions.size) * 100 : 0;
-      
+
       // Get previous period for comparison
       const periodLength = Math.ceil((end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24));
       const prevStart = subDays(start, periodLength);
       const prevEnd = subDays(end, periodLength);
-      
-      const { data: prevEvents } = await supabase
-        .from("events")
-        .select("id, visitor_id")
-        .eq("site_id", siteId)
-        .eq("event_name", "pageview")
-        .gte("created_at", prevStart.toISOString())
-        .lte("created_at", prevEnd.toISOString());
+
+      const { data: prevEvents } = await applyFilters(
+        supabase
+          .from("events")
+          .select("id, visitor_id")
+          .eq("site_id", siteId)
+          .eq("event_name", "pageview")
+          .gte("created_at", prevStart.toISOString())
+          .lte("created_at", prevEnd.toISOString()),
+        filters
+      );
 
       const prevPageviews = prevEvents?.length || 0;
       const prevVisitors = new Set(prevEvents?.map(e => e.visitor_id)).size;
-      
-      const pageviewsChange = prevPageviews > 0 
-        ? ((totalPageviews - prevPageviews) / prevPageviews) * 100 
+
+      const pageviewsChange = prevPageviews > 0
+        ? ((totalPageviews - prevPageviews) / prevPageviews) * 100
         : 0;
-      const visitorsChange = prevVisitors > 0 
-        ? ((uniqueVisitors - prevVisitors) / prevVisitors) * 100 
+      const visitorsChange = prevVisitors > 0
+        ? ((uniqueVisitors - prevVisitors) / prevVisitors) * 100
         : 0;
 
       return {
@@ -166,26 +194,29 @@ export function useAnalyticsStats({ siteId, dateRange }: AnalyticsParams) {
 }
 
 // Fetch time series data for charts
-export function useAnalyticsTimeSeries({ siteId, dateRange }: AnalyticsParams) {
+export function useAnalyticsTimeSeries({ siteId, dateRange, filters }: AnalyticsParams) {
   const { start, end } = getDateRangeFilter(dateRange);
-  
+
   return useQuery({
-    queryKey: ["analytics-timeseries", siteId, dateRange],
+    queryKey: ["analytics-timeseries", siteId, dateRange, filters],
     queryFn: async (): Promise<TimeSeriesData[]> => {
-      const { data: events, error } = await supabase
-        .from("events")
-        .select("created_at, visitor_id")
-        .eq("site_id", siteId)
-        .eq("event_name", "pageview")
-        .gte("created_at", start.toISOString())
-        .lte("created_at", end.toISOString())
-        .order("created_at", { ascending: true });
+      const { data: events, error } = await applyFilters(
+        supabase
+          .from("events")
+          .select("created_at, visitor_id")
+          .eq("site_id", siteId)
+          .eq("event_name", "pageview")
+          .gte("created_at", start.toISOString())
+          .lte("created_at", end.toISOString())
+          .order("created_at", { ascending: true }),
+        filters
+      );
 
       if (error) throw error;
 
       // Group by date
       const byDate = new Map<string, { pageviews: number; visitors: Set<string> }>();
-      
+
       events?.forEach(event => {
         const date = format(new Date(event.created_at), "yyyy-MM-dd");
         if (!byDate.has(date)) {
@@ -217,25 +248,28 @@ export function useAnalyticsTimeSeries({ siteId, dateRange }: AnalyticsParams) {
 }
 
 // Fetch top pages
-export function useTopPages({ siteId, dateRange }: AnalyticsParams) {
+export function useTopPages({ siteId, dateRange, filters }: AnalyticsParams) {
   const { start, end } = getDateRangeFilter(dateRange);
-  
+
   return useQuery({
-    queryKey: ["analytics-pages", siteId, dateRange],
+    queryKey: ["analytics-pages", siteId, dateRange, filters],
     queryFn: async (): Promise<TopPage[]> => {
-      const { data: events, error } = await supabase
-        .from("events")
-        .select("url, visitor_id")
-        .eq("site_id", siteId)
-        .eq("event_name", "pageview")
-        .gte("created_at", start.toISOString())
-        .lte("created_at", end.toISOString());
+      const { data: events, error } = await applyFilters(
+        supabase
+          .from("events")
+          .select("url, visitor_id")
+          .eq("site_id", siteId)
+          .eq("event_name", "pageview")
+          .gte("created_at", start.toISOString())
+          .lte("created_at", end.toISOString()),
+        filters
+      );
 
       if (error) throw error;
 
       // Group by URL
       const byUrl = new Map<string, { pageviews: number; visitors: Set<string> }>();
-      
+
       events?.forEach(event => {
         const url = event.url || "/";
         if (!byUrl.has(url)) {
@@ -260,27 +294,30 @@ export function useTopPages({ siteId, dateRange }: AnalyticsParams) {
 }
 
 // Fetch top referrers
-export function useTopReferrers({ siteId, dateRange }: AnalyticsParams) {
+export function useTopReferrers({ siteId, dateRange, filters }: AnalyticsParams) {
   const { start, end } = getDateRangeFilter(dateRange);
-  
+
   return useQuery({
-    queryKey: ["analytics-referrers", siteId, dateRange],
+    queryKey: ["analytics-referrers", siteId, dateRange, filters],
     queryFn: async (): Promise<TopReferrer[]> => {
-      const { data: events, error } = await supabase
-        .from("events")
-        .select("referrer")
-        .eq("site_id", siteId)
-        .eq("event_name", "pageview")
-        .gte("created_at", start.toISOString())
-        .lte("created_at", end.toISOString())
-        .not("referrer", "is", null);
+      const { data: events, error } = await applyFilters(
+        supabase
+          .from("events")
+          .select("referrer")
+          .eq("site_id", siteId)
+          .eq("event_name", "pageview")
+          .gte("created_at", start.toISOString())
+          .lte("created_at", end.toISOString())
+          .not("referrer", "is", null),
+        filters
+      );
 
       if (error) throw error;
 
       // Group by referrer
       const byReferrer = new Map<string, number>();
       let totalWithReferrer = 0;
-      
+
       events?.forEach(event => {
         if (event.referrer) {
           try {
@@ -308,36 +345,39 @@ export function useTopReferrers({ siteId, dateRange }: AnalyticsParams) {
 }
 
 // Fetch device stats
-export function useDeviceStats({ siteId, dateRange }: AnalyticsParams) {
+export function useDeviceStats({ siteId, dateRange, filters }: AnalyticsParams) {
   const { start, end } = getDateRangeFilter(dateRange);
-  
+
   return useQuery({
-    queryKey: ["analytics-devices", siteId, dateRange],
+    queryKey: ["analytics-devices", siteId, dateRange, filters],
     queryFn: async () => {
-      const { data: events, error } = await supabase
-        .from("events")
-        .select("browser, os, device_type")
-        .eq("site_id", siteId)
-        .eq("event_name", "pageview")
-        .gte("created_at", start.toISOString())
-        .lte("created_at", end.toISOString());
+      const { data: events, error } = await applyFilters(
+        supabase
+          .from("events")
+          .select("browser, os, device_type")
+          .eq("site_id", siteId)
+          .eq("event_name", "pageview")
+          .gte("created_at", start.toISOString())
+          .lte("created_at", end.toISOString()),
+        filters
+      );
 
       if (error) throw error;
 
       const total = events?.length || 0;
-      
+
       // Group by each category
       const browsers = new Map<string, number>();
       const operatingSystems = new Map<string, number>();
       const devices = new Map<string, number>();
-      
+
       events?.forEach(event => {
         if (event.browser) browsers.set(event.browser, (browsers.get(event.browser) || 0) + 1);
         if (event.os) operatingSystems.set(event.os, (operatingSystems.get(event.os) || 0) + 1);
         if (event.device_type) devices.set(event.device_type, (devices.get(event.device_type) || 0) + 1);
       });
 
-      const toStats = (map: Map<string, number>): DeviceStat[] => 
+      const toStats = (map: Map<string, number>): DeviceStat[] =>
         Array.from(map.entries())
           .map(([name, value]) => ({
             name,
@@ -357,26 +397,29 @@ export function useDeviceStats({ siteId, dateRange }: AnalyticsParams) {
 }
 
 // Fetch geo stats (countries)
-export function useGeoStats({ siteId, dateRange }: AnalyticsParams) {
+export function useGeoStats({ siteId, dateRange, filters }: AnalyticsParams) {
   const { start, end } = getDateRangeFilter(dateRange);
-  
+
   return useQuery({
-    queryKey: ["analytics-geo", siteId, dateRange],
+    queryKey: ["analytics-geo", siteId, dateRange, filters],
     queryFn: async (): Promise<GeoStat[]> => {
-      const { data: events, error } = await supabase
-        .from("events")
-        .select("country")
-        .eq("site_id", siteId)
-        .eq("event_name", "pageview")
-        .gte("created_at", start.toISOString())
-        .lte("created_at", end.toISOString())
-        .not("country", "is", null);
+      const { data: events, error } = await applyFilters(
+        supabase
+          .from("events")
+          .select("country")
+          .eq("site_id", siteId)
+          .eq("event_name", "pageview")
+          .gte("created_at", start.toISOString())
+          .lte("created_at", end.toISOString())
+          .not("country", "is", null),
+        filters
+      );
 
       if (error) throw error;
 
       const total = events?.length || 0;
       const byCountry = new Map<string, number>();
-      
+
       events?.forEach(event => {
         if (event.country) {
           byCountry.set(event.country, (byCountry.get(event.country) || 0) + 1);
@@ -397,26 +440,29 @@ export function useGeoStats({ siteId, dateRange }: AnalyticsParams) {
 }
 
 // Fetch city stats
-export function useCityStats({ siteId, dateRange }: AnalyticsParams) {
+export function useCityStats({ siteId, dateRange, filters }: AnalyticsParams) {
   const { start, end } = getDateRangeFilter(dateRange);
-  
+
   return useQuery({
-    queryKey: ["analytics-cities", siteId, dateRange],
+    queryKey: ["analytics-cities", siteId, dateRange, filters],
     queryFn: async (): Promise<CityStat[]> => {
-      const { data: events, error } = await supabase
-        .from("events")
-        .select("city, country")
-        .eq("site_id", siteId)
-        .eq("event_name", "pageview")
-        .gte("created_at", start.toISOString())
-        .lte("created_at", end.toISOString())
-        .not("city", "is", null);
+      const { data: events, error } = await applyFilters(
+        supabase
+          .from("events")
+          .select("city, country")
+          .eq("site_id", siteId)
+          .eq("event_name", "pageview")
+          .gte("created_at", start.toISOString())
+          .lte("created_at", end.toISOString())
+          .not("city", "is", null),
+        filters
+      );
 
       if (error) throw error;
 
       const total = events?.length || 0;
       const byCity = new Map<string, { country: string; visits: number }>();
-      
+
       events?.forEach(event => {
         if (event.city) {
           const key = `${event.city}|${event.country || 'Unknown'}`;
@@ -444,26 +490,29 @@ export function useCityStats({ siteId, dateRange }: AnalyticsParams) {
 }
 
 // Fetch language stats
-export function useLanguageStats({ siteId, dateRange }: AnalyticsParams) {
+export function useLanguageStats({ siteId, dateRange, filters }: AnalyticsParams) {
   const { start, end } = getDateRangeFilter(dateRange);
-  
+
   return useQuery({
-    queryKey: ["analytics-languages", siteId, dateRange],
+    queryKey: ["analytics-languages", siteId, dateRange, filters],
     queryFn: async (): Promise<LanguageStat[]> => {
-      const { data: events, error } = await supabase
-        .from("events")
-        .select("language")
-        .eq("site_id", siteId)
-        .eq("event_name", "pageview")
-        .gte("created_at", start.toISOString())
-        .lte("created_at", end.toISOString())
-        .not("language", "is", null);
+      const { data: events, error } = await applyFilters(
+        supabase
+          .from("events")
+          .select("language")
+          .eq("site_id", siteId)
+          .eq("event_name", "pageview")
+          .gte("created_at", start.toISOString())
+          .lte("created_at", end.toISOString())
+          .not("language", "is", null),
+        filters
+      );
 
       if (error) throw error;
 
       const total = events?.length || 0;
       const byLanguage = new Map<string, number>();
-      
+
       events?.forEach(event => {
         if (event.language) {
           byLanguage.set(event.language, (byLanguage.get(event.language) || 0) + 1);
@@ -484,19 +533,22 @@ export function useLanguageStats({ siteId, dateRange }: AnalyticsParams) {
 }
 
 // Fetch UTM campaign stats
-export function useUTMStats({ siteId, dateRange }: AnalyticsParams) {
+export function useUTMStats({ siteId, dateRange, filters }: AnalyticsParams) {
   const { start, end } = getDateRangeFilter(dateRange);
-  
+
   return useQuery({
-    queryKey: ["analytics-utm", siteId, dateRange],
+    queryKey: ["analytics-utm", siteId, dateRange, filters],
     queryFn: async (): Promise<UTMStats> => {
-      const { data: events, error } = await supabase
-        .from("events")
-        .select("properties")
-        .eq("site_id", siteId)
-        .eq("event_name", "pageview")
-        .gte("created_at", start.toISOString())
-        .lte("created_at", end.toISOString());
+      const { data: events, error } = await applyFilters(
+        supabase
+          .from("events")
+          .select("properties")
+          .eq("site_id", siteId)
+          .eq("event_name", "pageview")
+          .gte("created_at", start.toISOString())
+          .lte("created_at", end.toISOString()),
+        filters
+      );
 
       if (error) throw error;
 
@@ -504,14 +556,14 @@ export function useUTMStats({ siteId, dateRange }: AnalyticsParams) {
       const mediums = new Map<string, number>();
       const campaigns = new Map<string, number>();
       let totalWithUTM = 0;
-      
+
       events?.forEach(event => {
         const props = event.properties as { utm?: { utm_source?: string; utm_medium?: string; utm_campaign?: string } } | null;
         const utm = props?.utm;
-        
+
         if (utm && (utm.utm_source || utm.utm_medium || utm.utm_campaign)) {
           totalWithUTM++;
-          
+
           if (utm.utm_source) {
             sources.set(utm.utm_source, (sources.get(utm.utm_source) || 0) + 1);
           }
@@ -524,7 +576,7 @@ export function useUTMStats({ siteId, dateRange }: AnalyticsParams) {
         }
       });
 
-      const toStats = (map: Map<string, number>): UTMStat[] => 
+      const toStats = (map: Map<string, number>): UTMStat[] =>
         Array.from(map.entries())
           .map(([value, visits]) => ({
             value,
