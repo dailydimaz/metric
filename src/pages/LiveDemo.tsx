@@ -65,21 +65,21 @@ const mockTopReferrers = [
 
 const mockDevices = {
     browsers: [
-        { name: "Chrome", percentage: 62.5, visits: 17500 },
-        { name: "Safari", percentage: 24.2, visits: 6800 },
-        { name: "Firefox", percentage: 8.4, visits: 2350 },
-        { name: "Edge", percentage: 4.9, visits: 1370 },
+        { name: "Chrome", value: 17500, percentage: 62.5 },
+        { name: "Safari", value: 6800, percentage: 24.2 },
+        { name: "Firefox", value: 2350, percentage: 8.4 },
+        { name: "Edge", value: 1370, percentage: 4.9 },
     ],
     operatingSystems: [
-        { name: "Windows", percentage: 45.2, visits: 12700 },
-        { name: "Mac OS", percentage: 32.8, visits: 9200 },
-        { name: "iOS", percentage: 12.5, visits: 3500 },
-        { name: "Android", percentage: 8.5, visits: 2400 },
+        { name: "Windows", value: 12700, percentage: 45.2 },
+        { name: "Mac OS", value: 9200, percentage: 32.8 },
+        { name: "iOS", value: 3500, percentage: 12.5 },
+        { name: "Android", value: 2400, percentage: 8.5 },
     ],
     devices: [
-        { name: "Desktop", percentage: 78.5, visits: 22000 },
-        { name: "Mobile", percentage: 19.2, visits: 5400 },
-        { name: "Tablet", percentage: 2.3, visits: 650 },
+        { name: "Desktop", value: 22000, percentage: 78.5 },
+        { name: "Mobile", value: 5400, percentage: 19.2 },
+        { name: "Tablet", value: 650, percentage: 2.3 },
     ],
 };
 

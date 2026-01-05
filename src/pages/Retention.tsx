@@ -53,7 +53,7 @@ export default function Retention() {
     );
   }
 
-  const hasAccess = subscriptionPlan?.features?.includes('Retention cohorts') || isSelfHosted;
+  const hasAccess = (subscriptionPlan?.features as readonly string[] | undefined)?.includes('Retention cohorts') || isSelfHosted;
 
   if (!hasAccess) {
     return (

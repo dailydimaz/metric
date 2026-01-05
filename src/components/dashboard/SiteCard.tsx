@@ -1,19 +1,6 @@
 import { Link } from "react-router-dom";
 import { Site } from "@/hooks/useSites";
-import { Globe, ExternalLink, Copy, Check, BarChart2 } from "lucide-react";
-import { useState } from "react";
-import { useToast } from "@/hooks/use-toast";
-import { Card, CardContent, CardHeader } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-
-interface SiteCardProps {
-  site: Site;
-}
-
-import { Link } from "react-router-dom";
-import { Site } from "@/hooks/useSites";
-import { Globe, Copy, Check, BarChart2, TrendingUp, Users, ArrowUpRight } from "lucide-react";
+import { Globe, Copy, Check, BarChart2, TrendingUp, ArrowUpRight } from "lucide-react";
 import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
@@ -156,5 +143,3 @@ export function SiteCard({ site }: SiteCardProps) {
     </Link>
   );
 }
-
-import { ArrowRight } from "lucide-react";
