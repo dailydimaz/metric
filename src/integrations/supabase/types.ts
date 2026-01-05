@@ -576,6 +576,41 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      get_funnel_stats: {
+        Args: { _end_date: string; _funnel_id: string; _start_date: string }
+        Returns: {
+          conversion_rate: number
+          drop_off_rate: number
+          step_index: number
+          step_name: string
+          visitors: number
+        }[]
+      }
+      get_goal_stats: {
+        Args: { _end_date: string; _site_id: string; _start_date: string }
+        Returns: {
+          conversion_rate: number
+          conversions: number
+          event_name: string
+          goal_id: string
+          goal_name: string
+          match_type: string
+          total_visitors: number
+          url_match: string
+        }[]
+      }
+      get_retention_cohorts: {
+        Args: { _end_date: string; _site_id: string; _start_date: string }
+        Returns: Json
+      }
+      get_retention_trend: {
+        Args: { _end_date: string; _site_id: string; _start_date: string }
+        Returns: {
+          day: number
+          rate: number
+          retained: number
+        }[]
+      }
       get_team_member_profile: {
         Args: { _user_id: string }
         Returns: {

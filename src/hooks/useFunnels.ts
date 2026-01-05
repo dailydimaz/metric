@@ -4,6 +4,8 @@ import { toast } from "sonner";
 
 export interface FunnelStep {
   id: string;
+  order?: number;
+  name?: string;
   event_name: string;
   url_match?: string;
   match_type: "exact" | "contains" | "starts_with";
@@ -27,6 +29,30 @@ export interface FunnelStepAnalytics {
   conversion_rate: number;
   drop_off_rate: number;
 }
+
+const getDateRangeFilter = (dateRange: string) => {
+  const now = new Date();
+  let startDate: Date;
+
+  switch (dateRange) {
+    case "today":
+      startDate = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+      break;
+    case "7d":
+      startDate = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+      break;
+    case "30d":
+      startDate = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+      break;
+    case "90d":
+      startDate = new Date(now.getTime() - 90 * 24 * 60 * 60 * 1000);
+      break;
+    default:
+      startDate = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+  }
+
+  return { startDate, endDate: now };
+};
 
 export function useFunnels(siteId: string | undefined) {
   return useQuery({
@@ -173,7 +199,9 @@ export function useFunnelAnalytics(funnelId: string | undefined, dateRange: stri
     queryFn: async () => {
       if (!funnelId) return null;
 
-      // First get the funnel
+      const { startDate, endDate } = getDateRangeFilter(dateRange);
+
+      // First get the funnel details for the response
       const { data: funnel, error: funnelError } = await supabase
         .from("funnels")
         .select("*")
@@ -183,139 +211,43 @@ export function useFunnelAnalytics(funnelId: string | undefined, dateRange: stri
       if (funnelError) throw funnelError;
       if (!funnel) return null;
 
+      // Call the server-side RPC for efficient aggregation
+      const { data: stepAnalytics, error: analyticsError } = await supabase.rpc("get_funnel_stats", {
+        _funnel_id: funnelId,
+        _start_date: startDate.toISOString(),
+        _end_date: endDate.toISOString(),
+      });
+
+      if (analyticsError) throw analyticsError;
+
       const steps = (funnel.steps as unknown) as FunnelStep[];
-      const timeWindow = funnel.time_window_days || 7;
+      const analytics: FunnelStepAnalytics[] = (stepAnalytics || []).map((row: {
+        step_index: number;
+        step_name: string;
+        visitors: number;
+        conversion_rate: number;
+        drop_off_rate: number;
+      }) => ({
+        step_index: Number(row.step_index),
+        step_name: row.step_name || `Step ${row.step_index + 1}`,
+        visitors: Number(row.visitors),
+        conversion_rate: Number(row.conversion_rate),
+        drop_off_rate: Number(row.drop_off_rate),
+      }));
 
-      // Calculate date range
-      const now = new Date();
-      let startDate: Date;
-      switch (dateRange) {
-        case "today":
-          startDate = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-          break;
-        case "7d":
-          startDate = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
-          break;
-        case "30d":
-          startDate = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
-          break;
-        case "90d":
-          startDate = new Date(now.getTime() - 90 * 24 * 60 * 60 * 1000);
-          break;
-        default:
-          startDate = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
-      }
-
-      // Get all events for this site within the date range
-      const { data: events, error: eventsError } = await supabase
-        .from("events")
-        .select("visitor_id, event_name, url, created_at")
-        .eq("site_id", funnel.site_id)
-        .gte("created_at", startDate.toISOString())
-        .order("created_at", { ascending: true });
-
-      if (eventsError) throw eventsError;
-
-      // Group events by visitor
-      const visitorEvents = new Map<string, typeof events>();
-      (events || []).forEach(event => {
-        if (!event.visitor_id) return;
-        if (!visitorEvents.has(event.visitor_id)) {
-          visitorEvents.set(event.visitor_id, []);
-        }
-        visitorEvents.get(event.visitor_id)!.push(event);
-      });
-
-      // Calculate funnel analytics
-      const stepAnalytics: FunnelStepAnalytics[] = steps.map((step, index) => {
-        let visitors = 0;
-
-        visitorEvents.forEach((visitorEventList) => {
-          // Check if visitor completed all previous steps and this step
-          let lastStepTime: Date | null = null;
-          let completedPreviousSteps = true;
-
-          for (let i = 0; i <= index; i++) {
-            const currentStep = steps[i];
-            const matchingEvent = visitorEventList.find(event => {
-              // Check time window from last step
-              if (lastStepTime) {
-                const eventTime = new Date(event.created_at);
-                const daysDiff = (eventTime.getTime() - lastStepTime.getTime()) / (1000 * 60 * 60 * 24);
-                if (daysDiff > timeWindow) return false;
-              }
-
-              // Match event name
-              if (event.event_name !== currentStep.event_name) return false;
-
-              // Match URL if specified
-              if (currentStep.url_match && event.url) {
-                switch (currentStep.match_type) {
-                  case "exact":
-                    if (event.url !== currentStep.url_match) return false;
-                    break;
-                  case "contains":
-                    if (!event.url.includes(currentStep.url_match)) return false;
-                    break;
-                  case "starts_with":
-                    if (!event.url.startsWith(currentStep.url_match)) return false;
-                    break;
-                }
-              }
-
-              return true;
-            });
-
-            if (!matchingEvent) {
-              completedPreviousSteps = false;
-              break;
-            }
-
-            lastStepTime = new Date(matchingEvent.created_at);
-          }
-
-          if (completedPreviousSteps) {
-            visitors++;
-          }
-        });
-
-        const firstStepVisitors = index === 0 ? visitors : 0;
-        const prevVisitors = index > 0 ? 0 : visitors; // Will be calculated after
-
-        return {
-          step_index: index,
-          step_name: step.event_name + (step.url_match ? ` (${step.url_match})` : ""),
-          visitors,
-          conversion_rate: 0,
-          drop_off_rate: 0,
-        };
-      });
-
-      // Calculate conversion and drop-off rates
-      const firstStepVisitors = stepAnalytics[0]?.visitors || 0;
-      stepAnalytics.forEach((step, index) => {
-        step.conversion_rate = firstStepVisitors > 0 
-          ? Math.round((step.visitors / firstStepVisitors) * 100) 
-          : 0;
-        
-        if (index > 0) {
-          const prevVisitors = stepAnalytics[index - 1].visitors;
-          step.drop_off_rate = prevVisitors > 0 
-            ? Math.round(((prevVisitors - step.visitors) / prevVisitors) * 100)
-            : 0;
-        }
-      });
+      const firstStepVisitors = analytics[0]?.visitors || 0;
+      const lastStepConversion = analytics.length > 0 
+        ? analytics[analytics.length - 1].conversion_rate 
+        : 0;
 
       return {
         funnel: {
           ...funnel,
-          steps: (funnel.steps as unknown) as FunnelStep[]
+          steps,
         } as Funnel,
-        stepAnalytics,
+        stepAnalytics: analytics,
         totalVisitors: firstStepVisitors,
-        overallConversion: stepAnalytics.length > 0 
-          ? stepAnalytics[stepAnalytics.length - 1].conversion_rate 
-          : 0,
+        overallConversion: lastStepConversion,
       };
     },
     enabled: !!funnelId,

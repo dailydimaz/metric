@@ -72,80 +72,41 @@ export function useGoalStats({ siteId, dateRange }: GoalsParams) {
   return useQuery({
     queryKey: ["goal-stats", siteId, dateRange],
     queryFn: async (): Promise<GoalStats[]> => {
-      // Get goals
-      const { data: goals, error: goalsError } = await supabase
-        .from("goals")
-        .select("*")
-        .eq("site_id", siteId);
-
-      if (goalsError) throw goalsError;
-
-      if (!goals || goals.length === 0) return [];
-
-      // Get unique visitors for conversion rate
-      const { data: visitorData, error: visitorError } = await supabase
-        .from("events")
-        .select("visitor_id")
-        .eq("site_id", siteId)
-        .eq("event_name", "pageview")
-        .gte("created_at", start.toISOString())
-        .lte("created_at", end.toISOString());
-
-      if (visitorError) throw visitorError;
-
-      const totalVisitors = new Set(visitorData?.map(e => e.visitor_id)).size;
-
-      // Get events for matching
-      const { data: events, error: eventsError } = await supabase
-        .from("events")
-        .select("event_name, url, visitor_id")
-        .eq("site_id", siteId)
-        .gte("created_at", start.toISOString())
-        .lte("created_at", end.toISOString());
-
-      if (eventsError) throw eventsError;
-
-      // Calculate conversions for each goal
-      return (goals as Goal[]).map(goal => {
-        let matchingEvents = events || [];
-
-        // Filter by event name
-        matchingEvents = matchingEvents.filter(e => e.event_name === goal.event_name);
-
-        // Filter by URL match if specified
-        if (goal.url_match) {
-          matchingEvents = matchingEvents.filter(e => {
-            if (!e.url) return false;
-            switch (goal.match_type) {
-              case "exact":
-                return e.url === goal.url_match;
-              case "contains":
-                return e.url.includes(goal.url_match!);
-              case "starts_with":
-                return e.url.startsWith(goal.url_match!);
-              case "regex":
-                try {
-                  return new RegExp(goal.url_match!).test(e.url);
-                } catch {
-                  return false;
-                }
-              default:
-                return false;
-            }
-          });
-        }
-
-        // Count unique visitors who converted
-        const convertedVisitors = new Set(matchingEvents.map(e => e.visitor_id));
-        const conversions = convertedVisitors.size;
-        const conversionRate = totalVisitors > 0 ? (conversions / totalVisitors) * 100 : 0;
-
-        return {
-          goal,
-          conversions,
-          conversionRate,
-        };
+      // Call the server-side RPC for efficient aggregation
+      const { data, error } = await supabase.rpc("get_goal_stats", {
+        _site_id: siteId,
+        _start_date: start.toISOString(),
+        _end_date: end.toISOString(),
       });
+
+      if (error) throw error;
+
+      if (!data || data.length === 0) return [];
+
+      // Transform RPC response to match the existing GoalStats interface
+      return data.map((row: {
+        goal_id: string;
+        goal_name: string;
+        event_name: string;
+        url_match: string | null;
+        match_type: string;
+        conversions: number;
+        total_visitors: number;
+        conversion_rate: number;
+      }) => ({
+        goal: {
+          id: row.goal_id,
+          site_id: siteId,
+          name: row.goal_name,
+          event_name: row.event_name,
+          url_match: row.url_match,
+          match_type: row.match_type as Goal["match_type"],
+          created_at: "",
+          updated_at: "",
+        },
+        conversions: Number(row.conversions),
+        conversionRate: Number(row.conversion_rate),
+      }));
     },
     enabled: !!siteId,
   });
