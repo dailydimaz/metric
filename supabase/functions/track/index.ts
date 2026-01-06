@@ -224,7 +224,8 @@ serve(async (req) => {
       .maybeSingle();
 
     if (siteError) {
-      console.error('Error verifying site:', siteError);
+      // Log only error code, not full details to prevent schema leakage
+      console.error('Site verification failed', { code: siteError?.code, hint: siteError?.hint });
       return new Response(JSON.stringify({ error: 'Database error' }), {
         status: 500,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
@@ -300,7 +301,8 @@ serve(async (req) => {
       });
 
     if (insertError) {
-      console.error('Error inserting event:', insertError);
+      // Log only error code, not full details to prevent schema leakage
+      console.error('Event insert failed', { code: insertError?.code, hint: insertError?.hint });
       return new Response(JSON.stringify({ error: 'Failed to record event' }), {
         status: 500,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
