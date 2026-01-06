@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { subDays, startOfDay, endOfDay, format } from "date-fns";
+import { subDays, startOfDay, endOfDay } from "date-fns";
 
 export type DateRange = "today" | "7d" | "30d" | "90d";
 
@@ -19,7 +19,7 @@ interface AnalyticsParams {
   filters?: AnalyticsFilter;
 }
 
-function getDateRangeFilter(dateRange: DateRange): { start: Date; end: Date } {
+function getDateRangeFilter(dateRange: DateRange): { start: Date; end: Date; prevStart: Date; prevEnd: Date } {
   const end = endOfDay(new Date());
   let start: Date;
 
@@ -40,25 +40,11 @@ function getDateRangeFilter(dateRange: DateRange): { start: Date; end: Date } {
       start = startOfDay(subDays(new Date(), 7));
   }
 
-  return { start, end };
-}
+  const periodLength = Math.ceil((end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24));
+  const prevStart = subDays(start, periodLength);
+  const prevEnd = subDays(end, periodLength);
 
-function applyFilters(query: any, filters?: AnalyticsFilter) {
-  if (!filters) return query;
-
-  if (filters.country) query = query.eq('country', filters.country);
-  if (filters.browser) query = query.eq('browser', filters.browser);
-  if (filters.url) query = query.eq('url', filters.url);
-  if (filters.os) query = query.eq('os', filters.os);
-  if (filters.device) query = query.eq('device_type', filters.device);
-
-  if (filters.referrerPattern) {
-    const patterns = filters.referrerPattern.split('|');
-    const orClause = patterns.map(p => `referrer.ilike.%${p}%`).join(',');
-    query = query.or(orClause);
-  }
-
-  return query;
+  return { start, end, prevStart, prevEnd };
 }
 
 export interface StatsData {
@@ -127,516 +113,288 @@ export interface UTMStats {
   campaigns: UTMStat[];
 }
 
-// Fetch overall stats
-export function useAnalyticsStats({ siteId, dateRange, filters }: AnalyticsParams) {
-  const { start, end } = getDateRangeFilter(dateRange);
+// Fetch overall stats using RPC
+export function useAnalyticsStats({ siteId, dateRange }: AnalyticsParams) {
+  const { start, end, prevStart, prevEnd } = getDateRangeFilter(dateRange);
 
   return useQuery({
-    queryKey: ["analytics-stats", siteId, dateRange, filters],
+    queryKey: ["analytics-stats", siteId, dateRange],
     queryFn: async (): Promise<StatsData> => {
-      // Get current period data
-      let query = supabase
-        .from("events")
-        .select("id, visitor_id, session_id, created_at")
-        .eq("site_id", siteId)
-        .eq("event_name", "pageview")
-        .gte("created_at", start.toISOString())
-        .lte("created_at", end.toISOString());
-
-      query = applyFilters(query, filters);
-
-      const { data: events, error } = await query;
+      const { data, error } = await supabase.rpc('get_site_stats', {
+        _site_id: siteId,
+        _start_date: start.toISOString(),
+        _end_date: end.toISOString(),
+        _prev_start_date: prevStart.toISOString(),
+        _prev_end_date: prevEnd.toISOString(),
+      });
 
       if (error) throw error;
 
-      const totalPageviews = events?.length || 0;
-      const uniqueVisitors = new Set(events?.map(e => e.visitor_id)).size;
-
-      // Calculate sessions and bounce rate
-      const sessions = new Map<string, number>();
-      events?.forEach(e => {
-        if (e.session_id) {
-          sessions.set(e.session_id, (sessions.get(e.session_id) || 0) + 1);
-        }
-      });
-
-      const singlePageSessions = Array.from(sessions.values()).filter(count => count === 1).length;
-      const bounceRate = sessions.size > 0 ? (singlePageSessions / sessions.size) * 100 : 0;
-
-      // Get previous period for comparison
-      const periodLength = Math.ceil((end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24));
-      const prevStart = subDays(start, periodLength);
-      const prevEnd = subDays(end, periodLength);
-
-      const { data: prevEvents } = await applyFilters(
-        supabase
-          .from("events")
-          .select("id, visitor_id")
-          .eq("site_id", siteId)
-          .eq("event_name", "pageview")
-          .gte("created_at", prevStart.toISOString())
-          .lte("created_at", prevEnd.toISOString()),
-        filters
-      );
-
-      const prevPageviews = prevEvents?.length || 0;
-      const prevVisitors = new Set(prevEvents?.map(e => e.visitor_id)).size;
-
-      const pageviewsChange = prevPageviews > 0
-        ? ((totalPageviews - prevPageviews) / prevPageviews) * 100
-        : 0;
-      const visitorsChange = prevVisitors > 0
-        ? ((uniqueVisitors - prevVisitors) / prevVisitors) * 100
-        : 0;
+      const result = data?.[0] || {
+        total_pageviews: 0,
+        unique_visitors: 0,
+        bounce_rate: 0,
+        pageviews_change: 0,
+        visitors_change: 0,
+      };
 
       return {
-        totalPageviews,
-        uniqueVisitors,
-        avgSessionDuration: 0, // Would need session tracking
-        bounceRate,
-        pageviewsChange,
-        visitorsChange,
+        totalPageviews: Number(result.total_pageviews) || 0,
+        uniqueVisitors: Number(result.unique_visitors) || 0,
+        avgSessionDuration: 0,
+        bounceRate: Number(result.bounce_rate) || 0,
+        pageviewsChange: Number(result.pageviews_change) || 0,
+        visitorsChange: Number(result.visitors_change) || 0,
       };
     },
     enabled: !!siteId,
   });
 }
 
-// Fetch time series data for charts
-export function useAnalyticsTimeSeries({ siteId, dateRange, filters }: AnalyticsParams) {
-  const { start, end } = getDateRangeFilter(dateRange);
+// Fetch time series data using RPC
+export function useAnalyticsTimeSeries({ siteId, dateRange }: AnalyticsParams) {
+  const { start, end, prevStart, prevEnd } = getDateRangeFilter(dateRange);
 
   return useQuery({
-    queryKey: ["analytics-timeseries", siteId, dateRange, filters],
+    queryKey: ["analytics-timeseries", siteId, dateRange],
     queryFn: async (): Promise<TimeSeriesData[]> => {
-      const { data: events, error } = await applyFilters(
-        supabase
-          .from("events")
-          .select("created_at, visitor_id")
-          .eq("site_id", siteId)
-          .eq("event_name", "pageview")
-          .gte("created_at", start.toISOString())
-          .lte("created_at", end.toISOString())
-          .order("created_at", { ascending: true }),
-        filters
-      );
+      const { data, error } = await supabase.rpc('get_timeseries_stats', {
+        _site_id: siteId,
+        _start_date: start.toISOString(),
+        _end_date: end.toISOString(),
+        _prev_start_date: prevStart.toISOString(),
+        _prev_end_date: prevEnd.toISOString(),
+      });
 
       if (error) throw error;
 
-      // Group by date
-      const byDate = new Map<string, { pageviews: number; visitors: Set<string> }>();
-      events?.forEach(event => {
-        const date = format(new Date(event.created_at), "yyyy-MM-dd");
-        if (!byDate.has(date)) {
-          byDate.set(date, { pageviews: 0, visitors: new Set() });
-        }
-        const dayData = byDate.get(date)!;
-        dayData.pageviews++;
-        if (event.visitor_id) dayData.visitors.add(event.visitor_id);
-      });
-
-      // Fetch previous period data
-      const periodLength = Math.ceil((end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24));
-      const prevStart = subDays(start, periodLength);
-      const prevEnd = subDays(end, periodLength);
-
-      const { data: prevEvents, error: prevError } = await applyFilters(
-        supabase
-          .from("events")
-          .select("created_at, visitor_id")
-          .eq("site_id", siteId)
-          .eq("event_name", "pageview")
-          .gte("created_at", prevStart.toISOString())
-          .lte("created_at", prevEnd.toISOString()),
-        filters
-      );
-
-      if (prevError) throw prevError;
-
-      const prevByDate = new Map<string, { pageviews: number; visitors: Set<string> }>();
-      prevEvents?.forEach(event => {
-        const date = format(new Date(event.created_at), "yyyy-MM-dd");
-        if (!prevByDate.has(date)) {
-          prevByDate.set(date, { pageviews: 0, visitors: new Set() });
-        }
-        const dayData = prevByDate.get(date)!;
-        dayData.pageviews++;
-        if (event.visitor_id) dayData.visitors.add(event.visitor_id);
-      });
-
-      // Fill in missing dates
-      const result: TimeSeriesData[] = [];
-      const current = new Date(start);
-      // Need to iterate same number of days for prev period
-      let prevCurrent = new Date(prevStart);
-
-      while (current <= end) {
-        const dateStr = format(current, "yyyy-MM-dd");
-        const prevDateStr = format(prevCurrent, "yyyy-MM-dd");
-
-        const dayData = byDate.get(dateStr);
-        const prevDayData = prevByDate.get(prevDateStr);
-
-        result.push({
-          date: dateStr,
-          pageviews: dayData?.pageviews || 0,
-          visitors: dayData?.visitors.size || 0,
-          prevPageviews: prevDayData?.pageviews || 0,
-          prevVisitors: prevDayData?.visitors.size || 0,
-        });
-        current.setDate(current.getDate() + 1);
-        prevCurrent.setDate(prevCurrent.getDate() + 1);
-      }
-
-      return result;
+      return (data || []).map((row: {
+        date: string;
+        pageviews: number;
+        visitors: number;
+        prev_pageviews: number;
+        prev_visitors: number;
+      }) => ({
+        date: row.date,
+        pageviews: Number(row.pageviews) || 0,
+        visitors: Number(row.visitors) || 0,
+        prevPageviews: Number(row.prev_pageviews) || 0,
+        prevVisitors: Number(row.prev_visitors) || 0,
+      }));
     },
     enabled: !!siteId,
   });
 }
 
-// Fetch top pages
-export function useTopPages({ siteId, dateRange, filters }: AnalyticsParams) {
+// Fetch top pages using RPC
+export function useTopPages({ siteId, dateRange }: AnalyticsParams) {
   const { start, end } = getDateRangeFilter(dateRange);
 
   return useQuery({
-    queryKey: ["analytics-pages", siteId, dateRange, filters],
+    queryKey: ["analytics-pages", siteId, dateRange],
     queryFn: async (): Promise<TopPage[]> => {
-      const { data: events, error } = await applyFilters(
-        supabase
-          .from("events")
-          .select("url, visitor_id")
-          .eq("site_id", siteId)
-          .eq("event_name", "pageview")
-          .gte("created_at", start.toISOString())
-          .lte("created_at", end.toISOString()),
-        filters
-      );
+      const { data, error } = await supabase.rpc('get_top_pages', {
+        _site_id: siteId,
+        _start_date: start.toISOString(),
+        _end_date: end.toISOString(),
+        _limit: 10,
+      });
 
       if (error) throw error;
 
-      // Group by URL
-      const byUrl = new Map<string, { pageviews: number; visitors: Set<string> }>();
-
-      events?.forEach(event => {
-        const url = event.url || "/";
-        if (!byUrl.has(url)) {
-          byUrl.set(url, { pageviews: 0, visitors: new Set() });
-        }
-        const urlData = byUrl.get(url)!;
-        urlData.pageviews++;
-        if (event.visitor_id) urlData.visitors.add(event.visitor_id);
-      });
-
-      return Array.from(byUrl.entries())
-        .map(([url, data]) => ({
-          url,
-          pageviews: data.pageviews,
-          uniqueVisitors: data.visitors.size,
-        }))
-        .sort((a, b) => b.pageviews - a.pageviews)
-        .slice(0, 10);
+      return (data || []).map((row: {
+        url: string;
+        pageviews: number;
+        unique_visitors: number;
+      }) => ({
+        url: row.url,
+        pageviews: Number(row.pageviews) || 0,
+        uniqueVisitors: Number(row.unique_visitors) || 0,
+      }));
     },
     enabled: !!siteId,
   });
 }
 
-// Fetch top referrers
-export function useTopReferrers({ siteId, dateRange, filters }: AnalyticsParams) {
+// Fetch top referrers using RPC
+export function useTopReferrers({ siteId, dateRange }: AnalyticsParams) {
   const { start, end } = getDateRangeFilter(dateRange);
 
   return useQuery({
-    queryKey: ["analytics-referrers", siteId, dateRange, filters],
+    queryKey: ["analytics-referrers", siteId, dateRange],
     queryFn: async (): Promise<TopReferrer[]> => {
-      const { data: events, error } = await applyFilters(
-        supabase
-          .from("events")
-          .select("referrer")
-          .eq("site_id", siteId)
-          .eq("event_name", "pageview")
-          .gte("created_at", start.toISOString())
-          .lte("created_at", end.toISOString())
-          .not("referrer", "is", null),
-        filters
-      );
+      const { data, error } = await supabase.rpc('get_top_referrers', {
+        _site_id: siteId,
+        _start_date: start.toISOString(),
+        _end_date: end.toISOString(),
+        _limit: 10,
+      });
 
       if (error) throw error;
 
-      // Group by referrer
-      const byReferrer = new Map<string, number>();
-      let totalWithReferrer = 0;
-
-      events?.forEach(event => {
-        if (event.referrer) {
-          try {
-            const url = new URL(event.referrer);
-            const domain = url.hostname;
-            byReferrer.set(domain, (byReferrer.get(domain) || 0) + 1);
-            totalWithReferrer++;
-          } catch {
-            // Invalid URL, skip
-          }
-        }
-      });
-
-      return Array.from(byReferrer.entries())
-        .map(([referrer, visits]) => ({
-          referrer,
-          visits,
-          percentage: totalWithReferrer > 0 ? (visits / totalWithReferrer) * 100 : 0,
-        }))
-        .sort((a, b) => b.visits - a.visits)
-        .slice(0, 10);
+      return (data || []).map((row: {
+        referrer: string;
+        visits: number;
+        percentage: number;
+      }) => ({
+        referrer: row.referrer,
+        visits: Number(row.visits) || 0,
+        percentage: Number(row.percentage) || 0,
+      }));
     },
     enabled: !!siteId,
   });
 }
 
-// Fetch device stats
-export function useDeviceStats({ siteId, dateRange, filters }: AnalyticsParams) {
+// Fetch device stats using RPC
+export function useDeviceStats({ siteId, dateRange }: AnalyticsParams) {
   const { start, end } = getDateRangeFilter(dateRange);
 
   return useQuery({
-    queryKey: ["analytics-devices", siteId, dateRange, filters],
+    queryKey: ["analytics-devices", siteId, dateRange],
     queryFn: async () => {
-      const { data: events, error } = await applyFilters(
-        supabase
-          .from("events")
-          .select("browser, os, device_type")
-          .eq("site_id", siteId)
-          .eq("event_name", "pageview")
-          .gte("created_at", start.toISOString())
-          .lte("created_at", end.toISOString()),
-        filters
-      );
+      const { data, error } = await supabase.rpc('get_device_stats', {
+        _site_id: siteId,
+        _start_date: start.toISOString(),
+        _end_date: end.toISOString(),
+      });
 
       if (error) throw error;
 
-      const total = events?.length || 0;
-
-      // Group by each category
-      const browsers = new Map<string, number>();
-      const operatingSystems = new Map<string, number>();
-      const devices = new Map<string, number>();
-
-      events?.forEach(event => {
-        if (event.browser) browsers.set(event.browser, (browsers.get(event.browser) || 0) + 1);
-        if (event.os) operatingSystems.set(event.os, (operatingSystems.get(event.os) || 0) + 1);
-        if (event.device_type) devices.set(event.device_type, (devices.get(event.device_type) || 0) + 1);
-      });
-
-      const toStats = (map: Map<string, number>): DeviceStat[] =>
-        Array.from(map.entries())
-          .map(([name, value]) => ({
-            name,
-            value,
-            percentage: total > 0 ? (value / total) * 100 : 0,
-          }))
-          .sort((a, b) => b.value - a.value);
+      const result = data as unknown as {
+        browsers: DeviceStat[];
+        operatingSystems: DeviceStat[];
+        devices: DeviceStat[];
+      } | null;
 
       return {
-        browsers: toStats(browsers),
-        operatingSystems: toStats(operatingSystems),
-        devices: toStats(devices),
+        browsers: result?.browsers || [],
+        operatingSystems: result?.operatingSystems || [],
+        devices: result?.devices || [],
       };
     },
     enabled: !!siteId,
   });
 }
 
-// Fetch geo stats (countries)
-export function useGeoStats({ siteId, dateRange, filters }: AnalyticsParams) {
+// Fetch geo stats using RPC
+export function useGeoStats({ siteId, dateRange }: AnalyticsParams) {
   const { start, end } = getDateRangeFilter(dateRange);
 
   return useQuery({
-    queryKey: ["analytics-geo", siteId, dateRange, filters],
+    queryKey: ["analytics-geo", siteId, dateRange],
     queryFn: async (): Promise<GeoStat[]> => {
-      const { data: events, error } = await applyFilters(
-        supabase
-          .from("events")
-          .select("country")
-          .eq("site_id", siteId)
-          .eq("event_name", "pageview")
-          .gte("created_at", start.toISOString())
-          .lte("created_at", end.toISOString())
-          .not("country", "is", null),
-        filters
-      );
+      const { data, error } = await supabase.rpc('get_geo_stats', {
+        _site_id: siteId,
+        _start_date: start.toISOString(),
+        _end_date: end.toISOString(),
+        _limit: 10,
+      });
 
       if (error) throw error;
 
-      const total = events?.length || 0;
-      const byCountry = new Map<string, number>();
-
-      events?.forEach(event => {
-        if (event.country) {
-          byCountry.set(event.country, (byCountry.get(event.country) || 0) + 1);
-        }
-      });
-
-      return Array.from(byCountry.entries())
-        .map(([country, visits]) => ({
-          country,
-          visits,
-          percentage: total > 0 ? (visits / total) * 100 : 0,
-        }))
-        .sort((a, b) => b.visits - a.visits)
-        .slice(0, 10);
+      return (data || []).map((row: {
+        country: string;
+        visits: number;
+        percentage: number;
+      }) => ({
+        country: row.country,
+        visits: Number(row.visits) || 0,
+        percentage: Number(row.percentage) || 0,
+      }));
     },
     enabled: !!siteId,
   });
 }
 
-// Fetch city stats
-export function useCityStats({ siteId, dateRange, filters }: AnalyticsParams) {
+// Fetch city stats using RPC
+export function useCityStats({ siteId, dateRange }: AnalyticsParams) {
   const { start, end } = getDateRangeFilter(dateRange);
 
   return useQuery({
-    queryKey: ["analytics-cities", siteId, dateRange, filters],
+    queryKey: ["analytics-cities", siteId, dateRange],
     queryFn: async (): Promise<CityStat[]> => {
-      const { data: events, error } = await applyFilters(
-        supabase
-          .from("events")
-          .select("city, country")
-          .eq("site_id", siteId)
-          .eq("event_name", "pageview")
-          .gte("created_at", start.toISOString())
-          .lte("created_at", end.toISOString())
-          .not("city", "is", null),
-        filters
-      );
+      const { data, error } = await supabase.rpc('get_city_stats', {
+        _site_id: siteId,
+        _start_date: start.toISOString(),
+        _end_date: end.toISOString(),
+        _limit: 10,
+      });
 
       if (error) throw error;
 
-      const total = events?.length || 0;
-      const byCity = new Map<string, { country: string; visits: number }>();
-
-      events?.forEach(event => {
-        if (event.city) {
-          const key = `${event.city}|${event.country || 'Unknown'}`;
-          const existing = byCity.get(key);
-          if (existing) {
-            existing.visits++;
-          } else {
-            byCity.set(key, { country: event.country || 'Unknown', visits: 1 });
-          }
-        }
-      });
-
-      return Array.from(byCity.entries())
-        .map(([key, data]) => ({
-          city: key.split('|')[0],
-          country: data.country,
-          visits: data.visits,
-          percentage: total > 0 ? (data.visits / total) * 100 : 0,
-        }))
-        .sort((a, b) => b.visits - a.visits)
-        .slice(0, 10);
+      return (data || []).map((row: {
+        city: string;
+        country: string;
+        visits: number;
+        percentage: number;
+      }) => ({
+        city: row.city,
+        country: row.country,
+        visits: Number(row.visits) || 0,
+        percentage: Number(row.percentage) || 0,
+      }));
     },
     enabled: !!siteId,
   });
 }
 
-// Fetch language stats
-export function useLanguageStats({ siteId, dateRange, filters }: AnalyticsParams) {
+// Fetch language stats using RPC
+export function useLanguageStats({ siteId, dateRange }: AnalyticsParams) {
   const { start, end } = getDateRangeFilter(dateRange);
 
   return useQuery({
-    queryKey: ["analytics-languages", siteId, dateRange, filters],
+    queryKey: ["analytics-languages", siteId, dateRange],
     queryFn: async (): Promise<LanguageStat[]> => {
-      const { data: events, error } = await applyFilters(
-        supabase
-          .from("events")
-          .select("language")
-          .eq("site_id", siteId)
-          .eq("event_name", "pageview")
-          .gte("created_at", start.toISOString())
-          .lte("created_at", end.toISOString())
-          .not("language", "is", null),
-        filters
-      );
+      const { data, error } = await supabase.rpc('get_language_stats', {
+        _site_id: siteId,
+        _start_date: start.toISOString(),
+        _end_date: end.toISOString(),
+        _limit: 10,
+      });
 
       if (error) throw error;
 
-      const total = events?.length || 0;
-      const byLanguage = new Map<string, number>();
-
-      events?.forEach(event => {
-        if (event.language) {
-          byLanguage.set(event.language, (byLanguage.get(event.language) || 0) + 1);
-        }
-      });
-
-      return Array.from(byLanguage.entries())
-        .map(([language, visits]) => ({
-          language,
-          visits,
-          percentage: total > 0 ? (visits / total) * 100 : 0,
-        }))
-        .sort((a, b) => b.visits - a.visits)
-        .slice(0, 10);
+      return (data || []).map((row: {
+        language: string;
+        visits: number;
+        percentage: number;
+      }) => ({
+        language: row.language,
+        visits: Number(row.visits) || 0,
+        percentage: Number(row.percentage) || 0,
+      }));
     },
     enabled: !!siteId,
   });
 }
 
-// Fetch UTM campaign stats
-export function useUTMStats({ siteId, dateRange, filters }: AnalyticsParams) {
+// Fetch UTM campaign stats using RPC
+export function useUTMStats({ siteId, dateRange }: AnalyticsParams) {
   const { start, end } = getDateRangeFilter(dateRange);
 
   return useQuery({
-    queryKey: ["analytics-utm", siteId, dateRange, filters],
+    queryKey: ["analytics-utm", siteId, dateRange],
     queryFn: async (): Promise<UTMStats> => {
-      const { data: events, error } = await applyFilters(
-        supabase
-          .from("events")
-          .select("properties")
-          .eq("site_id", siteId)
-          .eq("event_name", "pageview")
-          .gte("created_at", start.toISOString())
-          .lte("created_at", end.toISOString()),
-        filters
-      );
+      const { data, error } = await supabase.rpc('get_utm_stats', {
+        _site_id: siteId,
+        _start_date: start.toISOString(),
+        _end_date: end.toISOString(),
+        _limit: 10,
+      });
 
       if (error) throw error;
 
-      const sources = new Map<string, number>();
-      const mediums = new Map<string, number>();
-      const campaigns = new Map<string, number>();
-      let totalWithUTM = 0;
-
-      events?.forEach(event => {
-        const props = event.properties as { utm?: { utm_source?: string; utm_medium?: string; utm_campaign?: string } } | null;
-        const utm = props?.utm;
-
-        if (utm && (utm.utm_source || utm.utm_medium || utm.utm_campaign)) {
-          totalWithUTM++;
-
-          if (utm.utm_source) {
-            sources.set(utm.utm_source, (sources.get(utm.utm_source) || 0) + 1);
-          }
-          if (utm.utm_medium) {
-            mediums.set(utm.utm_medium, (mediums.get(utm.utm_medium) || 0) + 1);
-          }
-          if (utm.utm_campaign) {
-            campaigns.set(utm.utm_campaign, (campaigns.get(utm.utm_campaign) || 0) + 1);
-          }
-        }
-      });
-
-      const toStats = (map: Map<string, number>): UTMStat[] =>
-        Array.from(map.entries())
-          .map(([value, visits]) => ({
-            value,
-            visits,
-            percentage: totalWithUTM > 0 ? (visits / totalWithUTM) * 100 : 0,
-          }))
-          .sort((a, b) => b.visits - a.visits)
-          .slice(0, 10);
+      const result = data as unknown as {
+        sources: UTMStat[];
+        mediums: UTMStat[];
+        campaigns: UTMStat[];
+      } | null;
 
       return {
-        sources: toStats(sources),
-        mediums: toStats(mediums),
-        campaigns: toStats(campaigns),
+        sources: result?.sources || [],
+        mediums: result?.mediums || [],
+        campaigns: result?.campaigns || [],
       };
     },
     enabled: !!siteId,
