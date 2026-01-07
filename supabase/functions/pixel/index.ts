@@ -1,102 +1,142 @@
+import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2.38.4";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
-// 1x1 transparent GIF
-const PIXEL_GIF = new Uint8Array([
+const corsHeaders = {
+    'Access-Control-Allow-Origin': '*',
+    'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+};
+
+// 1x1 Transparent GIF
+const GIF_BUFFER = new Uint8Array([
     0x47, 0x49, 0x46, 0x38, 0x39, 0x61, 0x01, 0x00, 0x01, 0x00, 0x80, 0x00, 0x00, 0xff, 0xff, 0xff,
     0x00, 0x00, 0x00, 0x21, 0xf9, 0x04, 0x01, 0x00, 0x00, 0x00, 0x00, 0x2c, 0x00, 0x00, 0x00, 0x00,
     0x01, 0x00, 0x01, 0x00, 0x00, 0x02, 0x02, 0x44, 0x01, 0x00, 0x3b
 ]);
 
 serve(async (req) => {
+    // Handle CORS preflight
+    if (req.method === 'OPTIONS') {
+        return new Response(null, { status: 204, headers: corsHeaders });
+    }
+
     try {
         const url = new URL(req.url);
-        const siteId = url.searchParams.get("site_id") || url.searchParams.get("id"); // 'id' for shorter URLs
+        const params = url.searchParams;
 
-        // Always return the GIF immediately (or set status 200)
-        // We process async to not block
-        const response = new Response(PIXEL_GIF, {
+        // Extract parameters
+        const site_id = params.get('site_id');
+        const pageUrl = params.get('url') || '/';
+        const referrer = params.get('ref') || null;
+        const event_name = params.get('event') || 'pageview';
+
+        // Basic validation
+        if (!site_id) {
+            // Even on error, return the GIF to avoid broken image icons on client
+            return new Response(GIF_BUFFER, {
+                headers: {
+                    ...corsHeaders,
+                    "Content-Type": "image/gif",
+                    "Cache-Control": "no-cache, no-store, must-revalidate"
+                }
+            });
+        }
+
+        // Capture requester info
+        const userAgent = req.headers.get('user-agent') || '';
+        const ip = req.headers.get('x-forwarded-for') || 'unknown';
+        const cfCountry = req.headers.get('cf-ipcountry') || null;
+        const cfCity = req.headers.get('cf-ipcity') || null;
+
+        // Generate simple IDs (since this is lightweight tracking)
+        // For robust fingerprinting, we'd reuse the logic from the main track function
+        // ensuring we import it or duplicate safely.
+        // Here we'll do a simplified version for the pixel.
+
+        const visitor_id = await generateVisitorId(ip, userAgent);
+        const session_id = `${visitor_id}-${Date.now()}`;
+
+        // Initialize Supabase
+        const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
+        const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
+        const supabase = createClient(supabaseUrl, supabaseServiceKey);
+
+        // Verify site exists
+        const { data: site } = await supabase
+            .from('sites')
+            .select('id')
+            .eq('tracking_id', site_id)
+            .maybeSingle();
+
+        if (site) {
+            // Record event
+            await supabase.from('events').insert({
+                site_id: site.id,
+                event_name,
+                url: pageUrl,
+                referrer,
+                visitor_id,
+                session_id,
+                browser: parseBrowser(userAgent),
+                os: parseOS(userAgent),
+                device_type: parseDevice(userAgent),
+                country: cfCountry,
+                city: cfCity,
+                properties: { type: 'pixel' }
+            });
+        }
+
+        // Always return GIF
+        return new Response(GIF_BUFFER, {
             headers: {
+                ...corsHeaders,
                 "Content-Type": "image/gif",
-                "Cache-Control": "no-store, no-cache, must-revalidate, proxy-revalidate",
-                "Pragma": "no-cache",
-                "Expires": "0",
-                "Access-Control-Allow-Origin": "*",
-            },
+                "Cache-Control": "no-cache, no-store, must-revalidate"
+            }
         });
-
-        if (!siteId) return response;
-
-        const userAgent = req.headers.get("user-agent") || "";
-        const clientIp = req.headers.get("x-forwarded-for")?.split(",")[0] || "";
-        // Referrer of the IMAGE request is the page where it was embedded
-        const referrer = req.headers.get("referer") || "";
-
-        // Generate visitor ID (simplified compared to track function, but consistent)
-        const encoder = new TextEncoder();
-        const data = encoder.encode(`${clientIp}-${userAgent}`);
-        const hashBuffer = await crypto.subtle.digest('SHA-256', data);
-        const hashArray = Array.from(new Uint8Array(hashBuffer));
-        const visitorId = hashArray.slice(0, 8).map(b => b.toString(16).padStart(2, '0')).join('');
-
-        // Async Insert
-        const supabaseAdmin = createClient(
-            Deno.env.get("SUPABASE_URL") ?? "",
-            Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? ""
-        );
-
-        // We try to infer as much as possible, but pixels are limited
-        const event = {
-            site_id: siteId,
-            event_name: "pixel_view", // Distinguish from 'pageview'
-            url: referrer || "pixel", // We don't know the exact URL unless passed as param, but referrer helps
-            referrer: null, // Hard to know real referrer of the page without JS
-            visitor_id: visitorId,
-            session_id: `px_${visitorId}_${Date.now()}`, // Generate a session ID
-            // Basic Device detection from UA
-            browser: getBrowser(userAgent),
-            os: getOS(userAgent),
-            device_type: getDeviceType(userAgent),
-            country: req.headers.get("cf-ipcountry") || null,
-        };
-
-        // Fire and forget insert
-        supabaseAdmin.from("events").insert(event).then(({ error }) => {
-            if (error) console.error("Pixel Insert Error:", error);
-        });
-
-        return response;
 
     } catch (error) {
-        console.error("Pixel Error:", error);
-        // Still return the GIF so we don't show a broken image
-        return new Response(PIXEL_GIF, {
-            headers: { "Content-Type": "image/gif" }
+        console.error('Pixel error:', error);
+        // Return GIF even on error
+        return new Response(GIF_BUFFER, {
+            headers: {
+                ...corsHeaders,
+                "Content-Type": "image/gif",
+                "Cache-Control": "no-cache, no-store, must-revalidate"
+            }
         });
     }
 });
 
-// Simple User Agent Parsers (Duplicate from track function logic for consistency if possible, or simplified)
-function getBrowser(ua: string): string {
-    if (ua.includes("Chrome")) return "Chrome";
-    if (ua.includes("Firefox")) return "Firefox";
-    if (ua.includes("Safari")) return "Safari";
-    if (ua.includes("Edge")) return "Edge";
-    if (ua.includes("MSIE") || ua.includes("Trident")) return "IE";
-    return "Other";
+// Helper functions (simplified from track/index.ts)
+async function generateVisitorId(ip: string, ua: string): Promise<string> {
+    const str = `${ip}-${ua}`;
+    const encoder = new TextEncoder();
+    const data = encoder.encode(str);
+    const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+    const hashArray = Array.from(new Uint8Array(hashBuffer));
+    return hashArray.slice(0, 8).map(b => b.toString(16).padStart(2, '0')).join('');
 }
 
-function getOS(ua: string): string {
-    if (ua.includes("Windows")) return "Windows";
-    if (ua.includes("Mac")) return "MacOS";
-    if (ua.includes("Linux")) return "Linux";
-    if (ua.includes("Android")) return "Android";
-    if (ua.includes("iOS") || ua.includes("iPhone") || ua.includes("iPad")) return "iOS";
-    return "Other";
+function parseBrowser(ua: string): string {
+    if (ua.includes('Firefox/')) return 'Firefox';
+    if (ua.includes('Edg/')) return 'Edge';
+    if (ua.includes('Chrome/')) return 'Chrome';
+    if (ua.includes('Safari/')) return 'Safari';
+    return 'Unknown';
 }
 
-function getDeviceType(ua: string): string {
-    if (ua.includes("Mobile") || ua.includes("Android") || ua.includes("iPhone")) return "Mobile";
-    if (ua.includes("iPad") || ua.includes("Tablet")) return "Tablet";
-    return "Desktop";
+function parseOS(ua: string): string {
+    if (ua.includes('Windows')) return 'Windows';
+    if (ua.includes('Mac OS X')) return 'macOS';
+    if (ua.includes('Linux')) return 'Linux';
+    if (ua.includes('Android')) return 'Android';
+    if (ua.includes('iPhone') || ua.includes('iPad')) return 'iOS';
+    return 'Unknown';
+}
+
+function parseDevice(ua: string): string {
+    if (ua.includes('Mobile') || ua.includes('Android')) return 'mobile';
+    if (ua.includes('Tablet') || ua.includes('iPad')) return 'tablet';
+    return 'desktop';
 }

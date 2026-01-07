@@ -3,6 +3,7 @@
  * Privacy-focused, cookie-less analytics with UTM and outbound tracking
  * 
  * Usage: <script defer src="https://mmmetric.lovable.app/track.js" data-site="YOUR_TRACKING_ID"></script>
+ * Pixel: <img src="https://lckjlefupqlblfcwhbom.supabase.co/functions/v1/pixel?site_id=YOUR_TRACKING_ID" alt="" />
  */
 (function () {
   'use strict';

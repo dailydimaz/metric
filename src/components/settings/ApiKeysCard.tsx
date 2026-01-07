@@ -299,7 +299,7 @@ export function ApiKeysCard() {
             <Label className="text-xs">Example Request</Label>
             <div className="relative group">
               <div className="bg-background border rounded-md p-3 text-xs font-mono overflow-x-auto whitespace-pre">
-                {`curl -X GET "https://[PROJECT_REF].supabase.co/functions/v1/stats?site_id=SITE_ID&range=7d" \\
+                {`curl -X GET "${import.meta.env.VITE_SUPABASE_URL}/functions/v1/stats?site_id=SITE_ID&range=7d" \\
   -H "Authorization: Bearer mk_..."`}
               </div>
               <Button
@@ -307,7 +307,7 @@ export function ApiKeysCard() {
                 variant="ghost"
                 className="absolute top-1 right-1 h-6 w-6 opacity-0 group-hover:opacity-100 transition-opacity"
                 onClick={() => {
-                  navigator.clipboard.writeText('curl -X GET "https://[PROJECT_REF].supabase.co/functions/v1/stats?site_id=SITE_ID&range=7d" -H "Authorization: Bearer <YOUR_KEY>"');
+                  navigator.clipboard.writeText(`curl -X GET "${import.meta.env.VITE_SUPABASE_URL}/functions/v1/stats?site_id=SITE_ID&range=7d" -H "Authorization: Bearer <YOUR_KEY>"`);
                   toast({ description: "Copied to clipboard" });
                 }}
               >
