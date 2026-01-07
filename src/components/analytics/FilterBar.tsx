@@ -1,21 +1,22 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
-    DropdownMenu,
-    DropdownMenuContent,
-    DropdownMenuItem,
-    DropdownMenuLabel,
-    DropdownMenuSeparator,
-    DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import {
     Popover,
     PopoverContent,
     PopoverTrigger,
 } from "@/components/ui/popover";
+import {
+    Command,
+    CommandEmpty,
+    CommandGroup,
+    CommandInput,
+    CommandItem,
+    CommandList,
+} from "@/components/ui/command";
 import { Input } from "@/components/ui/input";
 import { AnalyticsFilter } from "@/hooks/useAnalytics";
-import { Filter, X, Plus } from "lucide-react";
+import { Filter, X, Plus, Check, ChevronRight, ArrowLeft } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 interface FilterBarProps {
     filters: AnalyticsFilter;
@@ -31,23 +32,20 @@ const FILTER_OPTIONS: { key: keyof AnalyticsFilter; label: string; placeholder: 
 ];
 
 export function FilterBar({ filters, onFilterChange }: FilterBarProps) {
-    const [activeFilter, setActiveFilter] = useState<keyof AnalyticsFilter | null>(null);
+    const [open, setOpen] = useState(false);
+    const [selectedFilterKey, setSelectedFilterKey] = useState<keyof AnalyticsFilter | null>(null);
     const [inputValue, setInputValue] = useState("");
-    const [popoverOpen, setPopoverOpen] = useState(false);
-
-    const handleAddFilter = () => {
-        if (activeFilter && inputValue.trim()) {
-            onFilterChange({ ...filters, [activeFilter]: inputValue.trim() });
-            setActiveFilter(null);
-            setInputValue("");
-            setPopoverOpen(false);
-        }
-    };
 
     const handleSelectFilterType = (key: keyof AnalyticsFilter) => {
-        setActiveFilter(key);
+        setSelectedFilterKey(key);
         setInputValue(filters[key] || "");
-        setPopoverOpen(true);
+    };
+
+    const handleApplyFilter = () => {
+        if (selectedFilterKey && inputValue.trim()) {
+            onFilterChange({ ...filters, [selectedFilterKey]: inputValue.trim() });
+            resetState();
+        }
     };
 
     const removeFilter = (key: keyof AnalyticsFilter) => {
@@ -56,88 +54,110 @@ export function FilterBar({ filters, onFilterChange }: FilterBarProps) {
         onFilterChange(newFilters);
     };
 
-    const activeFilterCount = Object.keys(filters).filter(k => 
+    const resetState = () => {
+        setOpen(false);
+        setSelectedFilterKey(null);
+        setInputValue("");
+    };
+
+    const handleBack = () => {
+        setSelectedFilterKey(null);
+        setInputValue("");
+    };
+
+    const activeFilterCount = Object.keys(filters).filter(k =>
         k !== "referrerPattern" && filters[k as keyof AnalyticsFilter]
     ).length;
 
-    const currentFilterOption = FILTER_OPTIONS.find(f => f.key === activeFilter);
+    const currentFilterOption = FILTER_OPTIONS.find(f => f.key === selectedFilterKey);
 
     return (
         <div className="flex flex-wrap items-center gap-2">
-            <Popover open={popoverOpen} onOpenChange={setPopoverOpen}>
-                <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                        <Button variant="outline" size="sm" className="h-8 gap-2 border-dashed">
-                            <Filter className="h-3.5 w-3.5" />
-                            Filter
-                            {activeFilterCount > 0 && (
-                                <span className="ml-1 rounded-sm bg-primary/10 px-1.5 py-0.5 text-xs font-medium text-primary">
-                                    {activeFilterCount}
-                                </span>
-                            )}
-                        </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="start" className="w-[180px]">
-                        <DropdownMenuLabel className="text-xs font-medium text-muted-foreground">
-                            Add Filter
-                        </DropdownMenuLabel>
-                        <DropdownMenuSeparator />
-                        {FILTER_OPTIONS.map((option) => (
-                            <DropdownMenuItem
-                                key={option.key}
-                                onClick={() => handleSelectFilterType(option.key)}
-                                className="flex items-center justify-between"
-                            >
-                                {option.label}
-                                {filters[option.key] && (
-                                    <span className="text-xs text-muted-foreground truncate max-w-[80px]">
-                                        {filters[option.key]}
-                                    </span>
-                                )}
-                            </DropdownMenuItem>
-                        ))}
-                    </DropdownMenuContent>
-                </DropdownMenu>
-
+            <Popover open={open} onOpenChange={(isOpen) => {
+                setOpen(isOpen);
+                if (!isOpen) {
+                    // Slight delay to allow animation to finish if needed, but instant reset is usually better for UX here
+                    setTimeout(() => {
+                        setSelectedFilterKey(null);
+                        setInputValue("");
+                    }, 200);
+                }
+            }}>
                 <PopoverTrigger asChild>
-                    <span className="hidden" />
+                    <Button variant="outline" size="sm" className="h-8 gap-2 border-dashed">
+                        <Filter className="h-3.5 w-3.5" />
+                        Filter
+                        {activeFilterCount > 0 && (
+                            <span className="ml-1 rounded-sm bg-primary/10 px-1.5 py-0.5 text-xs font-medium text-primary">
+                                {activeFilterCount}
+                            </span>
+                        )}
+                    </Button>
                 </PopoverTrigger>
-                <PopoverContent className="w-[260px] p-3" align="start">
-                    {currentFilterOption && (
-                        <div className="space-y-3">
-                            <div className="text-sm font-medium">
-                                {currentFilterOption.label} filter
-                            </div>
-                            <Input
-                                autoFocus
-                                placeholder={currentFilterOption.placeholder}
-                                value={inputValue}
-                                onChange={(e) => setInputValue(e.target.value)}
-                                onKeyDown={(e) => {
-                                    if (e.key === "Enter") {
-                                        e.preventDefault();
-                                        handleAddFilter();
-                                    } else if (e.key === "Escape") {
-                                        setPopoverOpen(false);
-                                    }
-                                }}
-                            />
-                            <div className="flex justify-end gap-2">
+                <PopoverContent className="w-[220px] p-0" align="start">
+                    {!selectedFilterKey ? (
+                        <Command>
+                            <CommandInput placeholder="Filter by..." />
+                            <CommandList>
+                                <CommandEmpty>No filter found.</CommandEmpty>
+                                <CommandGroup heading="Filters">
+                                    {FILTER_OPTIONS.map((option) => {
+                                        const isActive = !!filters[option.key];
+                                        return (
+                                            <CommandItem
+                                                key={option.key}
+                                                onSelect={() => handleSelectFilterType(option.key)}
+                                                className="flex items-center justify-between cursor-pointer"
+                                            >
+                                                <div className="flex items-center gap-2">
+                                                    {isActive && <Check className="h-4 w-4 text-primary" />}
+                                                    <span className={!isActive ? "pl-6" : ""}>{option.label}</span>
+                                                </div>
+                                                <ChevronRight className="h-4 w-4 text-muted-foreground/50" />
+                                            </CommandItem>
+                                        );
+                                    })}
+                                </CommandGroup>
+                            </CommandList>
+                        </Command>
+                    ) : (
+                        <div className="p-3 space-y-3">
+                            <div className="flex items-center gap-2">
                                 <Button
                                     variant="ghost"
-                                    size="sm"
-                                    onClick={() => setPopoverOpen(false)}
+                                    size="icon"
+                                    className="h-6 w-6 -ml-1"
+                                    onClick={handleBack}
                                 >
-                                    Cancel
+                                    <ArrowLeft className="h-4 w-4" />
                                 </Button>
-                                <Button
-                                    size="sm"
-                                    onClick={handleAddFilter}
-                                    disabled={!inputValue.trim()}
-                                >
-                                    <Plus className="h-3.5 w-3.5 mr-1" />
-                                    Apply
-                                </Button>
+                                <span className="text-sm font-medium">
+                                    {currentFilterOption?.label}
+                                </span>
+                            </div>
+                            <div className="space-y-2">
+                                <Input
+                                    autoFocus
+                                    placeholder={currentFilterOption?.placeholder}
+                                    value={inputValue}
+                                    onChange={(e) => setInputValue(e.target.value)}
+                                    onKeyDown={(e) => {
+                                        if (e.key === "Enter") {
+                                            e.preventDefault();
+                                            handleApplyFilter();
+                                        }
+                                    }}
+                                />
+                                <div className="flex justify-end gap-2">
+                                    <Button
+                                        size="sm"
+                                        className="w-full"
+                                        onClick={handleApplyFilter}
+                                        disabled={!inputValue.trim()}
+                                    >
+                                        Apply Filter
+                                    </Button>
+                                </div>
                             </div>
                         </div>
                     )}
