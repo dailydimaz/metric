@@ -45,10 +45,6 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
-  useAnalyticsStats,
-  useAnalyticsTimeSeries,
-  useTopPages,
-  useTopReferrers,
   useDeviceStats,
   useGeoStats,
   useCityStats,
@@ -57,6 +53,12 @@ import {
   DateRange,
   AnalyticsFilter
 } from "@/hooks/useAnalytics";
+import {
+  useFilteredStats,
+  useFilteredTimeSeries,
+  useFilteredTopPages,
+  useFilteredTopReferrers,
+} from "@/hooks/useFilteredAnalytics";
 
 export default function SiteDetail() {
   const { siteId } = useParams<{ siteId: string }>();
@@ -77,23 +79,23 @@ export default function SiteDetail() {
 
   const site = sites.find((s) => s.id === siteId);
 
-  // Analytics hooks
-  const { data: stats, isLoading: statsLoading } = useAnalyticsStats({
+  // Analytics hooks - use filtered versions that support filtering
+  const { data: stats, isLoading: statsLoading } = useFilteredStats({
     siteId: siteId || "",
     dateRange,
     filters
   });
-  const { data: timeSeries, isLoading: timeSeriesLoading } = useAnalyticsTimeSeries({
+  const { data: timeSeries, isLoading: timeSeriesLoading } = useFilteredTimeSeries({
     siteId: siteId || "",
     dateRange,
     filters
   });
-  const { data: topPages, isLoading: pagesLoading } = useTopPages({
+  const { data: topPages, isLoading: pagesLoading } = useFilteredTopPages({
     siteId: siteId || "",
     dateRange,
     filters
   });
-  const { data: topReferrers, isLoading: referrersLoading } = useTopReferrers({
+  const { data: topReferrers, isLoading: referrersLoading } = useFilteredTopReferrers({
     siteId: siteId || "",
     dateRange,
     filters
@@ -414,6 +416,18 @@ export default function SiteDetail() {
                 <div className="mockup-code mt-2">
                   <pre><code>{`<script defer src="https://mmmetric.lovable.app/track.js" data-site="${site.tracking_id}"></script>`}</code></pre>
                 </div>
+
+                {/* Cross-Domain Tracking */}
+                <div className="mt-3 p-3 bg-base-300/30 rounded-lg">
+                  <h5 className="text-xs font-medium text-base-content/70 mb-1">Cross-Domain Tracking (optional)</h5>
+                  <p className="text-xs text-base-content/60 mb-2">
+                    To track users across multiple domains, add the <code className="bg-base-300 px-1 rounded">data-cross-domain</code> attribute:
+                  </p>
+                  <code className="text-xs bg-base-300 px-2 py-1 rounded block overflow-x-auto">
+                    data-cross-domain="otherdomain.com,anotherdomain.com"
+                  </code>
+                </div>
+
                 <p className="text-base-content/60 text-xs mt-2">
                   This lightweight script (~1KB) tracks page views, custom events, and UTM parameters while respecting user privacy.
                 </p>
@@ -465,7 +479,7 @@ export default function SiteDetail() {
                   Use this 1x1 image for tracking in emails or non-JS environments:
                 </p>
                 <div className="mockup-code mt-2">
-                  <pre><code>{`<img src="https://[PROJECT_REF].supabase.co/functions/v1/pixel?site_id=${site.tracking_id}" alt="" />`}</code></pre>
+                  <pre><code>{`<img src="${import.meta.env.VITE_SUPABASE_URL}/functions/v1/pixel?site_id=${site.tracking_id}" alt="" />`}</code></pre>
                 </div>
               </div>
             </div>
