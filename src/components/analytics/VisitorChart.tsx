@@ -117,6 +117,17 @@ export function VisitorChart({ data, isLoading }: VisitorChartProps) {
                 strokeWidth={2}
                 animationDuration={1000}
               />
+              <Area
+                type="monotone"
+                dataKey="prevVisitors"
+                name="Previous Visitors"
+                stroke="hsl(var(--secondary))"
+                strokeDasharray="4 4"
+                fillOpacity={0}
+                strokeWidth={2}
+                strokeOpacity={0.3}
+                animationDuration={1000}
+              />
             </AreaChart>
           </ResponsiveContainer>
         </div>
