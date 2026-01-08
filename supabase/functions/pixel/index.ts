@@ -24,14 +24,14 @@ serve(async (req) => {
         const url = new URL(req.url);
         const params = url.searchParams;
 
-        // Extract parameters
-        const site_id = params.get('site_id');
+        // Extract parameters - accept both 'tracking_id' (preferred) and 'site_id' (legacy) for backward compatibility
+        const trackingId = params.get('tracking_id') || params.get('site_id');
         const pageUrl = params.get('url') || '/';
         const referrer = params.get('ref') || null;
         const event_name = params.get('event') || 'pageview';
 
         // Basic validation
-        if (!site_id) {
+        if (!trackingId) {
             // Even on error, return the GIF to avoid broken image icons on client
             return new Response(GIF_BUFFER, {
                 headers: {
@@ -65,7 +65,7 @@ serve(async (req) => {
         const { data: site } = await supabase
             .from('sites')
             .select('id')
-            .eq('tracking_id', site_id)
+            .eq('tracking_id', trackingId)
             .maybeSingle();
 
         if (site) {
