@@ -14,6 +14,7 @@ import Retention from "./pages/Retention";
 import Settings from "./pages/Settings";
 import Roadmap from "./pages/Roadmap";
 import InviteAccept from "./pages/InviteAccept";
+import PublicDashboard from "./pages/PublicDashboard";
 
 import NotFound from "./pages/NotFound";
 import CompareGA from "./pages/CompareGA";
@@ -23,8 +24,6 @@ import Privacy from "./pages/Privacy";
 import PrivacyPolicy from "./pages/PrivacyPolicy";
 import Terms from "./pages/Terms";
 import Lightweight from "./pages/Lightweight";
-
-
 
 
 const queryClient = new QueryClient();
@@ -48,7 +47,8 @@ const App = () => (
           <Route path="/privacy-policy" element={<PrivacyPolicy />} />
           <Route path="/resources/lightweight" element={<Lightweight />} />
 
-
+          {/* Public routes */}
+          <Route path="/share/:token" element={<PublicDashboard />} />
 
           <Route path="/invite/:token" element={<InviteAccept />} />
           <Route path="/dashboard" element={<Dashboard />} />

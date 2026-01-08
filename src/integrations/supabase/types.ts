@@ -340,6 +340,62 @@ export type Database = {
         }
         Relationships: []
       }
+      public_dashboards: {
+        Row: {
+          created_at: string
+          id: string
+          is_enabled: boolean
+          share_token: string
+          show_devices: boolean
+          show_geo: boolean
+          show_pageviews: boolean
+          show_referrers: boolean
+          show_top_pages: boolean
+          show_visitors: boolean
+          site_id: string
+          title: string | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          is_enabled?: boolean
+          share_token?: string
+          show_devices?: boolean
+          show_geo?: boolean
+          show_pageviews?: boolean
+          show_referrers?: boolean
+          show_top_pages?: boolean
+          show_visitors?: boolean
+          site_id: string
+          title?: string | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          is_enabled?: boolean
+          share_token?: string
+          show_devices?: boolean
+          show_geo?: boolean
+          show_pageviews?: boolean
+          show_referrers?: boolean
+          show_top_pages?: boolean
+          show_visitors?: boolean
+          site_id?: string
+          title?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "public_dashboards_site_id_fkey"
+            columns: ["site_id"]
+            isOneToOne: true
+            referencedRelation: "sites"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       sites: {
         Row: {
           created_at: string
@@ -642,6 +698,10 @@ export type Database = {
           percentage: number
           visits: number
         }[]
+      }
+      get_public_dashboard_stats: {
+        Args: { _end_date: string; _share_token: string; _start_date: string }
+        Returns: Json
       }
       get_retention_cohorts: {
         Args: { _end_date: string; _site_id: string; _start_date: string }

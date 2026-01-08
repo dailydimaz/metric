@@ -33,6 +33,7 @@ import { ApiKeysCard } from "@/components/settings/ApiKeysCard";
 import { TeamCard } from "@/components/settings/TeamCard";
 import { CustomDashboardsCard } from "@/components/settings/CustomDashboardsCard";
 import { SlackIntegrationCard } from "@/components/settings/SlackIntegrationCard";
+import { PublicDashboardCard } from "@/components/settings/PublicDashboardCard";
 
 interface Profile {
   id: string;
@@ -445,6 +446,9 @@ export default function Settings() {
 
         {/* Slack Integration - Business only */}
         <SlackIntegrationCard />
+
+        {/* Public Dashboard Sharing */}
+        <PublicDashboardCard />
 
         {/* Email Preferences */}
         <EmailPreferences />
