@@ -114,11 +114,11 @@ export interface UTMStats {
 }
 
 // Fetch overall stats using RPC
-export function useAnalyticsStats({ siteId, dateRange, filters }: AnalyticsParams) {
+export function useAnalyticsStats({ siteId, dateRange }: AnalyticsParams) {
   const { start, end, prevStart, prevEnd } = getDateRangeFilter(dateRange);
 
   return useQuery({
-    queryKey: ["analytics-stats", siteId, dateRange, filters],
+    queryKey: ["analytics-stats", siteId, dateRange],
     queryFn: async (): Promise<StatsData> => {
       const { data, error } = await supabase.rpc('get_site_stats', {
         _site_id: siteId,
@@ -126,7 +126,6 @@ export function useAnalyticsStats({ siteId, dateRange, filters }: AnalyticsParam
         _end_date: end.toISOString(),
         _prev_start_date: prevStart.toISOString(),
         _prev_end_date: prevEnd.toISOString(),
-        _filters: filters || {},
       });
 
       if (error) throw error;
@@ -153,11 +152,11 @@ export function useAnalyticsStats({ siteId, dateRange, filters }: AnalyticsParam
 }
 
 // Fetch time series data using RPC
-export function useAnalyticsTimeSeries({ siteId, dateRange, filters }: AnalyticsParams) {
+export function useAnalyticsTimeSeries({ siteId, dateRange }: AnalyticsParams) {
   const { start, end, prevStart, prevEnd } = getDateRangeFilter(dateRange);
 
   return useQuery({
-    queryKey: ["analytics-timeseries", siteId, dateRange, filters],
+    queryKey: ["analytics-timeseries", siteId, dateRange],
     queryFn: async (): Promise<TimeSeriesData[]> => {
       const { data, error } = await supabase.rpc('get_timeseries_stats', {
         _site_id: siteId,
@@ -165,7 +164,6 @@ export function useAnalyticsTimeSeries({ siteId, dateRange, filters }: Analytics
         _end_date: end.toISOString(),
         _prev_start_date: prevStart.toISOString(),
         _prev_end_date: prevEnd.toISOString(),
-        _filters: filters || {},
       });
 
       if (error) throw error;
@@ -189,18 +187,17 @@ export function useAnalyticsTimeSeries({ siteId, dateRange, filters }: Analytics
 }
 
 // Fetch top pages using RPC
-export function useTopPages({ siteId, dateRange, filters }: AnalyticsParams) {
+export function useTopPages({ siteId, dateRange }: AnalyticsParams) {
   const { start, end } = getDateRangeFilter(dateRange);
 
   return useQuery({
-    queryKey: ["analytics-pages", siteId, dateRange, filters],
+    queryKey: ["analytics-pages", siteId, dateRange],
     queryFn: async (): Promise<TopPage[]> => {
       const { data, error } = await supabase.rpc('get_top_pages', {
         _site_id: siteId,
         _start_date: start.toISOString(),
         _end_date: end.toISOString(),
         _limit: 10,
-        _filters: filters || {},
       });
 
       if (error) throw error;
@@ -220,18 +217,17 @@ export function useTopPages({ siteId, dateRange, filters }: AnalyticsParams) {
 }
 
 // Fetch top referrers using RPC
-export function useTopReferrers({ siteId, dateRange, filters }: AnalyticsParams) {
+export function useTopReferrers({ siteId, dateRange }: AnalyticsParams) {
   const { start, end } = getDateRangeFilter(dateRange);
 
   return useQuery({
-    queryKey: ["analytics-referrers", siteId, dateRange, filters],
+    queryKey: ["analytics-referrers", siteId, dateRange],
     queryFn: async (): Promise<TopReferrer[]> => {
       const { data, error } = await supabase.rpc('get_top_referrers', {
         _site_id: siteId,
         _start_date: start.toISOString(),
         _end_date: end.toISOString(),
         _limit: 10,
-        _filters: filters || {},
       });
 
       if (error) throw error;
@@ -251,17 +247,16 @@ export function useTopReferrers({ siteId, dateRange, filters }: AnalyticsParams)
 }
 
 // Fetch device stats using RPC
-export function useDeviceStats({ siteId, dateRange, filters }: AnalyticsParams) {
+export function useDeviceStats({ siteId, dateRange }: AnalyticsParams) {
   const { start, end } = getDateRangeFilter(dateRange);
 
   return useQuery({
-    queryKey: ["analytics-devices", siteId, dateRange, filters],
+    queryKey: ["analytics-devices", siteId, dateRange],
     queryFn: async () => {
       const { data, error } = await supabase.rpc('get_device_stats', {
         _site_id: siteId,
         _start_date: start.toISOString(),
         _end_date: end.toISOString(),
-        _filters: filters || {},
       });
 
       if (error) throw error;
@@ -283,18 +278,17 @@ export function useDeviceStats({ siteId, dateRange, filters }: AnalyticsParams) 
 }
 
 // Fetch geo stats using RPC
-export function useGeoStats({ siteId, dateRange, filters }: AnalyticsParams) {
+export function useGeoStats({ siteId, dateRange }: AnalyticsParams) {
   const { start, end } = getDateRangeFilter(dateRange);
 
   return useQuery({
-    queryKey: ["analytics-geo", siteId, dateRange, filters],
+    queryKey: ["analytics-geo", siteId, dateRange],
     queryFn: async (): Promise<GeoStat[]> => {
       const { data, error } = await supabase.rpc('get_geo_stats', {
         _site_id: siteId,
         _start_date: start.toISOString(),
         _end_date: end.toISOString(),
         _limit: 10,
-        _filters: filters || {},
       });
 
       if (error) throw error;

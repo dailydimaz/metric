@@ -3,10 +3,10 @@ import { StatsCards } from "./StatsCards";
 import { VisitorChart } from "./VisitorChart";
 import { TopPages } from "./TopPages";
 import {
-    useAnalyticsStats,
-    useAnalyticsTimeSeries,
-    useTopPages,
-} from "@/hooks/useAnalytics";
+    useFilteredStats,
+    useFilteredTimeSeries,
+    useFilteredTopPages,
+} from "@/hooks/useFilteredAnalytics";
 import { DateRange } from "@/hooks/useAnalytics";
 import { Button } from "@/components/ui/button";
 
@@ -19,19 +19,19 @@ export function TwitterStats({ siteId, dateRange }: TwitterStatsProps) {
     // Filter for X/Twitter referrers
     const filters = { referrerPattern: "t.co|twitter.com|x.com" };
 
-    const { data: stats, isLoading: statsLoading } = useAnalyticsStats({
+    const { data: stats, isLoading: statsLoading } = useFilteredStats({
         siteId,
         dateRange,
         filters
     });
 
-    const { data: timeSeries, isLoading: timeSeriesLoading } = useAnalyticsTimeSeries({
+    const { data: timeSeries, isLoading: timeSeriesLoading } = useFilteredTimeSeries({
         siteId,
         dateRange,
         filters
     });
 
-    const { data: topPages, isLoading: pagesLoading } = useTopPages({
+    const { data: topPages, isLoading: pagesLoading } = useFilteredTopPages({
         siteId,
         dateRange,
         filters
