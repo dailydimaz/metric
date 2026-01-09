@@ -14,6 +14,7 @@ export interface PublicDashboardConfig {
   show_referrers: boolean;
   show_devices: boolean;
   show_geo: boolean;
+  password_hash: string | null;
   created_at: string;
   updated_at: string;
 }
@@ -82,6 +83,46 @@ export function usePublicDashboard(siteId: string | undefined) {
     },
   });
 
+  const setPassword = useMutation({
+    mutationFn: async (password: string | null) => {
+      if (!siteId || !configQuery.data) throw new Error('No config found');
+
+      // Hash password on the server using crypt
+      let passwordHash: string | null = null;
+      if (password) {
+        const { data, error } = await supabase.rpc('hash_password', {
+          _password: password,
+        });
+        if (error) throw error;
+        passwordHash = data;
+      }
+
+      const { error } = await supabase
+        .from('public_dashboards')
+        .update({
+          password_hash: passwordHash,
+          updated_at: new Date().toISOString(),
+        })
+        .eq('id', configQuery.data.id);
+
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['public-dashboard', siteId] });
+      toast({
+        title: 'Password updated',
+        description: 'Public dashboard password has been updated.',
+      });
+    },
+    onError: (error: Error) => {
+      toast({
+        title: 'Error',
+        description: error.message,
+        variant: 'destructive',
+      });
+    },
+  });
+
   const regenerateToken = useMutation({
     mutationFn: async () => {
       if (!siteId || !configQuery.data) throw new Error('No config found');
@@ -122,14 +163,19 @@ export function usePublicDashboard(siteId: string | undefined) {
     isLoading: configQuery.isLoading,
     error: configQuery.error,
     createOrUpdate,
+    setPassword,
     regenerateToken,
   };
 }
 
 // Hook for fetching public dashboard data (no auth required)
-export function usePublicDashboardData(shareToken: string | undefined, dateRange: { start: string; end: string }) {
+export function usePublicDashboardData(
+  shareToken: string | undefined, 
+  dateRange: { start: string; end: string },
+  password?: string
+) {
   return useQuery({
-    queryKey: ['public-dashboard-data', shareToken, dateRange],
+    queryKey: ['public-dashboard-data', shareToken, dateRange, password],
     queryFn: async () => {
       if (!shareToken) return null;
 
@@ -137,6 +183,7 @@ export function usePublicDashboardData(shareToken: string | undefined, dateRange
         _share_token: shareToken,
         _start_date: dateRange.start,
         _end_date: dateRange.end,
+        _password: password || null,
       });
 
       if (error) throw error;

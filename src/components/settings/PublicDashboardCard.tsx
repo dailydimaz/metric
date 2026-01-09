@@ -8,14 +8,24 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { useToast } from '@/hooks/use-toast';
 import { usePublicDashboard } from '@/hooks/usePublicDashboard';
 import { useSites } from '@/hooks/useSites';
-import { Copy, RefreshCw, ExternalLink, Share2, Loader2 } from 'lucide-react';
+import { Copy, RefreshCw, ExternalLink, Share2, Loader2, Lock, Code, X } from 'lucide-react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Separator } from '@/components/ui/separator';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from '@/components/ui/dialog';
+import { Textarea } from '@/components/ui/textarea';
 
 export function PublicDashboardCard() {
   const { toast } = useToast();
   const { sites } = useSites();
   const [selectedSiteId, setSelectedSiteId] = useState<string>('');
-  const { config, isLoading, createOrUpdate, regenerateToken } = usePublicDashboard(selectedSiteId);
+  const { config, isLoading, createOrUpdate, setPassword, regenerateToken } = usePublicDashboard(selectedSiteId);
 
   const [isEnabled, setIsEnabled] = useState(false);
   const [title, setTitle] = useState('');
@@ -25,6 +35,15 @@ export function PublicDashboardCard() {
   const [showReferrers, setShowReferrers] = useState(true);
   const [showDevices, setShowDevices] = useState(false);
   const [showGeo, setShowGeo] = useState(false);
+
+  // Password state
+  const [passwordEnabled, setPasswordEnabled] = useState(false);
+  const [newPassword, setNewPassword] = useState('');
+  const [showPasswordInput, setShowPasswordInput] = useState(false);
+
+  // Embed dialog
+  const [embedWidth, setEmbedWidth] = useState('100%');
+  const [embedHeight, setEmbedHeight] = useState('600');
 
   // Set default site on load
   useEffect(() => {
@@ -44,6 +63,7 @@ export function PublicDashboardCard() {
       setShowReferrers(config.show_referrers);
       setShowDevices(config.show_devices);
       setShowGeo(config.show_geo);
+      setPasswordEnabled(!!config.password_hash);
     } else {
       // Reset to defaults when no config
       setIsEnabled(false);
@@ -54,12 +74,17 @@ export function PublicDashboardCard() {
       setShowReferrers(true);
       setShowDevices(false);
       setShowGeo(false);
+      setPasswordEnabled(false);
     }
   }, [config]);
 
   const shareUrl = config?.share_token
     ? `${window.location.origin}/share/${config.share_token}`
     : null;
+
+  const embedCode = shareUrl
+    ? `<iframe src="${shareUrl}?embed=true" width="${embedWidth}" height="${embedHeight}" frameborder="0" style="border: none; border-radius: 8px;"></iframe>`
+    : '';
 
   const handleSave = () => {
     createOrUpdate.mutate({
@@ -82,6 +107,32 @@ export function PublicDashboardCard() {
         description: 'Share URL copied to clipboard.',
       });
     }
+  };
+
+  const handleCopyEmbed = () => {
+    navigator.clipboard.writeText(embedCode);
+    toast({
+      title: 'Copied!',
+      description: 'Embed code copied to clipboard.',
+    });
+  };
+
+  const handleSetPassword = () => {
+    if (newPassword.length < 4) {
+      toast({
+        title: 'Error',
+        description: 'Password must be at least 4 characters.',
+        variant: 'destructive',
+      });
+      return;
+    }
+    setPassword.mutate(newPassword);
+    setNewPassword('');
+    setShowPasswordInput(false);
+  };
+
+  const handleRemovePassword = () => {
+    setPassword.mutate(null);
   };
 
   if (sites.length === 0) {
@@ -175,6 +226,144 @@ export function PublicDashboardCard() {
                 </p>
               </div>
             )}
+
+            {/* Embed Code */}
+            {shareUrl && (
+              <Dialog>
+                <DialogTrigger asChild>
+                  <Button variant="outline" className="w-full">
+                    <Code className="h-4 w-4 mr-2" />
+                    Get Embed Code
+                  </Button>
+                </DialogTrigger>
+                <DialogContent className="sm:max-w-lg">
+                  <DialogHeader>
+                    <DialogTitle>Embed Dashboard</DialogTitle>
+                    <DialogDescription>
+                      Copy this code to embed your analytics dashboard on any website.
+                    </DialogDescription>
+                  </DialogHeader>
+                  <div className="space-y-4 pt-4">
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                        <Label>Width</Label>
+                        <Input
+                          value={embedWidth}
+                          onChange={(e) => setEmbedWidth(e.target.value)}
+                          placeholder="e.g., 100% or 800px"
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label>Height</Label>
+                        <Input
+                          value={embedHeight}
+                          onChange={(e) => setEmbedHeight(e.target.value)}
+                          placeholder="e.g., 600"
+                        />
+                      </div>
+                    </div>
+                    <div className="space-y-2">
+                      <Label>Embed Code</Label>
+                      <Textarea
+                        value={embedCode}
+                        readOnly
+                        className="font-mono text-xs h-24"
+                      />
+                    </div>
+                    <Button onClick={handleCopyEmbed} className="w-full">
+                      <Copy className="h-4 w-4 mr-2" />
+                      Copy Embed Code
+                    </Button>
+                  </div>
+                </DialogContent>
+              </Dialog>
+            )}
+
+            <Separator />
+
+            {/* Password Protection */}
+            {config && (
+              <div className="space-y-3">
+                <div className="flex items-center justify-between">
+                  <div className="space-y-0.5">
+                    <Label className="flex items-center gap-2">
+                      <Lock className="h-4 w-4" />
+                      Password Protection
+                    </Label>
+                    <p className="text-sm text-muted-foreground">
+                      Require a password to view this dashboard
+                    </p>
+                  </div>
+                  {passwordEnabled && (
+                    <span className="text-xs bg-primary/10 text-primary px-2 py-1 rounded">
+                      Enabled
+                    </span>
+                  )}
+                </div>
+
+                {passwordEnabled ? (
+                  <div className="flex gap-2">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setShowPasswordInput(!showPasswordInput)}
+                    >
+                      Change Password
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={handleRemovePassword}
+                      disabled={setPassword.isPending}
+                    >
+                      <X className="h-4 w-4 mr-1" />
+                      Remove Password
+                    </Button>
+                  </div>
+                ) : (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setShowPasswordInput(true)}
+                  >
+                    <Lock className="h-4 w-4 mr-1" />
+                    Set Password
+                  </Button>
+                )}
+
+                {showPasswordInput && (
+                  <div className="flex gap-2">
+                    <Input
+                      type="password"
+                      value={newPassword}
+                      onChange={(e) => setNewPassword(e.target.value)}
+                      placeholder="Enter password (min 4 chars)"
+                    />
+                    <Button
+                      onClick={handleSetPassword}
+                      disabled={setPassword.isPending}
+                    >
+                      {setPassword.isPending ? (
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                      ) : (
+                        'Save'
+                      )}
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      onClick={() => {
+                        setShowPasswordInput(false);
+                        setNewPassword('');
+                      }}
+                    >
+                      Cancel
+                    </Button>
+                  </div>
+                )}
+              </div>
+            )}
+
+            <Separator />
 
             {/* Custom title */}
             <div className="space-y-2">

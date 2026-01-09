@@ -345,6 +345,7 @@ export type Database = {
           created_at: string
           id: string
           is_enabled: boolean
+          password_hash: string | null
           share_token: string
           show_devices: boolean
           show_geo: boolean
@@ -360,6 +361,7 @@ export type Database = {
           created_at?: string
           id?: string
           is_enabled?: boolean
+          password_hash?: string | null
           share_token?: string
           show_devices?: boolean
           show_geo?: boolean
@@ -375,6 +377,7 @@ export type Database = {
           created_at?: string
           id?: string
           is_enabled?: boolean
+          password_hash?: string | null
           share_token?: string
           show_devices?: boolean
           show_geo?: boolean
@@ -699,10 +702,24 @@ export type Database = {
           visits: number
         }[]
       }
-      get_public_dashboard_stats: {
-        Args: { _end_date: string; _share_token: string; _start_date: string }
-        Returns: Json
-      }
+      get_public_dashboard_stats:
+        | {
+            Args: {
+              _end_date: string
+              _share_token: string
+              _start_date: string
+            }
+            Returns: Json
+          }
+        | {
+            Args: {
+              _end_date: string
+              _password?: string
+              _share_token: string
+              _start_date: string
+            }
+            Returns: Json
+          }
       get_retention_cohorts: {
         Args: { _end_date: string; _site_id: string; _start_date: string }
         Returns: Json
