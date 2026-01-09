@@ -90,11 +90,12 @@ export function usePublicDashboard(siteId: string | undefined) {
       // Hash password on the server using crypt
       let passwordHash: string | null = null;
       if (password) {
-        const { data, error } = await supabase.rpc('hash_password', {
+        // Use type assertion since the function is newly created
+        const { data, error } = await (supabase.rpc as any)('hash_password', {
           _password: password,
         });
         if (error) throw error;
-        passwordHash = data;
+        passwordHash = data as string;
       }
 
       const { error } = await supabase
@@ -102,7 +103,7 @@ export function usePublicDashboard(siteId: string | undefined) {
         .update({
           password_hash: passwordHash,
           updated_at: new Date().toISOString(),
-        })
+        } as any)
         .eq('id', configQuery.data.id);
 
       if (error) throw error;
