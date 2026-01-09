@@ -2,11 +2,15 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from './useAuth';
 
-// Slack webhook URL validation regex (matches official Slack webhook format)
-const SLACK_WEBHOOK_REGEX = /^https:\/\/hooks\.slack\.com\/services\/T[A-Z0-9]+\/B[A-Z0-9]+\/[a-zA-Z0-9]+$/;
+// Slack/Discord webhook URL validation regex
+// Matches: 
+// - https://hooks.slack.com/services/...
+// - https://discord.com/api/webhooks/...
+// - https://discordapp.com/api/webhooks/...
+const WEBHOOK_REGEX = /^https:\/\/(hooks\.slack\.com\/services\/T[A-Z0-9]+\/B[A-Z0-9]+\/[a-zA-Z0-9]+|(discord|discordapp)\.com\/api\/webhooks\/[0-9]+\/[a-zA-Z0-9_-]+)$/;
 
 export function isValidSlackWebhookUrl(url: string): boolean {
-  return SLACK_WEBHOOK_REGEX.test(url);
+  return WEBHOOK_REGEX.test(url);
 }
 
 interface SlackNotifySettings {
@@ -44,7 +48,7 @@ export function useSlackIntegration(siteId: string | undefined) {
         .maybeSingle();
 
       if (error) throw error;
-      
+
       if (data) {
         return {
           ...data,
@@ -62,12 +66,12 @@ export function useSlackIntegration(siteId: string | undefined) {
   });
 
   const setupIntegration = useMutation({
-    mutationFn: async ({ 
-      webhookUrl, 
+    mutationFn: async ({
+      webhookUrl,
       channelName,
-      notifyOn 
-    }: { 
-      webhookUrl: string; 
+      notifyOn
+    }: {
+      webhookUrl: string;
       channelName?: string;
       notifyOn?: Partial<SlackNotifySettings>;
     }) => {
@@ -75,7 +79,7 @@ export function useSlackIntegration(siteId: string | undefined) {
 
       // Server-side validation of webhook URL
       if (!isValidSlackWebhookUrl(webhookUrl)) {
-        throw new Error('Invalid Slack webhook URL format. URL must be a valid Slack incoming webhook URL.');
+        throw new Error('Invalid webhook URL format. Must be a valid Slack or Discord webhook URL.');
       }
 
       const defaultNotifyOn: SlackNotifySettings = {
@@ -110,10 +114,10 @@ export function useSlackIntegration(siteId: string | undefined) {
   });
 
   const updateSettings = useMutation({
-    mutationFn: async ({ 
+    mutationFn: async ({
       notifyOn,
-      isActive 
-    }: { 
+      isActive
+    }: {
       notifyOn?: Partial<SlackNotifySettings>;
       isActive?: boolean;
     }) => {

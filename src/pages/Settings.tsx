@@ -32,7 +32,7 @@ import { UsageCard, PlanCard } from "@/components/billing";
 import { ApiKeysCard } from "@/components/settings/ApiKeysCard";
 import { TeamCard } from "@/components/settings/TeamCard";
 import { CustomDashboardsCard } from "@/components/settings/CustomDashboardsCard";
-import { SlackIntegrationCard } from "@/components/settings/SlackIntegrationCard";
+import { WebhookIntegrationCard } from "@/components/settings/WebhookIntegrationCard";
 import { PublicDashboardCard } from "@/components/settings/PublicDashboardCard";
 
 interface Profile {
@@ -46,18 +46,18 @@ export default function Settings() {
   const { user, loading: authLoading } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
-  
+
   const [profile, setProfile] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  
+
   // Form states
   const [fullName, setFullName] = useState("");
   const [newEmail, setNewEmail] = useState("");
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
-  
+
   // Action states
   const [changingEmail, setChangingEmail] = useState(false);
   const [changingPassword, setChangingPassword] = useState(false);
@@ -79,13 +79,13 @@ export default function Settings() {
 
   const fetchProfile = async () => {
     if (!user) return;
-    
+
     const { data, error } = await supabase
       .from("profiles")
       .select("*")
       .eq("id", user.id)
       .maybeSingle();
-    
+
     if (error) {
       console.error("Error fetching profile:", error);
     } else {
@@ -97,13 +97,13 @@ export default function Settings() {
 
   const handleSaveProfile = async () => {
     if (!user) return;
-    
+
     setSaving(true);
     const { error } = await supabase
       .from("profiles")
       .update({ full_name: fullName })
       .eq("id", user.id);
-    
+
     if (error) {
       toast({
         title: "Error",
@@ -210,7 +210,7 @@ export default function Settings() {
     setDeletingAccount(true);
     try {
       const { data: { session } } = await supabase.auth.getSession();
-      
+
       if (!session) {
         throw new Error("No active session");
       }
@@ -229,7 +229,7 @@ export default function Settings() {
         title: "Account deleted",
         description: "Your account and all data have been permanently deleted",
       });
-      
+
       // Sign out and redirect
       await supabase.auth.signOut();
       navigate("/");
@@ -365,8 +365,8 @@ export default function Settings() {
                 placeholder="new@email.com"
               />
             </div>
-            <Button 
-              onClick={handleChangeEmail} 
+            <Button
+              onClick={handleChangeEmail}
               disabled={changingEmail || newEmail === user.email}
               variant="outline"
             >
@@ -407,8 +407,8 @@ export default function Settings() {
                 placeholder="••••••••"
               />
             </div>
-            <Button 
-              onClick={handleChangePassword} 
+            <Button
+              onClick={handleChangePassword}
               disabled={changingPassword}
               variant="outline"
             >
@@ -444,8 +444,8 @@ export default function Settings() {
         {/* Custom Dashboards - Business only */}
         <CustomDashboardsCard />
 
-        {/* Slack Integration - Business only */}
-        <SlackIntegrationCard />
+        {/* Webhook Integration - Slack / Discord */}
+        <WebhookIntegrationCard />
 
         {/* Public Dashboard Sharing */}
         <PublicDashboardCard />

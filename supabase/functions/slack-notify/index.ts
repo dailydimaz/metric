@@ -10,27 +10,27 @@ interface SlackMessage {
   blocks?: any[];
 }
 
-// Validate Slack webhook URL format (server-side validation)
-const SLACK_WEBHOOK_REGEX = /^https:\/\/hooks\.slack\.com\/services\/T[A-Z0-9]+\/B[A-Z0-9]+\/[a-zA-Z0-9]+$/;
+// Slack key validation regex (server-side validation)
+const WEBHOOK_REGEX = /^https:\/\/(hooks\.slack\.com\/services\/T[A-Z0-9]+\/B[A-Z0-9]+\/[a-zA-Z0-9]+|(discord|discordapp)\.com\/api\/webhooks\/[0-9]+\/[a-zA-Z0-9_-]+)$/;
 
 function isValidSlackWebhookUrl(url: string): boolean {
-  return SLACK_WEBHOOK_REGEX.test(url);
+  return WEBHOOK_REGEX.test(url);
 }
 
 // Sanitize user-controlled input for Slack mrkdwn to prevent injection attacks
 function sanitizeForSlackMrkdwn(text: string | null | undefined): string {
   if (!text) return 'Unknown';
-  
+
   // Limit length to prevent message bloat
   const maxLength = 200;
   let sanitized = text.substring(0, maxLength);
-  
+
   // Escape Slack mrkdwn special characters to prevent formatting/link injection
   sanitized = sanitized
     .replace(/&/g, '&amp;')
     .replace(/</g, '&lt;')
     .replace(/>/g, '&gt;');
-  
+
   return sanitized;
 }
 
@@ -43,12 +43,12 @@ async function getUserIdFromRequest(req: Request, supabase: any): Promise<string
 
   const token = authHeader.replace('Bearer ', '');
   const { data: { user }, error } = await supabase.auth.getUser(token);
-  
+
   if (error || !user) {
     console.error('Error getting user from token:', error);
     return null;
   }
-  
+
   return user.id;
 }
 
@@ -96,10 +96,10 @@ Deno.serve(async (req) => {
     const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
     const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
     const supabaseAnonKey = Deno.env.get('SUPABASE_ANON_KEY')!;
-    
+
     // Create service role client for database operations
     const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey);
-    
+
     // Create anon client for auth verification
     const supabaseAuth = createClient(supabaseUrl, supabaseAnonKey);
 
@@ -109,7 +109,7 @@ Deno.serve(async (req) => {
       console.error('Unauthorized: No valid user token');
       return new Response(
         JSON.stringify({ error: 'Unauthorized: Authentication required' }),
-        { 
+        {
           headers: { ...corsHeaders, 'Content-Type': 'application/json' },
           status: 401,
         }
@@ -134,7 +134,7 @@ Deno.serve(async (req) => {
       console.error(`Unauthorized: User ${userId} does not have access to site ${siteId}`);
       return new Response(
         JSON.stringify({ error: 'Unauthorized: You do not have access to this site' }),
-        { 
+        {
           headers: { ...corsHeaders, 'Content-Type': 'application/json' },
           status: 403,
         }
@@ -161,7 +161,7 @@ Deno.serve(async (req) => {
     // Server-side webhook URL validation
     if (!isValidSlackWebhookUrl(integration.webhook_url)) {
       console.error('Invalid webhook URL detected:', integration.webhook_url.substring(0, 30) + '...');
-      throw new Error('Invalid Slack webhook URL format');
+      throw new Error('Invalid webhook URL format. Must be Slack or Discord.');
     }
 
     // Get site info
@@ -278,7 +278,7 @@ Deno.serve(async (req) => {
 
     return new Response(
       JSON.stringify({ success: true }),
-      { 
+      {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         status: 200,
       }
@@ -287,7 +287,7 @@ Deno.serve(async (req) => {
     console.error('Error in slack-notify function:', error);
     return new Response(
       JSON.stringify({ error: error?.message || 'Unknown error' }),
-      { 
+      {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         status: 400,
       }

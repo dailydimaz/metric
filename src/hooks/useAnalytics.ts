@@ -400,3 +400,91 @@ export function useUTMStats({ siteId, dateRange }: AnalyticsParams) {
     enabled: !!siteId,
   });
 }
+
+export interface BreakdownStat {
+  value: string;
+  visitors: number;
+  pageviews: number;
+  bounce_rate: number;
+  avg_duration: number;
+}
+
+export function useBreakdownStats({
+  siteId,
+  dateRange,
+  groupBy,
+  filterColumn,
+  filterValue
+}: {
+  siteId: string;
+  dateRange: DateRange;
+  groupBy: string;
+  filterColumn?: string;
+  filterValue?: string;
+}) {
+  const { start, end } = getDateRangeFilter(dateRange);
+
+  return useQuery({
+    queryKey: ['breakdown-stats', siteId, dateRange, groupBy, filterColumn, filterValue],
+    queryFn: async () => {
+      const { data, error } = await supabase.rpc('get_breakdown_stats', {
+        _site_id: siteId,
+        _start_date: start.toISOString(),
+        _end_date: end.toISOString(),
+        _group_by: groupBy,
+        _filter_column: filterColumn || null,
+        _filter_value: filterValue || null
+      });
+
+      if (error) throw error;
+      return data as BreakdownStat[];
+    },
+    enabled: !!siteId,
+  });
+}
+
+export interface JourneyStep {
+  source: string;
+  target: string;
+  count: number;
+}
+
+export function useUserJourneys({ siteId, dateRange }: AnalyticsParams) {
+  const { start, end } = getDateRangeFilter(dateRange);
+
+  return useQuery({
+    queryKey: ['user-journeys', siteId, dateRange],
+    queryFn: async () => {
+      const { data, error } = await supabase.rpc('get_user_journeys', {
+        _site_id: siteId,
+        _start_date: start.toISOString(),
+        _end_date: end.toISOString(),
+      });
+
+      if (error) throw error;
+      return data as JourneyStep[];
+    },
+    enabled: !!siteId,
+  });
+}
+
+// Fetch retention cohorts using RPC
+export function useRetentionCohorts({ siteId, dateRange }: AnalyticsParams) {
+  const { start, end } = getDateRangeFilter(dateRange);
+
+  return useQuery({
+    queryKey: ["analytics-cohorts", siteId, dateRange],
+    queryFn: async () => {
+      const { data, error } = await supabase.rpc('get_retention_cohorts', {
+        _site_id: siteId,
+        _start_date: start.toISOString(),
+        _end_date: end.toISOString(),
+      });
+
+      if (error) throw error;
+
+      return (data || []) as any[];
+    },
+    enabled: !!siteId,
+  });
+}

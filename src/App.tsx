@@ -11,6 +11,9 @@ import SiteDetail from "./pages/SiteDetail";
 import FunnelDetail from "./pages/FunnelDetail";
 import Funnels from "./pages/Funnels";
 import Retention from "./pages/Retention";
+import Cohorts from "./pages/Cohorts";
+import Breakdown from "./pages/Breakdown";
+import Journey from "./pages/Journey";
 import Settings from "./pages/Settings";
 import Roadmap from "./pages/Roadmap";
 import InviteAccept from "./pages/InviteAccept";
@@ -56,6 +59,9 @@ const App = () => (
           <Route path="/dashboard/sites/:siteId/funnels" element={<Funnels />} />
           <Route path="/dashboard/sites/:siteId/funnels/:funnelId" element={<FunnelDetail />} />
           <Route path="/dashboard/sites/:siteId/retention" element={<Retention />} />
+          <Route path="/dashboard/sites/:siteId/cohorts" element={<Cohorts />} />
+          <Route path="/dashboard/sites/:siteId/breakdown" element={<Breakdown />} />
+          <Route path="/dashboard/sites/:siteId/journey" element={<Journey />} />
           <Route path="/dashboard/settings" element={<Settings />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
