@@ -308,7 +308,7 @@ export default function SiteDetail() {
 
           <div className="flex items-center gap-2 shrink-0 overflow-x-auto pb-1 sm:pb-0">
             <ExportButton siteId={site.id} siteName={site.name} dateRange={dateRange} />
-            <FilterBar filters={filters} onFilterChange={setFilters} />
+            <FilterBar filters={filters} onFilterChange={setFilters} siteId={siteId} />
             <DateRangePicker value={dateRange} onChange={setDateRange} />
             {isEditing ? (
               <>
