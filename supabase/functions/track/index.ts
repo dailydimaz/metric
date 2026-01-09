@@ -17,16 +17,16 @@ const RATE_WINDOW = 60000; // 1 minute in ms
 function checkRateLimit(ip: string): boolean {
   const now = Date.now();
   const entry = rateLimitMap.get(ip);
-  
+
   if (!entry || now > entry.resetTime) {
     rateLimitMap.set(ip, { count: 1, resetTime: now + RATE_WINDOW });
     return true;
   }
-  
+
   if (entry.count >= RATE_LIMIT) {
     return false;
   }
-  
+
   entry.count++;
   return true;
 }
@@ -110,10 +110,10 @@ serve(async (req) => {
   }
 
   // Get client IP for rate limiting
-  const clientIp = req.headers.get('cf-connecting-ip') || 
-                   req.headers.get('x-forwarded-for')?.split(',')[0]?.trim() || 
-                   req.headers.get('x-real-ip') || 
-                   'unknown';
+  const clientIp = req.headers.get('cf-connecting-ip') ||
+    req.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ||
+    req.headers.get('x-real-ip') ||
+    'unknown';
 
   // Check rate limit
   if (!checkRateLimit(clientIp)) {
@@ -127,7 +127,7 @@ serve(async (req) => {
   try {
     const rawBody = await req.text();
     console.log(`Body received (${rawBody.length} bytes)`);
-    
+
     let body;
     try {
       body = JSON.parse(rawBody);
@@ -138,7 +138,7 @@ serve(async (req) => {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
     }
-    
+
     const { site_id, url, referrer, event_name = 'pageview', properties = {}, skip_origin_check = false } = body;
 
     // Validate required fields
@@ -194,9 +194,32 @@ serve(async (req) => {
 
     // Get headers for geo and user agent
     const userAgent = req.headers.get('user-agent') || '';
-    const cfCountry = req.headers.get('cf-ipcountry') || req.headers.get('x-country') || null;
-    const cfCity = req.headers.get('cf-ipcity') || req.headers.get('x-city') || null;
-    
+
+    // Improved Geo Detection
+    // Check multiple common headers for country and city
+    const country = req.headers.get('cf-ipcountry') ||
+      req.headers.get('x-vercel-ip-country') ||
+      req.headers.get('x-country') ||
+      req.headers.get('x-real-ip-country') ||
+      null;
+
+    const city = req.headers.get('cf-ipcity') ||
+      req.headers.get('x-vercel-ip-city') ||
+      req.headers.get('x-city') ||
+      req.headers.get('x-real-ip-city') ||
+      null;
+
+    // Log geo detection results for debugging
+    if (!country) {
+      console.log('Geo: Country not found in headers. Checked: cf-ipcountry, x-vercel-ip-country, x-country, x-real-ip-country');
+    } else {
+      console.log(`Geo: Country detected: ${country}`);
+    }
+
+    if (!city) {
+      console.log('Geo: City not found in headers. Checked: cf-ipcity, x-vercel-ip-city, x-city, x-real-ip-city');
+    }
+
     // Get Accept-Language header and extract primary language
     const acceptLanguage = req.headers.get('accept-language') || '';
     const primaryLanguage = acceptLanguage.split(',')[0]?.split('-')[0]?.trim() || null;
@@ -247,7 +270,7 @@ serve(async (req) => {
     // - When no origin header is present (server-side or sendBeacon)
     const isTestEvent = event_name === 'test_connection';
     const shouldValidateOrigin = origin && site.domain && !skip_origin_check && !isTestEvent;
-    
+
     if (shouldValidateOrigin) {
       try {
         const originHost = new URL(origin).hostname.toLowerCase();
@@ -257,15 +280,15 @@ serve(async (req) => {
           .replace(/^www\./i, '')
           .replace(/\/.*$/, '') // Remove any path
           .trim();
-        
+
         // Check if origin matches the configured domain (with or without www)
-        const isValidOrigin = originHost === siteDomain || 
-                              originHost === `www.${siteDomain}` ||
-                              originHost.endsWith(`.${siteDomain}`) ||
-                              siteDomain.includes(originHost) || // Handle subdomain cases
-                              originHost.includes('lovable.app') || // Allow Lovable preview domains
-                              originHost.includes('localhost'); // Allow localhost for development
-        
+        const isValidOrigin = originHost === siteDomain ||
+          originHost === `www.${siteDomain}` ||
+          originHost.endsWith(`.${siteDomain}`) ||
+          siteDomain.includes(originHost) || // Handle subdomain cases
+          originHost.includes('lovable.app') || // Allow Lovable preview domains
+          originHost.includes('localhost'); // Allow localhost for development
+
         if (!isValidOrigin) {
           console.warn(`Origin mismatch: ${originHost} vs ${siteDomain} for site ${site_id}`);
           // Log but allow for now - strict mode can be enabled later
@@ -294,8 +317,8 @@ serve(async (req) => {
         browser,
         os,
         device_type,
-        country: cfCountry,
-        city: cfCity,
+        country: country,
+        city: city,
         language: primaryLanguage,
         properties,
       });
