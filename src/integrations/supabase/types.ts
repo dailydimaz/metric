@@ -811,6 +811,7 @@ export type Database = {
         Args: { _min_role: string; _site_id: string }
         Returns: boolean
       }
+      hash_password: { Args: { _password: string }; Returns: string }
       is_site_owner: { Args: { _site_id: string }; Returns: boolean }
       is_team_member_of_same_site: {
         Args: { _profile_user_id: string }
