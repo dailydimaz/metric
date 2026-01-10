@@ -679,24 +679,50 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      get_city_stats: {
-        Args: {
-          _end_date: string
-          _limit?: number
-          _site_id: string
-          _start_date: string
-        }
-        Returns: {
-          city: string
-          country: string
-          percentage: number
-          visits: number
-        }[]
-      }
-      get_device_stats: {
-        Args: { _end_date: string; _site_id: string; _start_date: string }
-        Returns: Json
-      }
+      get_city_stats:
+        | {
+            Args: {
+              _end_date: string
+              _limit?: number
+              _site_id: string
+              _start_date: string
+            }
+            Returns: {
+              city: string
+              country: string
+              percentage: number
+              visits: number
+            }[]
+          }
+        | {
+            Args: {
+              _end_date: string
+              _filters?: Json
+              _limit?: number
+              _site_id: string
+              _start_date: string
+            }
+            Returns: {
+              city: string
+              country: string
+              percentage: number
+              visits: number
+            }[]
+          }
+      get_device_stats:
+        | {
+            Args: { _end_date: string; _site_id: string; _start_date: string }
+            Returns: Json
+          }
+        | {
+            Args: {
+              _end_date: string
+              _filters?: Json
+              _site_id: string
+              _start_date: string
+            }
+            Returns: Json
+          }
       get_funnel_stats: {
         Args: { _end_date: string; _funnel_id: string; _start_date: string }
         Returns: {
@@ -707,19 +733,34 @@ export type Database = {
           visitors: number
         }[]
       }
-      get_geo_stats: {
-        Args: {
-          _end_date: string
-          _limit?: number
-          _site_id: string
-          _start_date: string
-        }
-        Returns: {
-          country: string
-          percentage: number
-          visits: number
-        }[]
-      }
+      get_geo_stats:
+        | {
+            Args: {
+              _end_date: string
+              _limit?: number
+              _site_id: string
+              _start_date: string
+            }
+            Returns: {
+              country: string
+              percentage: number
+              visits: number
+            }[]
+          }
+        | {
+            Args: {
+              _end_date: string
+              _filters?: Json
+              _limit?: number
+              _site_id: string
+              _start_date: string
+            }
+            Returns: {
+              country: string
+              percentage: number
+              visits: number
+            }[]
+          }
       get_goal_stats: {
         Args: { _end_date: string; _site_id: string; _start_date: string }
         Returns: {
@@ -733,19 +774,34 @@ export type Database = {
           url_match: string
         }[]
       }
-      get_language_stats: {
-        Args: {
-          _end_date: string
-          _limit?: number
-          _site_id: string
-          _start_date: string
-        }
-        Returns: {
-          language: string
-          percentage: number
-          visits: number
-        }[]
-      }
+      get_language_stats:
+        | {
+            Args: {
+              _end_date: string
+              _limit?: number
+              _site_id: string
+              _start_date: string
+            }
+            Returns: {
+              language: string
+              percentage: number
+              visits: number
+            }[]
+          }
+        | {
+            Args: {
+              _end_date: string
+              _filters?: Json
+              _limit?: number
+              _site_id: string
+              _start_date: string
+            }
+            Returns: {
+              language: string
+              percentage: number
+              visits: number
+            }[]
+          }
       get_public_dashboard_stats:
         | {
             Args: {
@@ -776,22 +832,40 @@ export type Database = {
           retained: number
         }[]
       }
-      get_site_stats: {
-        Args: {
-          _end_date: string
-          _prev_end_date: string
-          _prev_start_date: string
-          _site_id: string
-          _start_date: string
-        }
-        Returns: {
-          bounce_rate: number
-          pageviews_change: number
-          total_pageviews: number
-          unique_visitors: number
-          visitors_change: number
-        }[]
-      }
+      get_site_stats:
+        | {
+            Args: {
+              _end_date: string
+              _prev_end_date: string
+              _prev_start_date: string
+              _site_id: string
+              _start_date: string
+            }
+            Returns: {
+              bounce_rate: number
+              pageviews_change: number
+              total_pageviews: number
+              unique_visitors: number
+              visitors_change: number
+            }[]
+          }
+        | {
+            Args: {
+              _end_date: string
+              _filters?: Json
+              _prev_end_date: string
+              _prev_start_date: string
+              _site_id: string
+              _start_date: string
+            }
+            Returns: {
+              bounce_rate: number
+              pageviews_change: number
+              total_pageviews: number
+              unique_visitors: number
+              visitors_change: number
+            }[]
+          }
       get_team_member_profile: {
         Args: { _user_id: string }
         Returns: {
@@ -800,57 +874,116 @@ export type Database = {
           id: string
         }[]
       }
-      get_timeseries_stats: {
-        Args: {
-          _end_date: string
-          _prev_end_date: string
-          _prev_start_date: string
-          _site_id: string
-          _start_date: string
-        }
-        Returns: {
-          date: string
-          pageviews: number
-          prev_pageviews: number
-          prev_visitors: number
-          visitors: number
-        }[]
-      }
-      get_top_pages: {
-        Args: {
-          _end_date: string
-          _limit?: number
-          _site_id: string
-          _start_date: string
-        }
-        Returns: {
-          pageviews: number
-          unique_visitors: number
-          url: string
-        }[]
-      }
-      get_top_referrers: {
-        Args: {
-          _end_date: string
-          _limit?: number
-          _site_id: string
-          _start_date: string
-        }
-        Returns: {
-          percentage: number
-          referrer: string
-          visits: number
-        }[]
-      }
-      get_utm_stats: {
-        Args: {
-          _end_date: string
-          _limit?: number
-          _site_id: string
-          _start_date: string
-        }
-        Returns: Json
-      }
+      get_timeseries_stats:
+        | {
+            Args: {
+              _end_date: string
+              _prev_end_date: string
+              _prev_start_date: string
+              _site_id: string
+              _start_date: string
+            }
+            Returns: {
+              date: string
+              pageviews: number
+              prev_pageviews: number
+              prev_visitors: number
+              visitors: number
+            }[]
+          }
+        | {
+            Args: {
+              _end_date: string
+              _filters?: Json
+              _prev_end_date: string
+              _prev_start_date: string
+              _site_id: string
+              _start_date: string
+            }
+            Returns: {
+              date: string
+              pageviews: number
+              prev_pageviews: number
+              prev_visitors: number
+              visitors: number
+            }[]
+          }
+      get_top_pages:
+        | {
+            Args: {
+              _end_date: string
+              _limit?: number
+              _site_id: string
+              _start_date: string
+            }
+            Returns: {
+              pageviews: number
+              unique_visitors: number
+              url: string
+            }[]
+          }
+        | {
+            Args: {
+              _end_date: string
+              _filters?: Json
+              _limit?: number
+              _site_id: string
+              _start_date: string
+            }
+            Returns: {
+              pageviews: number
+              unique_visitors: number
+              url: string
+            }[]
+          }
+      get_top_referrers:
+        | {
+            Args: {
+              _end_date: string
+              _limit?: number
+              _site_id: string
+              _start_date: string
+            }
+            Returns: {
+              percentage: number
+              referrer: string
+              visits: number
+            }[]
+          }
+        | {
+            Args: {
+              _end_date: string
+              _filters?: Json
+              _limit?: number
+              _site_id: string
+              _start_date: string
+            }
+            Returns: {
+              percentage: number
+              referrer: string
+              visits: number
+            }[]
+          }
+      get_utm_stats:
+        | {
+            Args: {
+              _end_date: string
+              _limit?: number
+              _site_id: string
+              _start_date: string
+            }
+            Returns: Json
+          }
+        | {
+            Args: {
+              _end_date: string
+              _filters?: Json
+              _limit?: number
+              _site_id: string
+              _start_date: string
+            }
+            Returns: Json
+          }
       has_team_role: {
         Args: { _min_role: string; _site_id: string }
         Returns: boolean

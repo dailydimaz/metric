@@ -45,6 +45,10 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
+  useAnalyticsStats,
+  useAnalyticsTimeSeries,
+  useTopPages,
+  useTopReferrers,
   useDeviceStats,
   useGeoStats,
   useCityStats,
@@ -53,12 +57,6 @@ import {
   DateRange,
   AnalyticsFilter
 } from "@/hooks/useAnalytics";
-import {
-  useFilteredStats,
-  useFilteredTimeSeries,
-  useFilteredTopPages,
-  useFilteredTopReferrers,
-} from "@/hooks/useFilteredAnalytics";
 
 export default function SiteDetail() {
   const { siteId } = useParams<{ siteId: string }>();
@@ -79,23 +77,23 @@ export default function SiteDetail() {
 
   const site = sites.find((s) => s.id === siteId);
 
-  // Analytics hooks - use filtered versions that support filtering
-  const { data: stats, isLoading: statsLoading } = useFilteredStats({
+  // Analytics hooks - all hooks now support server-side filtering via RPCs
+  const { data: stats, isLoading: statsLoading } = useAnalyticsStats({
     siteId: siteId || "",
     dateRange,
     filters
   });
-  const { data: timeSeries, isLoading: timeSeriesLoading } = useFilteredTimeSeries({
+  const { data: timeSeries, isLoading: timeSeriesLoading } = useAnalyticsTimeSeries({
     siteId: siteId || "",
     dateRange,
     filters
   });
-  const { data: topPages, isLoading: pagesLoading } = useFilteredTopPages({
+  const { data: topPages, isLoading: pagesLoading } = useTopPages({
     siteId: siteId || "",
     dateRange,
     filters
   });
-  const { data: topReferrers, isLoading: referrersLoading } = useFilteredTopReferrers({
+  const { data: topReferrers, isLoading: referrersLoading } = useTopReferrers({
     siteId: siteId || "",
     dateRange,
     filters
