@@ -145,6 +145,14 @@ const features: Feature[] = [
     category: "analytics",
   },
   {
+    name: "Insight Properties",
+    description: "Deep dive into custom event properties",
+    icon: Lightbulb,
+    implemented: true,
+    difficulty: "medium",
+    category: "analytics",
+  },
+  {
     name: "UTM Tracking",
     description: "Measure campaign effectiveness",
     icon: Target,

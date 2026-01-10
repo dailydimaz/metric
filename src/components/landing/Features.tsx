@@ -6,7 +6,11 @@ import {
   Zap,
   Shield,
   Code2,
-  Globe
+  Globe,
+  LayoutTemplate,
+  Target,
+  UserPlus,
+  Download
 } from "lucide-react";
 import { motion } from "framer-motion";
 
@@ -50,6 +54,26 @@ const features = [
     icon: Globe,
     title: "Geo Analytics",
     description: "See where your visitors come from. Country, city, and language breakdowns."
+  },
+  {
+    icon: LayoutTemplate,
+    title: "Insight Properties",
+    description: "Deep dive into your custom events. Analyze property breakdowns and distribution instantly."
+  },
+  {
+    icon: Target,
+    title: "UTM Tracking",
+    description: "Measure campaign effectiveness automatically. Track sources, mediums, and campaigns."
+  },
+  {
+    icon: UserPlus,
+    title: "Team Collaboration",
+    description: "Invite your team members to view dashboards and manage sites together."
+  },
+  {
+    icon: Download,
+    title: "Data Export",
+    description: "Your data belongs to you. Export all your analytics data to CSV anytime."
   }
 ];
 

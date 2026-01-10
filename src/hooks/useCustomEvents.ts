@@ -27,7 +27,7 @@ export interface EventGroup {
 function getDateRangeFilter(dateRange: DateRange): { start: Date; end: Date } {
   const end = endOfDay(new Date());
   let start: Date;
-  
+
   switch (dateRange) {
     case "today":
       start = startOfDay(new Date());
@@ -44,7 +44,7 @@ function getDateRangeFilter(dateRange: DateRange): { start: Date; end: Date } {
     default:
       start = startOfDay(subDays(new Date(), 7));
   }
-  
+
   return { start, end };
 }
 
@@ -65,7 +65,7 @@ export function useCustomEvents({ siteId, dateRange }: CustomEventsParams) {
         .limit(100);
 
       if (error) throw error;
-      
+
       return (data || []).map(event => ({
         ...event,
         properties: event.properties as Record<string, unknown> | null,
@@ -94,7 +94,7 @@ export function useEventGroups({ siteId, dateRange }: CustomEventsParams) {
 
       // Group by event name
       const groups = new Map<string, { count: number; lastOccurrence: string }>();
-      
+
       data?.forEach(event => {
         const existing = groups.get(event.event_name);
         if (existing) {
@@ -116,5 +116,76 @@ export function useEventGroups({ siteId, dateRange }: CustomEventsParams) {
         .sort((a, b) => b.count - a.count);
     },
     enabled: !!siteId,
+  });
+}
+
+export interface PropertyStats {
+  value: string;
+  count: number;
+  percentage: number;
+}
+
+export function useEventProperties({ siteId, eventName, dateRange }: CustomEventsParams & { eventName: string | null }) {
+  const { start, end } = getDateRangeFilter(dateRange);
+
+  return useQuery({
+    queryKey: ["event-properties", siteId, eventName, dateRange],
+    queryFn: async (): Promise<Record<string, PropertyStats[]> | null> => {
+      if (!eventName) return null;
+
+      const { data, error } = await supabase
+        .from("events")
+        .select("properties")
+        .eq("site_id", siteId)
+        .eq("event_name", eventName)
+        .gte("created_at", start.toISOString())
+        .lte("created_at", end.toISOString())
+        .not("properties", "is", null)
+        .limit(1000); // Limit analysis to 1000 recent events for performance
+
+      if (error) throw error;
+
+      if (!data || data.length === 0) return {};
+
+      // Aggregate properties
+      const propertyCounts: Record<string, Record<string, number>> = {};
+
+      data.forEach(row => {
+        const props = row.properties as Record<string, unknown>;
+        if (!props) return;
+
+        Object.entries(props).forEach(([key, value]) => {
+          if (value === null || value === undefined) return;
+
+          const stringValue = String(value);
+
+          if (!propertyCounts[key]) {
+            propertyCounts[key] = {};
+          }
+
+          propertyCounts[key][stringValue] = (propertyCounts[key][stringValue] || 0) + 1;
+        });
+      });
+
+      // Convert to stats array
+      const stats: Record<string, PropertyStats[]> = {};
+
+      Object.entries(propertyCounts).forEach(([key, counts]) => {
+        const totalForProp = Object.values(counts).reduce((a, b) => a + b, 0);
+
+        stats[key] = Object.entries(counts)
+          .map(([value, count]) => ({
+            value,
+            count,
+            // Calculate percentage based on total occurrences of this property
+            percentage: Math.round((count / totalForProp) * 100),
+          }))
+          .sort((a, b) => b.count - a.count)
+          .slice(0, 10); // Top 10 values only
+      });
+
+      return stats;
+    },
+    enabled: !!siteId && !!eventName,
   });
 }
