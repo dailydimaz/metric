@@ -90,10 +90,59 @@ async function generateVisitorId(ip: string, ua: string): Promise<string> {
   return hashArray.slice(0, 8).map(b => b.toString(16).padStart(2, '0')).join('');
 }
 
+// Extract geo data from various proxy headers
+function extractGeoData(req: Request): { country: string | null; city: string | null } {
+  // Try multiple header sources for geo data
+  // Priority: Cloudflare > Vercel > Netlify > AWS CloudFront > Generic
+  
+  const country = 
+    req.headers.get('cf-ipcountry') ||           // Cloudflare
+    req.headers.get('x-vercel-ip-country') ||    // Vercel
+    req.headers.get('x-nf-country-code') ||      // Netlify
+    req.headers.get('cloudfront-viewer-country') || // AWS CloudFront
+    req.headers.get('x-country-code') ||         // Generic CDN
+    req.headers.get('x-country') ||              // Generic
+    null;
+  
+  const city = 
+    req.headers.get('cf-ipcity') ||              // Cloudflare
+    req.headers.get('x-vercel-ip-city') ||       // Vercel
+    req.headers.get('x-nf-city') ||              // Netlify (undocumented)
+    req.headers.get('cloudfront-viewer-city') || // AWS CloudFront
+    req.headers.get('x-city') ||                 // Generic
+    null;
+  
+  return { country, city };
+}
+
+// Extract language from Accept-Language header
+function extractLanguage(req: Request): string | null {
+  const acceptLanguage = req.headers.get('accept-language') || '';
+  
+  // Parse Accept-Language header (e.g., "en-US,en;q=0.9,es;q=0.8")
+  if (!acceptLanguage) return null;
+  
+  // Get the primary language code (first part before any comma or semicolon)
+  const primaryLang = acceptLanguage.split(',')[0]?.split(';')[0]?.trim();
+  
+  // Return just the language code (e.g., "en" from "en-US")
+  return primaryLang?.split('-')[0]?.toLowerCase() || null;
+}
+
 serve(async (req) => {
   const origin = req.headers.get('origin') || 'no-origin';
   const contentType = req.headers.get('content-type') || 'no-content-type';
   console.log(`Incoming request: ${req.method} from ${origin}, content-type: ${contentType}`);
+
+  // Log all relevant headers for debugging geo issues
+  const geoHeaders = {
+    'cf-ipcountry': req.headers.get('cf-ipcountry'),
+    'cf-ipcity': req.headers.get('cf-ipcity'),
+    'x-vercel-ip-country': req.headers.get('x-vercel-ip-country'),
+    'x-vercel-ip-city': req.headers.get('x-vercel-ip-city'),
+    'accept-language': req.headers.get('accept-language'),
+  };
+  console.log('Geo headers:', JSON.stringify(geoHeaders));
 
   // Handle CORS preflight with explicit 204 status
   if (req.method === 'OPTIONS') {
@@ -109,10 +158,10 @@ serve(async (req) => {
     });
   }
 
-  // Get client IP for rate limiting
+  // Get client IP for rate limiting - check multiple headers
   const clientIp = req.headers.get('cf-connecting-ip') || 
+                   req.headers.get('x-real-ip') ||
                    req.headers.get('x-forwarded-for')?.split(',')[0]?.trim() || 
-                   req.headers.get('x-real-ip') || 
                    'unknown';
 
   // Check rate limit
@@ -194,18 +243,21 @@ serve(async (req) => {
 
     // Get headers for geo and user agent
     const userAgent = req.headers.get('user-agent') || '';
-    const cfCountry = req.headers.get('cf-ipcountry') || req.headers.get('x-country') || null;
-    const cfCity = req.headers.get('cf-ipcity') || req.headers.get('x-city') || null;
     
-    // Get Accept-Language header and extract primary language
-    const acceptLanguage = req.headers.get('accept-language') || '';
-    const primaryLanguage = acceptLanguage.split(',')[0]?.split('-')[0]?.trim() || null;
+    // Extract geo data from multiple header sources
+    const { country: geoCountry, city: geoCity } = extractGeoData(req);
+    
+    // Extract language from Accept-Language header
+    const primaryLanguage = extractLanguage(req);
+
+    // Log extracted data for debugging
+    console.log(`Geo data: country=${geoCountry}, city=${geoCity}, language=${primaryLanguage}`);
 
     // Parse user agent
     const { browser, os, device_type } = parseUserAgent(userAgent);
 
     // Get request origin for validation
-    const origin = req.headers.get('origin');
+    const reqOrigin = req.headers.get('origin');
 
     // Generate visitor and session IDs (now async with crypto)
     const visitor_id = await generateVisitorId(clientIp, userAgent);
@@ -246,11 +298,11 @@ serve(async (req) => {
     // - sendBeacon requests (may not have origin header)
     // - When no origin header is present (server-side or sendBeacon)
     const isTestEvent = event_name === 'test_connection';
-    const shouldValidateOrigin = origin && site.domain && !skip_origin_check && !isTestEvent;
+    const shouldValidateOrigin = reqOrigin && site.domain && !skip_origin_check && !isTestEvent;
     
     if (shouldValidateOrigin) {
       try {
-        const originHost = new URL(origin).hostname.toLowerCase();
+        const originHost = new URL(reqOrigin).hostname.toLowerCase();
         // Clean up the domain - remove protocol and www prefix
         let siteDomain = site.domain.toLowerCase()
           .replace(/^(https?:\/\/)/i, '')
@@ -274,9 +326,9 @@ serve(async (req) => {
         }
       } catch (e) {
         // If URL parsing fails, log but allow (could be server-side request)
-        console.warn(`Could not parse origin: ${origin}`, e);
+        console.warn(`Could not parse origin: ${reqOrigin}`, e);
       }
-    } else if (!origin) {
+    } else if (!reqOrigin) {
       // sendBeacon requests may not include origin header - this is normal
       console.log(`No origin header present for ${event_name} event - likely sendBeacon`);
     }
@@ -294,8 +346,8 @@ serve(async (req) => {
         browser,
         os,
         device_type,
-        country: cfCountry,
-        city: cfCity,
+        country: geoCountry,
+        city: geoCity,
         language: primaryLanguage,
         properties,
       });
@@ -312,7 +364,7 @@ serve(async (req) => {
     // Note: Usage tracking is handled by the frontend useUsage hook
     // which counts events directly for simplicity and accuracy
 
-    console.log(`Event recorded: ${event_name} for site ${site_id}`);
+    console.log(`Event recorded: ${event_name} for site ${site_id}, geo: ${geoCountry}/${geoCity}, lang: ${primaryLanguage}`);
 
     // Return success with minimal response
     return new Response(JSON.stringify({ success: true }), {
