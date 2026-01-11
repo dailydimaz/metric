@@ -94,6 +94,30 @@ Deploy the `dist/` folder to any static hosting provider:
 - GitHub Pages
 - Your own server
 
+#### GeoIP Setup (Optional)
+
+For visitor geolocation (country/city detection), mmmetric uses a self-hosted IP database:
+
+1. **Quick Start** - The database includes sample data for testing. For production, import a full dataset.
+
+2. **Import GeoIP Data** - Download free data from [DB-IP Lite](https://db-ip.com/db/lite.php) (no registration) or [MaxMind GeoLite2](https://dev.maxmind.com/geoip/geolite2-free-geolocation-data/) (free account required):
+
+```sql
+-- Import locations from GeoLite2-City-Locations-en.csv
+\copy temp_locations FROM 'GeoLite2-City-Locations-en.csv' WITH CSV HEADER;
+INSERT INTO geoip_locations (geoname_id, country_code, country_name, city_name)
+SELECT geoname_id, country_iso_code, country_name, city_name FROM temp_locations;
+
+-- Import IP blocks from GeoLite2-City-Blocks-IPv4.csv  
+\copy temp_blocks FROM 'GeoLite2-City-Blocks-IPv4.csv' WITH CSV HEADER;
+INSERT INTO geoip_blocks (network, geoname_id)
+SELECT network::inet, geoname_id FROM temp_blocks WHERE geoname_id IS NOT NULL;
+```
+
+See [docs/geoip-import.md](docs/geoip-import.md) for detailed instructions.
+
+3. **How It Works** - The tracking function automatically looks up visitor IPs against your local database - no external API calls, no rate limits, complete privacy.
+
 ## 📊 Usage
 
 ### Adding the Tracking Script
