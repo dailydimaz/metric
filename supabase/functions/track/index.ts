@@ -232,24 +232,31 @@ serve(async (req) => {
     const headerLanguage = extractLanguage(req);
     const primaryLanguage = bodyLanguage || headerLanguage;
 
-    // If no geo data found (e.g. localhost or direct access), try fallback API
+    // If no geo data found (e.g. localhost or direct access), try database lookup
     // only if clientIp is available and not localhost/private
     if (!geoCountry && clientIp && clientIp !== 'unknown' && !clientIp.startsWith('127.') && !clientIp.startsWith('192.168.') && !clientIp.startsWith('10.')) {
       try {
-        console.log(`No geo headers found for IP ${clientIp}, attempting fallback lookup...`);
-        // Use ip-api.com (free for non-commercial use, 45 requests/minute limit)
-        // In a real production app with heavy load, you should use a paid service or maxmind db
-        const geoResponse = await fetch(`http://ip-api.com/json/${clientIp}?fields=status,countryCode,city`);
-        if (geoResponse.ok) {
-          const geoData = await geoResponse.json();
-          if (geoData.status === 'success') {
-            geoCountry = geoData.countryCode || null;
-            geoCity = geoData.city || null;
-            console.log('Fallback geo lookup successful:', { geoCountry, geoCity });
-          }
+        console.log(`No geo headers found for IP ${clientIp}, attempting database lookup...`);
+        // Create Supabase client for geo lookup (using service role for RLS bypass)
+        const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
+        const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
+        const geoSupabase = createClient(supabaseUrl, supabaseServiceKey);
+        
+        const { data: geoData, error: geoError } = await geoSupabase.rpc('lookup_geoip', { 
+          ip_address: clientIp 
+        });
+        
+        if (geoError) {
+          console.warn('GeoIP lookup RPC error:', geoError.message);
+        } else if (geoData && geoData.length > 0) {
+          geoCountry = geoData[0].country || null;
+          geoCity = geoData[0].city || null;
+          console.log('Database geo lookup successful:', { geoCountry, geoCity });
+        } else {
+          console.log('No geo data found in database for IP:', clientIp);
         }
       } catch (e) {
-        console.warn('Fallback geo lookup failed:', e);
+        console.warn('Database geo lookup failed:', e);
       }
     }
 
