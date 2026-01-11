@@ -221,6 +221,50 @@ export type Database = {
           },
         ]
       }
+      geoip_blocks: {
+        Row: {
+          geoname_id: number | null
+          network: unknown
+        }
+        Insert: {
+          geoname_id?: number | null
+          network: unknown
+        }
+        Update: {
+          geoname_id?: number | null
+          network?: unknown
+        }
+        Relationships: [
+          {
+            foreignKeyName: "geoip_blocks_geoname_id_fkey"
+            columns: ["geoname_id"]
+            isOneToOne: false
+            referencedRelation: "geoip_locations"
+            referencedColumns: ["geoname_id"]
+          },
+        ]
+      }
+      geoip_locations: {
+        Row: {
+          city_name: string | null
+          country_code: string
+          country_name: string | null
+          geoname_id: number
+        }
+        Insert: {
+          city_name?: string | null
+          country_code: string
+          country_name?: string | null
+          geoname_id: number
+        }
+        Update: {
+          city_name?: string | null
+          country_code?: string
+          country_name?: string | null
+          geoname_id?: number
+        }
+        Relationships: []
+      }
       goals: {
         Row: {
           created_at: string
@@ -993,6 +1037,13 @@ export type Database = {
       is_team_member_of_same_site: {
         Args: { _profile_user_id: string }
         Returns: boolean
+      }
+      lookup_geoip: {
+        Args: { ip_address: string }
+        Returns: {
+          city: string
+          country: string
+        }[]
       }
     }
     Enums: {
