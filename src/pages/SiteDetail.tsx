@@ -40,6 +40,7 @@ import {
   RetentionCard,
   FilterBar,
   TwitterStats,
+  LinksStats,
 } from "@/components/analytics";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
@@ -547,6 +548,9 @@ export default function SiteDetail() {
                 isLoading={languagesLoading}
               />
             </div>
+
+            {/* Outbound Links */}
+            <LinksStats siteId={site.id} dateRange={dateRange} />
           </TabsContent>
 
           <TabsContent value="twitter">

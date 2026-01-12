@@ -21,3 +21,4 @@ export { RetentionChart } from "./RetentionChart";
 export { RetentionCard } from "./RetentionCard";
 export { FilterBar } from "./FilterBar";
 export { TwitterStats } from "./TwitterStats";
+export { LinksStats } from "./LinksStats";

@@ -197,7 +197,7 @@ export function CustomEvents({ siteId, dateRange }: CustomEventsProps) {
               className={`tab ${!showEvents ? 'tab-active' : ''}`}
               onClick={() => setShowEvents(false)}
             >
-              Insigths
+              Insights
             </button>
             <button
               className={`tab ${showEvents ? 'tab-active' : ''}`}

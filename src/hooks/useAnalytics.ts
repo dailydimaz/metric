@@ -153,12 +153,13 @@ export function useAnalyticsStats({ siteId, dateRange, filters }: AnalyticsParam
         bounce_rate: 0,
         pageviews_change: 0,
         visitors_change: 0,
+        avg_session_duration: 0,
       };
 
       return {
         totalPageviews: Number(result.total_pageviews) || 0,
         uniqueVisitors: Number(result.unique_visitors) || 0,
-        avgSessionDuration: 0,
+        avgSessionDuration: Number(result.avg_session_duration) || 0,
         bounceRate: Number(result.bounce_rate) || 0,
         pageviewsChange: Number(result.pageviews_change) || 0,
         visitorsChange: Number(result.visitors_change) || 0,
