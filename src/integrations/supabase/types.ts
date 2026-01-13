@@ -306,6 +306,59 @@ export type Database = {
           },
         ]
       }
+      insights: {
+        Row: {
+          created_at: string
+          date_range: Json
+          description: string | null
+          filters: Json
+          id: string
+          is_public: boolean
+          name: string
+          share_token: string | null
+          site_id: string
+          updated_at: string
+          user_id: string
+          widgets: Json
+        }
+        Insert: {
+          created_at?: string
+          date_range?: Json
+          description?: string | null
+          filters?: Json
+          id?: string
+          is_public?: boolean
+          name: string
+          share_token?: string | null
+          site_id: string
+          updated_at?: string
+          user_id: string
+          widgets?: Json
+        }
+        Update: {
+          created_at?: string
+          date_range?: Json
+          description?: string | null
+          filters?: Json
+          id?: string
+          is_public?: boolean
+          name?: string
+          share_token?: string | null
+          site_id?: string
+          updated_at?: string
+          user_id?: string
+          widgets?: Json
+        }
+        Relationships: [
+          {
+            foreignKeyName: "insights_site_id_fkey"
+            columns: ["site_id"]
+            isOneToOne: false
+            referencedRelation: "sites"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       login_history: {
         Row: {
           browser: string | null
@@ -874,6 +927,18 @@ export type Database = {
           day: number
           rate: number
           retained: number
+        }[]
+      }
+      get_shared_insight: {
+        Args: { _share_token: string }
+        Returns: {
+          date_range: Json
+          description: string
+          filters: Json
+          id: string
+          name: string
+          site_id: string
+          widgets: Json
         }[]
       }
       get_site_stats:
