@@ -7,7 +7,9 @@ import { DashboardLayout } from "@/components/dashboard/DashboardLayout";
 import { SiteCard } from "@/components/dashboard/SiteCard";
 import { CreateSiteDialog } from "@/components/dashboard/CreateSiteDialog";
 import { UsageAlert } from "@/components/billing";
-import { Plus, BarChart3, Lock, Loader2 } from "lucide-react";
+import { Plus, BarChart3, Lock, Loader2, Lightbulb, ArrowRight } from "lucide-react";
+import { Link } from "react-router-dom";
+import { useInsights } from "@/hooks/useInsights";
 import { isOverLimit } from "@/lib/billing";
 import { Button } from "@/components/ui/button";
 
@@ -39,6 +41,11 @@ export default function Dashboard() {
   const sitesCount = sites.length;
   const sitesLimit = plan.sitesLimit;
   const canCreateSite = isSelfHosted || sitesLimit < 0 || !isOverLimit(sitesCount, sitesLimit);
+
+  // Get first site for insights quick-link
+  const firstSite = sites[0];
+  const { insights, isLoading: insightsLoading } = useInsights(firstSite?.id || null);
+  const hasInsights = insights && insights.length > 0;
 
   return (
     <DashboardLayout>
@@ -99,6 +106,33 @@ export default function Dashboard() {
               <Plus className="mr-2 h-4 w-4" />
               Create your first site
             </Button>
+          </div>
+        )}
+
+        {/* Insights Quick Link Card */}
+        {firstSite && (
+          <div className="mt-8 rounded-xl border border-border bg-card p-6">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-4">
+                <div className="flex h-12 w-12 items-center justify-center rounded-full bg-primary/10 text-primary">
+                  <Lightbulb className="h-6 w-6" />
+                </div>
+                <div>
+                  <h3 className="font-semibold text-lg">Insights</h3>
+                  <p className="text-sm text-muted-foreground">
+                    {hasInsights
+                      ? `You have ${insights.length} saved report${insights.length === 1 ? "" : "s"}`
+                      : "Create custom reports with saved filters and date ranges"}
+                  </p>
+                </div>
+              </div>
+              <Link to={`/dashboard/sites/${firstSite.id}/insights`}>
+                <Button variant={hasInsights ? "outline" : "default"} className="gap-2">
+                  {hasInsights ? "View Insights" : "Create First Report"}
+                  <ArrowRight className="h-4 w-4" />
+                </Button>
+              </Link>
+            </div>
           </div>
         )}
       </div>
