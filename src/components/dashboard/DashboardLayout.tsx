@@ -3,6 +3,7 @@ import { Link, useNavigate, useLocation, useParams } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { useSites } from "@/hooks/useSites";
 import { CreateSiteDialog } from "@/components/dashboard/CreateSiteDialog";
+import { isBillingEnabled } from "@/lib/billing";
 import mmmetricLogo from "@/assets/mmmetric-logo.png";
 import {
   Menu,
@@ -16,17 +17,29 @@ import {
   Users,
   Link2,
   Lightbulb,
+  LinkIcon,
 } from "lucide-react";
 
-// Nav items
-const getNavItems = (siteId: string | null) => [
-  { icon: LayoutDashboard, label: "Overview", href: "/dashboard" },
-  { icon: MousePointerClick, label: "Analytics", href: siteId ? `/dashboard/sites/${siteId}` : "/dashboard", siteSpecific: true },
-  { icon: GitBranch, label: "Funnels", href: siteId ? `/dashboard/sites/${siteId}/funnels` : "/dashboard", siteSpecific: true },
-  { icon: Users, label: "Retention", href: siteId ? `/dashboard/sites/${siteId}/retention` : "/dashboard", siteSpecific: true },
-  { icon: Lightbulb, label: "Insights", href: siteId ? `/dashboard/sites/${siteId}/insights` : "/dashboard", siteSpecific: true },
-  { icon: Link2, label: "URL Builder", href: "/tools/campaign-builder" },
-];
+// Nav items - conditionally include cloud-only items
+const getNavItems = (siteId: string | null, billingEnabled: boolean) => {
+  const items = [
+    { icon: LayoutDashboard, label: "Overview", href: "/dashboard" },
+    { icon: MousePointerClick, label: "Analytics", href: siteId ? `/dashboard/sites/${siteId}` : "/dashboard", siteSpecific: true },
+    { icon: GitBranch, label: "Funnels", href: siteId ? `/dashboard/sites/${siteId}/funnels` : "/dashboard", siteSpecific: true },
+    { icon: Users, label: "Retention", href: siteId ? `/dashboard/sites/${siteId}/retention` : "/dashboard", siteSpecific: true },
+    { icon: Lightbulb, label: "Insights", href: siteId ? `/dashboard/sites/${siteId}/insights` : "/dashboard", siteSpecific: true },
+  ];
+
+  // Add cloud-only items
+  if (billingEnabled) {
+    items.push({ icon: LinkIcon, label: "Links", href: siteId ? `/dashboard/sites/${siteId}/links` : "/dashboard", siteSpecific: true });
+  }
+
+  // URL Builder is always available
+  items.push({ icon: Link2, label: "URL Builder", href: "/tools/campaign-builder" });
+
+  return items;
+};
 
 interface DashboardLayoutProps {
   children: React.ReactNode;
@@ -63,7 +76,8 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
   }, [sites, selectedSiteId, urlSiteId]);
 
   const selectedSite = sites.find((s) => s.id === selectedSiteId) ?? sites[0];
-  const navItems = getNavItems(selectedSiteId);
+  const billingEnabled = isBillingEnabled();
+  const navItems = getNavItems(selectedSiteId, billingEnabled);
 
   const handleSignOut = async () => {
     localStorage.removeItem("selectedSiteId");

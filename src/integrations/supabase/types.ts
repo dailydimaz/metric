@@ -359,6 +359,44 @@ export type Database = {
           },
         ]
       }
+      links: {
+        Row: {
+          created_at: string
+          description: string | null
+          id: string
+          original_url: string
+          site_id: string
+          slug: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          original_url: string
+          site_id: string
+          slug: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          original_url?: string
+          site_id?: string
+          slug?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "links_site_id_fkey"
+            columns: ["site_id"]
+            isOneToOne: false
+            referencedRelation: "sites"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       login_history: {
         Row: {
           browser: string | null
