@@ -50,37 +50,49 @@ function formatNumber(num: number): string {
   return num.toString();
 }
 
-export function StatsCards({ stats, isLoading }: StatsCardsProps) {
+export function StatsCards({ stats, isLoading, visibleMetrics }: StatsCardsProps & { visibleMetrics?: string[] }) {
+  const show = (key: string) => !visibleMetrics || visibleMetrics.includes(key);
+
+  if (visibleMetrics && visibleMetrics.length === 0) return null;
+
   return (
     <div className="grid gap-4 grid-cols-1 md:grid-cols-2 lg:grid-cols-4">
-      <StatCard
-        title="Total Views"
-        value={formatNumber(stats?.totalPageviews || 0)}
-        change={stats?.pageviewsChange}
-        icon={<Eye className="h-6 w-6" />}
-        isLoading={isLoading}
-      />
-      <StatCard
-        title="Unique Visitors"
-        value={formatNumber(stats?.uniqueVisitors || 0)}
-        change={stats?.visitorsChange}
-        icon={<Users className="h-6 w-6" />}
-        isLoading={isLoading}
-      />
-      <StatCard
-        title="Bounce Rate"
-        value={`${(stats?.bounceRate || 0).toFixed(1)}%`}
-        desc="Single page sessions"
-        icon={<MousePointerClick className="h-6 w-6" />}
-        isLoading={isLoading}
-      />
-      <StatCard
-        title="Avg. Session"
-        value={stats?.avgSessionDuration ? `${Math.round(stats.avgSessionDuration)}s` : "—"}
-        desc="Time spent on site"
-        icon={<Clock className="h-6 w-6" />}
-        isLoading={isLoading}
-      />
+      {show('pageviews') && (
+        <StatCard
+          title="Total Views"
+          value={formatNumber(stats?.totalPageviews || 0)}
+          change={stats?.pageviewsChange}
+          icon={<Eye className="h-6 w-6" />}
+          isLoading={isLoading}
+        />
+      )}
+      {show('visitors') && (
+        <StatCard
+          title="Unique Visitors"
+          value={formatNumber(stats?.uniqueVisitors || 0)}
+          change={stats?.visitorsChange}
+          icon={<Users className="h-6 w-6" />}
+          isLoading={isLoading}
+        />
+      )}
+      {show('bounce_rate') && (
+        <StatCard
+          title="Bounce Rate"
+          value={`${(stats?.bounceRate || 0).toFixed(1)}%`}
+          desc="Single page sessions"
+          icon={<MousePointerClick className="h-6 w-6" />}
+          isLoading={isLoading}
+        />
+      )}
+      {show('avg_duration') && (
+        <StatCard
+          title="Avg. Session"
+          value={stats?.avgSessionDuration ? `${Math.round(stats.avgSessionDuration)}s` : "—"}
+          desc="Time spent on site"
+          icon={<Clock className="h-6 w-6" />}
+          isLoading={isLoading}
+        />
+      )}
     </div>
   );
 }

@@ -20,7 +20,7 @@ export default function Insights() {
   const handleView = (insight: Insight) => {
     // Navigate to the insight view with applied filters and date range
     const params = new URLSearchParams();
-    
+
     // Add date range
     if (insight.date_range.preset) {
       params.set("range", insight.date_range.preset);
@@ -28,14 +28,19 @@ export default function Insights() {
       params.set("from", insight.date_range.startDate);
       params.set("to", insight.date_range.endDate);
     }
-    
+
     // Add filters
     if (insight.filters.country) params.set("country", insight.filters.country);
     if (insight.filters.browser) params.set("browser", insight.filters.browser);
     if (insight.filters.os) params.set("os", insight.filters.os);
     if (insight.filters.device) params.set("device", insight.filters.device);
-    
-    navigate(`/sites/${siteId}?${params.toString()}`);
+
+    // Add widgets
+    if (insight.widgets && insight.widgets.length > 0) {
+      params.set("widgets", insight.widgets.join(","));
+    }
+
+    navigate(`/dashboard/sites/${siteId}?${params.toString()}`);
   };
 
   const handleEdit = (insight: Insight) => {

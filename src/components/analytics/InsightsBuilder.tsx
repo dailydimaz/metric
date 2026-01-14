@@ -247,16 +247,16 @@ export function InsightsBuilder({ siteId, insight, onBack, onSave }: InsightsBui
                 <div className="space-y-2">
                   <Label>Device Type</Label>
                   <Select
-                    value={filters.device || ""}
+                    value={filters.device || "all"}
                     onValueChange={(value) =>
-                      setFilters({ ...filters, device: value || undefined })
+                      setFilters({ ...filters, device: value === "all" ? undefined : value })
                     }
                   >
                     <SelectTrigger>
                       <SelectValue placeholder="Any device" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="">Any device</SelectItem>
+                      <SelectItem value="all">Any device</SelectItem>
                       <SelectItem value="desktop">Desktop</SelectItem>
                       <SelectItem value="mobile">Mobile</SelectItem>
                       <SelectItem value="tablet">Tablet</SelectItem>
@@ -300,11 +300,10 @@ export function InsightsBuilder({ siteId, insight, onBack, onSave }: InsightsBui
                 {WIDGET_OPTIONS.map((widget) => (
                   <label
                     key={widget.id}
-                    className={`flex items-start gap-3 p-4 rounded-lg border cursor-pointer transition-colors ${
-                      widgets.includes(widget.id)
+                    className={`flex items-start gap-3 p-4 rounded-lg border cursor-pointer transition-colors ${widgets.includes(widget.id)
                         ? "bg-primary/5 border-primary"
                         : "hover:bg-accent"
-                    }`}
+                      }`}
                   >
                     <Checkbox
                       checked={widgets.includes(widget.id)}

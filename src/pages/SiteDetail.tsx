@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate, useSearchParams } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { useSites } from "@/hooks/useSites";
 import { DashboardLayout } from "@/components/dashboard/DashboardLayout";
@@ -61,20 +61,65 @@ import {
 
 export default function SiteDetail() {
   const { siteId } = useParams<{ siteId: string }>();
+  const [searchParams] = useSearchParams();
   const { user, loading: authLoading } = useAuth();
   const { sites, isLoading: sitesLoading, deleteSite, updateSite } = useSites();
   const navigate = useNavigate();
   const { toast } = useToast();
+
+  // State initialization from URL params
+  const [dateRange, setDateRange] = useState<DateRange>(() => {
+    const rangeParam = searchParams.get("range");
+    if (rangeParam && ["today", "7d", "30d", "90d"].includes(rangeParam)) {
+      return rangeParam as DateRange;
+    }
+    // TODO: Handle custom range (from/to) if DateRange type supports it, 
+    // currently DateRange is string union type "today" | "7d"... 
+    // If DateRange supports object {from, to}, we'd parse that here.
+    // For now assuming string union based on existing code.
+    return "7d";
+  });
+
+  const [filters, setFilters] = useState<AnalyticsFilter>(() => {
+    const newFilters: AnalyticsFilter = {};
+    const country = searchParams.get("country");
+    const browser = searchParams.get("browser");
+    const os = searchParams.get("os");
+    const device = searchParams.get("device");
+    const url = searchParams.get("url");
+    // referrerPattern key might need mapping if URL param is just "referrer"
+    // The previous Insights.tsx didn't seem to set 'referrerPattern', let's check what it sets.
+    // It sets: params.set("referrer", insight.filters.referrerPattern) probably? 
+    // Actually Insights.tsx didn't set referrer in previous view. 
+    // Wait, let's verify Insights.tsx `handleView` implementation from previous turns... 
+    // It didn't explicitly set referrer. It set country, browser, os, device.
+    // Let's support what we can.
+
+    if (country) newFilters.country = country;
+    if (browser) newFilters.browser = browser;
+    if (os) newFilters.os = os;
+    if (device) newFilters.device = device;
+    if (url) newFilters.url = url;
+
+    return newFilters;
+  });
+
+  // Widget visibility helper
+  const widgetsParam = searchParams.get("widgets");
+  const visibleWidgets = widgetsParam ? new Set(widgetsParam.split(",")) : null;
+
+  const shouldShow = (widgetKey: string) => {
+    if (!visibleWidgets) return true;
+    return visibleWidgets.has(widgetKey);
+  };
+
   const [copied, setCopied] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [editName, setEditName] = useState("");
   const [editDomain, setEditDomain] = useState("");
   const [showSettings, setShowSettings] = useState(false);
-  const [dateRange, setDateRange] = useState<DateRange>("7d");
   const [showGoalSetup, setShowGoalSetup] = useState(false);
   const [testStatus, setTestStatus] = useState<'idle' | 'testing' | 'success' | 'error'>('idle');
-
-  const [filters, setFilters] = useState<AnalyticsFilter>({});
 
   const site = sites.find((s) => s.id === siteId);
 
@@ -494,63 +539,81 @@ export default function SiteDetail() {
 
           <TabsContent value="overview" className="space-y-6">
             {/* Real-time Section */}
-            <div className="grid gap-6 lg:grid-cols-2">
-              <RealtimeStats siteId={site.id} />
-              <RealtimeActivityFeed siteId={site.id} />
-            </div>
+            {!widgetsParam && (
+              <div className="grid gap-6 lg:grid-cols-2">
+                <RealtimeStats siteId={site.id} />
+                <RealtimeActivityFeed siteId={site.id} />
+              </div>
+            )}
 
             {/* Stats Overview */}
-            <StatsCards stats={stats} isLoading={statsLoading} />
+            {(shouldShow('visitors') || shouldShow('pageviews') || shouldShow('bounce_rate') || shouldShow('avg_duration')) && (
+              <StatsCards
+                stats={stats}
+                isLoading={statsLoading}
+                visibleMetrics={widgetsParam ? widgetsParam.split(',') : undefined}
+              />
+            )}
 
             {/* Visitor Chart */}
-            <VisitorChart data={timeSeries} isLoading={timeSeriesLoading} />
+            {shouldShow('visitor_chart') && (
+              <VisitorChart data={timeSeries} isLoading={timeSeriesLoading} />
+            )}
 
             {/* Two Column Layout */}
             <div className="grid gap-6 lg:grid-cols-2">
-              <TopPages pages={topPages} isLoading={pagesLoading} />
-              <TopReferrers referrers={topReferrers} isLoading={referrersLoading} />
+              {shouldShow('top_pages') && <TopPages pages={topPages} isLoading={pagesLoading} />}
+              {shouldShow('top_referrers') && <TopReferrers referrers={topReferrers} isLoading={referrersLoading} />}
             </div>
 
             {/* Funnels */}
-            <FunnelList siteId={site.id} />
+            {!widgetsParam && <FunnelList siteId={site.id} />}
 
             {/* Goals, Retention & Custom Events */}
-            <div className="grid gap-6 lg:grid-cols-3">
-              <GoalsCard
-                siteId={site.id}
-                dateRange={dateRange}
-                onCreateGoal={() => setShowGoalSetup(true)}
-              />
-              <RetentionCard siteId={site.id} dateRange={dateRange} />
-              <CustomEvents siteId={site.id} dateRange={dateRange} />
-            </div>
+            {!widgetsParam && (
+              <div className="grid gap-6 lg:grid-cols-3">
+                <GoalsCard
+                  siteId={site.id}
+                  dateRange={dateRange}
+                  onCreateGoal={() => setShowGoalSetup(true)}
+                />
+                <RetentionCard siteId={site.id} dateRange={dateRange} />
+                <CustomEvents siteId={site.id} dateRange={dateRange} />
+              </div>
+            )}
 
             {/* Device Stats */}
-            <DeviceStats
-              browsers={deviceStats?.browsers}
-              operatingSystems={deviceStats?.operatingSystems}
-              devices={deviceStats?.devices}
-              isLoading={devicesLoading}
-            />
+            {shouldShow('device_stats') && (
+              <DeviceStats
+                browsers={deviceStats?.browsers}
+                operatingSystems={deviceStats?.operatingSystems}
+                devices={deviceStats?.devices}
+                isLoading={devicesLoading}
+              />
+            )}
 
             {/* UTM Campaign Stats */}
-            <UTMStats utmStats={utmStats} isLoading={utmLoading} />
+            {!widgetsParam && <UTMStats utmStats={utmStats} isLoading={utmLoading} />}
 
             {/* Geo & Language Stats */}
             <div className="grid gap-6 lg:grid-cols-2">
-              <GeoStats
-                countries={geoStats}
-                cities={cityStats}
-                isLoading={geoLoading || citiesLoading}
-              />
-              <LanguageStats
-                languages={languageStats}
-                isLoading={languagesLoading}
-              />
+              {shouldShow('geo_stats') && (
+                <GeoStats
+                  countries={geoStats}
+                  cities={cityStats}
+                  isLoading={geoLoading || citiesLoading}
+                />
+              )}
+              {!widgetsParam && (
+                <LanguageStats
+                  languages={languageStats}
+                  isLoading={languagesLoading}
+                />
+              )}
             </div>
 
             {/* Outbound Links */}
-            <LinksStats siteId={site.id} dateRange={dateRange} />
+            {!widgetsParam && <LinksStats siteId={site.id} dateRange={dateRange} />}
           </TabsContent>
 
           <TabsContent value="twitter">
