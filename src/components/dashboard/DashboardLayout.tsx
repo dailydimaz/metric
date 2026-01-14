@@ -15,6 +15,7 @@ import {
   GitBranch,
   Users,
   Link2,
+  Lightbulb,
 } from "lucide-react";
 
 // Nav items
@@ -23,6 +24,7 @@ const getNavItems = (siteId: string | null) => [
   { icon: MousePointerClick, label: "Analytics", href: siteId ? `/dashboard/sites/${siteId}` : "/dashboard", siteSpecific: true },
   { icon: GitBranch, label: "Funnels", href: siteId ? `/dashboard/sites/${siteId}/funnels` : "/dashboard", siteSpecific: true },
   { icon: Users, label: "Retention", href: siteId ? `/dashboard/sites/${siteId}/retention` : "/dashboard", siteSpecific: true },
+  { icon: Lightbulb, label: "Insights", href: siteId ? `/dashboard/sites/${siteId}/insights` : "/dashboard", siteSpecific: true },
   { icon: Link2, label: "URL Builder", href: "/tools/campaign-builder" },
 ];
 
