@@ -1,11 +1,12 @@
 import { useState } from "react";
-import { MapPin, Building2, Map as MapIcon } from "lucide-react";
+import { MapPin, Building2, Map as MapIcon, Layers } from "lucide-react";
 import { GeoStat, CityStat } from "@/hooks/useAnalytics";
 
 interface GeoStatsProps {
   countries: GeoStat[] | undefined;
   cities: CityStat[] | undefined;
   isLoading: boolean;
+  onBreakdown?: (country: string) => void;
 }
 
 // Country code to flag emoji
@@ -16,7 +17,7 @@ function getCountryFlag(countryCode: string): string {
   return String.fromCodePoint(...[...code].map(c => c.charCodeAt(0) + offset));
 }
 
-// Country code to name (basic mapping) - keeping the same map for brevity but ideally this should be a utility
+// Country code to name (basic mapping)
 const countryNames: Record<string, string> = {
   US: "United States", GB: "United Kingdom", DE: "Germany", FR: "France", CA: "Canada",
   AU: "Australia", JP: "Japan", CN: "China", IN: "India", BR: "Brazil",
@@ -30,7 +31,7 @@ function getCountryName(code: string): string {
   return countryNames[code.toUpperCase()] || code;
 }
 
-export function GeoStats({ countries, cities, isLoading }: GeoStatsProps) {
+export function GeoStats({ countries, cities, isLoading, onBreakdown }: GeoStatsProps) {
   const [activeTab, setActiveTab] = useState<"countries" | "cities">("countries");
 
   return (
@@ -44,19 +45,26 @@ export function GeoStats({ countries, cities, isLoading }: GeoStatsProps) {
             <h3 className="font-semibold text-base">Locations</h3>
           </div>
 
-          <div className="join">
-            <button
-              className={`join-item btn btn-sm ${activeTab === "countries" ? "btn-active btn-neutral" : "btn-ghost"}`}
-              onClick={() => setActiveTab("countries")}
-            >
-              Countries
-            </button>
-            <button
-              className={`join-item btn btn-sm ${activeTab === "cities" ? "btn-active btn-neutral" : "btn-ghost"}`}
-              onClick={() => setActiveTab("cities")}
-            >
-              Cities
-            </button>
+          <div className="flex items-center gap-2">
+            {onBreakdown && activeTab === "countries" && (
+              <span className="text-xs text-muted-foreground flex items-center gap-1">
+                <Layers className="h-3 w-3" />
+              </span>
+            )}
+            <div className="join">
+              <button
+                className={`join-item btn btn-sm ${activeTab === "countries" ? "btn-active btn-neutral" : "btn-ghost"}`}
+                onClick={() => setActiveTab("countries")}
+              >
+                Countries
+              </button>
+              <button
+                className={`join-item btn btn-sm ${activeTab === "cities" ? "btn-active btn-neutral" : "btn-ghost"}`}
+                onClick={() => setActiveTab("cities")}
+              >
+                Cities
+              </button>
+            </div>
           </div>
         </div>
 
@@ -79,7 +87,11 @@ export function GeoStats({ countries, cities, isLoading }: GeoStatsProps) {
                 <table className="table">
                   <tbody>
                     {countries.slice(0, 8).map((country, index) => (
-                      <tr key={index} className="hover:bg-base-50 group border-b border-base-100 last:border-0">
+                      <tr 
+                        key={index} 
+                        className={`hover:bg-base-50 group border-b border-base-100 last:border-0 ${onBreakdown ? 'cursor-pointer' : ''}`}
+                        onClick={() => onBreakdown?.(country.country)}
+                      >
                         <td className="w-full flex items-center gap-3">
                           <span className="text-xl">{getCountryFlag(country.country)}</span>
                           <div className="relative flex-1 h-1.5 bg-base-200 rounded-full overflow-hidden max-w-[100px] md:max-w-[150px]">
@@ -88,7 +100,7 @@ export function GeoStats({ countries, cities, isLoading }: GeoStatsProps) {
                               style={{ width: `${country.percentage}%` }}
                             />
                           </div>
-                          <span className="font-medium text-sm truncate w-24 md:w-auto">{getCountryName(country.country)}</span>
+                          <span className="font-medium text-sm truncate w-24 md:w-auto group-hover:text-info transition-colors">{getCountryName(country.country)}</span>
                         </td>
                         <td className="text-right font-medium">{country.visits}</td>
                         <td className="text-right font-mono text-xs text-base-content/60 w-16">{country.percentage.toFixed(0)}%</td>
@@ -144,4 +156,3 @@ export function GeoStats({ countries, cities, isLoading }: GeoStatsProps) {
     </div>
   );
 }
-

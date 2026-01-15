@@ -1,23 +1,30 @@
-import { Monitor, Smartphone, Tablet, Globe, Chrome, LayoutGrid } from "lucide-react";
+import { Monitor, Smartphone, Tablet, Globe, Chrome, LayoutGrid, Layers } from "lucide-react";
 import { DeviceStat } from "@/hooks/useAnalytics";
+
+type BreakdownType = "browser" | "os" | "device";
 
 interface DeviceStatsProps {
   browsers: DeviceStat[] | undefined;
   operatingSystems: DeviceStat[] | undefined;
   devices: DeviceStat[] | undefined;
   isLoading: boolean;
+  onBreakdown?: (type: BreakdownType, value: string) => void;
 }
 
 function StatList({
   title,
   items,
   icon,
-  isLoading
+  isLoading,
+  type,
+  onBreakdown,
 }: {
   title: string;
   items: DeviceStat[] | undefined;
   icon: React.ReactNode;
   isLoading: boolean;
+  type: BreakdownType;
+  onBreakdown?: (type: BreakdownType, value: string) => void;
 }) {
   return (
     <div className="flex flex-col h-full">
@@ -26,6 +33,9 @@ function StatList({
           {icon}
         </div>
         <h4 className="text-sm font-semibold">{title}</h4>
+        {onBreakdown && (
+          <Layers className="h-3 w-3 text-muted-foreground ml-auto" />
+        )}
       </div>
 
       {isLoading ? (
@@ -40,7 +50,11 @@ function StatList({
       ) : items && items.length > 0 ? (
         <div className="space-y-3">
           {items.slice(0, 5).map((item, index) => (
-            <div key={index} className="group">
+            <div 
+              key={index} 
+              className={`group ${onBreakdown ? 'cursor-pointer' : ''}`}
+              onClick={() => onBreakdown?.(type, item.name)}
+            >
               <div className="flex justify-between items-center text-sm mb-1">
                 <span className="font-medium text-base-content/80 group-hover:text-primary transition-colors">{item.name}</span>
                 <span className="text-xs text-base-content/60 font-mono">{item.percentage.toFixed(1)}%</span>
@@ -60,7 +74,7 @@ function StatList({
   );
 }
 
-export function DeviceStats({ browsers, operatingSystems, devices, isLoading }: DeviceStatsProps) {
+export function DeviceStats({ browsers, operatingSystems, devices, isLoading, onBreakdown }: DeviceStatsProps) {
   return (
     <div className="card bg-base-100 shadow-sm border border-base-200">
       <div className="card-body p-0">
@@ -69,6 +83,12 @@ export function DeviceStats({ browsers, operatingSystems, devices, isLoading }: 
             <LayoutGrid className="h-4 w-4" />
           </div>
           <h3 className="font-semibold text-base">Tech Specs</h3>
+          {onBreakdown && (
+            <span className="text-xs text-muted-foreground flex items-center gap-1 ml-auto">
+              <Layers className="h-3 w-3" />
+              Click to drill down
+            </span>
+          )}
         </div>
 
         <div className="grid gap-8 md:grid-cols-3 p-6">
@@ -77,22 +97,27 @@ export function DeviceStats({ browsers, operatingSystems, devices, isLoading }: 
             items={devices}
             icon={<Monitor className="h-4 w-4" />}
             isLoading={isLoading}
+            type="device"
+            onBreakdown={onBreakdown}
           />
           <StatList
             title="Browser"
             items={browsers}
             icon={<Chrome className="h-4 w-4" />}
             isLoading={isLoading}
+            type="browser"
+            onBreakdown={onBreakdown}
           />
           <StatList
             title="Operating System"
             items={operatingSystems}
             icon={<Globe className="h-4 w-4" />}
             isLoading={isLoading}
+            type="os"
+            onBreakdown={onBreakdown}
           />
         </div>
       </div>
     </div>
   );
 }
-

@@ -1,12 +1,13 @@
-import { Link2, ArrowRight } from "lucide-react";
+import { Link2, ArrowRight, Layers } from "lucide-react";
 import { TopReferrer } from "@/hooks/useAnalytics";
 
 interface TopReferrersProps {
   referrers: TopReferrer[] | undefined;
   isLoading: boolean;
+  onBreakdown?: (referrer: string) => void;
 }
 
-export function TopReferrers({ referrers, isLoading }: TopReferrersProps) {
+export function TopReferrers({ referrers, isLoading, onBreakdown }: TopReferrersProps) {
   // Calculate max visits for progress bars
   const maxVisits = referrers && referrers.length > 0 ? Math.max(...referrers.map(r => r.visits)) : 0;
 
@@ -20,6 +21,12 @@ export function TopReferrers({ referrers, isLoading }: TopReferrersProps) {
             </div>
             <h3 className="font-semibold text-base">Top Referrers</h3>
           </div>
+          {onBreakdown && (
+            <span className="text-xs text-muted-foreground flex items-center gap-1">
+              <Layers className="h-3 w-3" />
+              Click to drill down
+            </span>
+          )}
         </div>
 
         {isLoading ? (
@@ -45,7 +52,11 @@ export function TopReferrers({ referrers, isLoading }: TopReferrersProps) {
                 {referrers.map((ref, index) => {
                   const percentage = maxVisits > 0 ? (ref.visits / maxVisits) * 100 : 0;
                   return (
-                    <tr key={index} className="hover:bg-base-50 group transition-colors">
+                    <tr 
+                      key={index} 
+                      className={`hover:bg-base-50 group transition-colors ${onBreakdown ? 'cursor-pointer' : ''}`}
+                      onClick={() => onBreakdown?.(ref.referrer)}
+                    >
                       <td className="pl-4 relative">
                         {/* Background progress bar */}
                         <div
@@ -63,6 +74,7 @@ export function TopReferrers({ referrers, isLoading }: TopReferrersProps) {
                               target="_blank"
                               rel="noopener noreferrer"
                               className="opacity-0 group-hover:opacity-100 text-base-content/40 hover:text-secondary transition-all"
+                              onClick={(e) => e.stopPropagation()}
                             >
                               <ArrowRight className="h-3 w-3" />
                             </a>
@@ -87,4 +99,3 @@ export function TopReferrers({ referrers, isLoading }: TopReferrersProps) {
     </div>
   );
 }
-

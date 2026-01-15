@@ -19,7 +19,7 @@ interface AnalyticsParams {
   filters?: AnalyticsFilter;
 }
 
-function getDateRangeFilter(dateRange: DateRange): { start: Date; end: Date; prevStart: Date; prevEnd: Date } {
+export function getDateRangeFilter(dateRange: DateRange): { start: Date; end: Date; prevStart: Date; prevEnd: Date } {
   const end = endOfDay(new Date());
   let start: Date;
 

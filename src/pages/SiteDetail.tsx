@@ -41,6 +41,8 @@ import {
   FilterBar,
   TwitterStats,
   LinksStats,
+  BreakdownPanel,
+  BreakdownDimension,
 } from "@/components/analytics";
 import { DashboardCustomizer } from "@/components/dashboard/DashboardCustomizer";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -126,6 +128,7 @@ export default function SiteDetail() {
   const [showGoalSetup, setShowGoalSetup] = useState(false);
   const [showCustomizer, setShowCustomizer] = useState(false);
   const [testStatus, setTestStatus] = useState<'idle' | 'testing' | 'success' | 'error'>('idle');
+  const [breakdown, setBreakdown] = useState<{ dimension: BreakdownDimension; value: string } | null>(null);
 
   const site = sites.find((s) => s.id === siteId);
 
@@ -578,8 +581,8 @@ export default function SiteDetail() {
 
             {/* Two Column Layout */}
             <div className="grid gap-6 lg:grid-cols-2">
-              {shouldShow('top_pages') && <TopPages pages={topPages} isLoading={pagesLoading} />}
-              {shouldShow('top_referrers') && <TopReferrers referrers={topReferrers} isLoading={referrersLoading} />}
+              {shouldShow('top_pages') && <TopPages pages={topPages} isLoading={pagesLoading} onBreakdown={(url) => setBreakdown({ dimension: 'url', value: url })} />}
+              {shouldShow('top_referrers') && <TopReferrers referrers={topReferrers} isLoading={referrersLoading} onBreakdown={(ref) => setBreakdown({ dimension: 'referrer', value: ref })} />}
             </div>
 
             {/* Funnels */}
@@ -605,6 +608,7 @@ export default function SiteDetail() {
                 operatingSystems={deviceStats?.operatingSystems}
                 devices={deviceStats?.devices}
                 isLoading={devicesLoading}
+                onBreakdown={(type, value) => setBreakdown({ dimension: type, value })}
               />
             )}
 
@@ -618,6 +622,7 @@ export default function SiteDetail() {
                   countries={geoStats}
                   cities={cityStats}
                   isLoading={geoLoading || citiesLoading}
+                  onBreakdown={(country) => setBreakdown({ dimension: 'country', value: country })}
                 />
               )}
               {shouldShow('language_stats') && (
@@ -660,6 +665,19 @@ export default function SiteDetail() {
           navigate(`/dashboard/sites/${site.id}?${newParams.toString()}`);
         }}
       />
+
+      {/* Breakdown Panel */}
+      {breakdown && site && (
+        <BreakdownPanel
+          siteId={site.id}
+          dateRange={dateRange}
+          dimension={breakdown.dimension}
+          value={breakdown.value}
+          baseFilters={filters}
+          onClose={() => setBreakdown(null)}
+          onDrillDown={(dim, val) => setBreakdown({ dimension: dim, value: val })}
+        />
+      )}
     </DashboardLayout>
   );
 }

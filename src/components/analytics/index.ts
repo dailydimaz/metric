@@ -24,3 +24,5 @@ export { RetentionCard } from "./RetentionCard";
 export { FilterBar } from "./FilterBar";
 export { TwitterStats } from "./TwitterStats";
 export { LinksStats } from "./LinksStats";
+export { BreakdownPanel } from "./BreakdownPanel";
+export type { BreakdownDimension } from "./BreakdownPanel";

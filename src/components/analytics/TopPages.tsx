@@ -1,12 +1,13 @@
-import { FileText, ArrowRight } from "lucide-react";
+import { FileText, ArrowRight, Layers } from "lucide-react";
 import { TopPage } from "@/hooks/useAnalytics";
 
 interface TopPagesProps {
   pages: TopPage[] | undefined;
   isLoading: boolean;
+  onBreakdown?: (url: string) => void;
 }
 
-export function TopPages({ pages, isLoading }: TopPagesProps) {
+export function TopPages({ pages, isLoading, onBreakdown }: TopPagesProps) {
   // Calculate max views for progress bars
   const maxViews = pages && pages.length > 0 ? Math.max(...pages.map(p => p.pageviews)) : 0;
 
@@ -20,6 +21,12 @@ export function TopPages({ pages, isLoading }: TopPagesProps) {
             </div>
             <h3 className="font-semibold text-base">Top Pages</h3>
           </div>
+          {onBreakdown && (
+            <span className="text-xs text-muted-foreground flex items-center gap-1">
+              <Layers className="h-3 w-3" />
+              Click to drill down
+            </span>
+          )}
         </div>
 
         {isLoading ? (
@@ -45,7 +52,11 @@ export function TopPages({ pages, isLoading }: TopPagesProps) {
                 {pages.map((page, index) => {
                   const percentage = maxViews > 0 ? (page.pageviews / maxViews) * 100 : 0;
                   return (
-                    <tr key={index} className="hover:bg-base-50 group transition-colors">
+                    <tr 
+                      key={index} 
+                      className={`hover:bg-base-50 group transition-colors ${onBreakdown ? 'cursor-pointer' : ''}`}
+                      onClick={() => onBreakdown?.(page.url)}
+                    >
                       <td className="pl-4 max-w-[200px] md:max-w-xs relative">
                         {/* Background progress bar */}
                         <div
@@ -63,6 +74,7 @@ export function TopPages({ pages, isLoading }: TopPagesProps) {
                               target="_blank"
                               rel="noopener noreferrer"
                               className="opacity-0 group-hover:opacity-100 text-base-content/40 hover:text-primary transition-all"
+                              onClick={(e) => e.stopPropagation()}
                             >
                               <ArrowRight className="h-3 w-3" />
                             </a>
@@ -87,4 +99,3 @@ export function TopPages({ pages, isLoading }: TopPagesProps) {
     </div>
   );
 }
-
