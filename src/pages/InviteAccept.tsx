@@ -75,6 +75,16 @@ export default function InviteAccept() {
   const handleAcceptInvitation = async () => {
     if (!user || !token || !invitation) return;
 
+    // Verify user's email matches the invitation email
+    if (user.email?.toLowerCase() !== invitation.email.toLowerCase()) {
+      toast({
+        title: "Email mismatch",
+        description: `This invitation was sent to ${invitation.email}. Please log in with that email address.`,
+        variant: "destructive",
+      });
+      return;
+    }
+
     setAccepting(true);
     try {
       // Add user as team member
