@@ -475,6 +475,33 @@ export type Database = {
         }
         Relationships: []
       }
+      public_dashboard_attempts: {
+        Row: {
+          attempts: number | null
+          created_at: string
+          id: string
+          last_attempt: string | null
+          locked_until: string | null
+          share_token: string
+        }
+        Insert: {
+          attempts?: number | null
+          created_at?: string
+          id?: string
+          last_attempt?: string | null
+          locked_until?: string | null
+          share_token: string
+        }
+        Update: {
+          attempts?: number | null
+          created_at?: string
+          id?: string
+          last_attempt?: string | null
+          locked_until?: string | null
+          share_token?: string
+        }
+        Relationships: []
+      }
       public_dashboards: {
         Row: {
           created_at: string
@@ -938,6 +965,15 @@ export type Database = {
             }[]
           }
       get_public_dashboard_stats:
+        | {
+            Args: {
+              _end_date: string
+              _password?: string
+              _share_token: string
+              _start_date: string
+            }
+            Returns: Json
+          }
         | {
             Args: {
               _end_date: string
