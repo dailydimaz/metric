@@ -1,6 +1,17 @@
 import { useState } from "react";
 import { MapPin, Building2, Map as MapIcon, Layers } from "lucide-react";
 import { GeoStat, CityStat } from "@/hooks/useAnalytics";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import { Skeleton } from "@/components/ui/skeleton";
 
 interface GeoStatsProps {
   countries: GeoStat[] | undefined;
@@ -35,82 +46,76 @@ export function GeoStats({ countries, cities, isLoading, onBreakdown }: GeoStats
   const [activeTab, setActiveTab] = useState<"countries" | "cities">("countries");
 
   return (
-    <div className="card bg-base-100 shadow-sm border border-base-200 h-full">
-      <div className="card-body p-0">
-        <div className="flex items-center justify-between p-4 border-b border-base-200">
-          <div className="flex items-center gap-2">
-            <div className="p-2 bg-info/10 rounded-lg text-info">
-              <MapIcon className="h-4 w-4" />
-            </div>
-            <h3 className="font-semibold text-base">Locations</h3>
+    <Card className="h-full">
+      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 border-b border-border/50">
+        <div className="flex items-center gap-2">
+          <div className="p-2 bg-blue-500/10 rounded-lg text-blue-500">
+            <MapIcon className="h-4 w-4" />
           </div>
-
-          <div className="flex items-center gap-2">
-            {onBreakdown && activeTab === "countries" && (
-              <span className="text-xs text-muted-foreground flex items-center gap-1">
-                <Layers className="h-3 w-3" />
-              </span>
-            )}
-            <div className="join">
-              <button
-                className={`join-item btn btn-sm ${activeTab === "countries" ? "btn-active btn-neutral" : "btn-ghost"}`}
-                onClick={() => setActiveTab("countries")}
-              >
-                Countries
-              </button>
-              <button
-                className={`join-item btn btn-sm ${activeTab === "cities" ? "btn-active btn-neutral" : "btn-ghost"}`}
-                onClick={() => setActiveTab("cities")}
-              >
-                Cities
-              </button>
-            </div>
-          </div>
+          <CardTitle className="text-base font-semibold">Locations</CardTitle>
         </div>
 
-        <div className="p-0 overflow-hidden">
+        <div className="flex items-center gap-2">
+          {onBreakdown && activeTab === "countries" && (
+            <span className="text-xs text-muted-foreground flex items-center gap-1">
+              <Layers className="h-3 w-3" />
+            </span>
+          )}
+          <ToggleGroup type="single" value={activeTab} onValueChange={(val) => val && setActiveTab(val as "countries" | "cities")} className="bg-muted p-1 rounded-lg">
+            <ToggleGroupItem value="countries" size="sm" className="h-7 text-xs data-[state=on]:bg-background data-[state=on]:shadow-sm">
+              Countries
+            </ToggleGroupItem>
+            <ToggleGroupItem value="cities" size="sm" className="h-7 text-xs data-[state=on]:bg-background data-[state=on]:shadow-sm">
+              Cities
+            </ToggleGroupItem>
+          </ToggleGroup>
+        </div>
+      </CardHeader>
+
+      <CardContent className="p-0">
+        <div className="overflow-hidden">
           {isLoading ? (
             <div className="p-4 space-y-4">
               {[...Array(5)].map((_, i) => (
                 <div key={i} className="flex justify-between items-center">
                   <div className="flex items-center gap-2">
-                    <div className="skeleton h-5 w-5 rounded"></div>
-                    <div className="skeleton h-4 w-24"></div>
+                    <Skeleton className="h-5 w-5 rounded" />
+                    <Skeleton className="h-4 w-24" />
                   </div>
-                  <div className="skeleton h-4 w-12"></div>
+                  <Skeleton className="h-4 w-12" />
                 </div>
               ))}
             </div>
           ) : activeTab === "countries" ? (
             countries && countries.length > 0 ? (
               <div className="overflow-x-auto">
-                <table className="table">
-                  <tbody>
+                <Table>
+                  <TableBody>
                     {countries.slice(0, 8).map((country, index) => (
-                      <tr 
-                        key={index} 
-                        className={`hover:bg-base-50 group border-b border-base-100 last:border-0 ${onBreakdown ? 'cursor-pointer' : ''}`}
+                      <TableRow
+                        key={index}
+                        className={`hover:bg-muted/50 border-b border-border last:border-0 ${onBreakdown ? 'cursor-pointer' : ''}`}
                         onClick={() => onBreakdown?.(country.country)}
                       >
-                        <td className="w-full flex items-center gap-3">
+                        <TableCell className="w-full flex items-center gap-3 py-3">
                           <span className="text-xl">{getCountryFlag(country.country)}</span>
-                          <div className="relative flex-1 h-1.5 bg-base-200 rounded-full overflow-hidden max-w-[100px] md:max-w-[150px]">
+                          <div className="relative flex-1 h-1.5 bg-muted rounded-full overflow-hidden max-w-[100px] md:max-w-[150px]">
                             <div
-                              className="absolute inset-y-0 left-0 bg-info rounded-full"
+                              className="absolute inset-y-0 left-0 bg-blue-500 rounded-full"
                               style={{ width: `${country.percentage}%` }}
                             />
                           </div>
-                          <span className="font-medium text-sm truncate w-24 md:w-auto group-hover:text-info transition-colors">{getCountryName(country.country)}</span>
-                        </td>
-                        <td className="text-right font-medium">{country.visits}</td>
-                        <td className="text-right font-mono text-xs text-base-content/60 w-16">{country.percentage.toFixed(0)}%</td>
-                      </tr>
+                          <span className="font-medium text-sm truncate w-24 md:w-auto hover:text-blue-500 transition-colors">{getCountryName(country.country)}</span>
+                        </TableCell>
+                        <TableCell className="text-right font-medium py-3">{country.visits}</TableCell>
+                        <TableCell className="text-right font-mono text-xs text-muted-foreground w-16 py-3">{country.percentage.toFixed(0)}%</TableCell>
+                      </TableRow>
                     ))}
-                  </tbody>
-                </table>
+                  </TableBody>
+                </Table>
               </div>
             ) : (
-              <div className="flex flex-col items-center justify-center py-12 text-base-content/40">
+              <div className="flex flex-col items-center justify-center py-12 text-muted-foreground/40">
                 <MapPin className="h-10 w-10 mb-2 opacity-20" />
                 <p className="text-sm">No country data yet</p>
               </div>
@@ -118,41 +123,41 @@ export function GeoStats({ countries, cities, isLoading, onBreakdown }: GeoStats
           ) : (
             cities && cities.length > 0 ? (
               <div className="overflow-x-auto">
-                <table className="table">
-                  <tbody>
+                <Table>
+                  <TableBody>
                     {cities.slice(0, 8).map((city, index) => (
-                      <tr key={index} className="hover:bg-base-50 group border-b border-base-100 last:border-0">
-                        <td className="w-full flex items-center gap-3">
-                          <div className="p-1 rounded bg-base-200 text-base-content/40">
+                      <TableRow key={index} className="hover:bg-muted/50 border-b border-border last:border-0">
+                        <TableCell className="w-full flex items-center gap-3 py-3">
+                          <div className="p-1 rounded bg-muted text-muted-foreground">
                             <Building2 className="h-3 w-3" />
                           </div>
-                          <div className="relative flex-1 h-1.5 bg-base-200 rounded-full overflow-hidden max-w-[100px] md:max-w-[150px]">
+                          <div className="relative flex-1 h-1.5 bg-muted rounded-full overflow-hidden max-w-[100px] md:max-w-[150px]">
                             <div
-                              className="absolute inset-y-0 left-0 bg-info rounded-full"
+                              className="absolute inset-y-0 left-0 bg-blue-500 rounded-full"
                               style={{ width: `${city.percentage}%` }}
                             />
                           </div>
                           <div className="flex flex-col min-w-0">
                             <span className="font-medium text-sm truncate max-w-[120px]">{city.city}</span>
-                            <span className="text-xs text-base-content/40">{getCountryName(city.country)}</span>
+                            <span className="text-xs text-muted-foreground">{getCountryName(city.country)}</span>
                           </div>
-                        </td>
-                        <td className="text-right font-medium">{city.visits}</td>
-                        <td className="text-right font-mono text-xs text-base-content/60 w-16">{city.percentage.toFixed(0)}%</td>
-                      </tr>
+                        </TableCell>
+                        <TableCell className="text-right font-medium py-3">{city.visits}</TableCell>
+                        <TableCell className="text-right font-mono text-xs text-muted-foreground w-16 py-3">{city.percentage.toFixed(0)}%</TableCell>
+                      </TableRow>
                     ))}
-                  </tbody>
-                </table>
+                  </TableBody>
+                </Table>
               </div>
             ) : (
-              <div className="flex flex-col items-center justify-center py-12 text-base-content/40">
+              <div className="flex flex-col items-center justify-center py-12 text-muted-foreground/40">
                 <Building2 className="h-10 w-10 mb-2 opacity-20" />
                 <p className="text-sm">No city data yet</p>
               </div>
             )
           )}
         </div>
-      </div>
-    </div>
+      </CardContent>
+    </Card>
   );
 }

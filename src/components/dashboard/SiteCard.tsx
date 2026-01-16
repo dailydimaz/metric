@@ -37,12 +37,12 @@ export function SiteCard({ site }: SiteCardProps) {
 
   return (
     <Link to={`/dashboard/sites/${site.id}`}>
-      <Card className="hover:shadow-xl transition-all duration-300 border-border/50 bg-card hover:border-primary/20 group cursor-pointer relative overflow-hidden h-full flex flex-col">
-        <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+      <Card className="hover:shadow-2xl transition-all duration-500 border-border/60 bg-card hover:border-primary/20 group cursor-pointer relative overflow-hidden h-full flex flex-col hover:-translate-y-1">
+        <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
 
         <CardHeader className="flex flex-row items-start justify-between space-y-0 pb-2 relative z-10">
           <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10 text-primary group-hover:scale-105 transition-transform duration-300 shadow-sm">
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10 text-primary group-hover:scale-105 group-hover:bg-primary group-hover:text-primary-foreground transition-all duration-300 shadow-sm">
               <Globe className="h-5 w-5" />
             </div>
             <div>
@@ -51,11 +51,11 @@ export function SiteCard({ site }: SiteCardProps) {
               </h3>
               <div className="flex items-center gap-2 mt-1.5">
                 {site.domain && (
-                  <span className="text-xs text-muted-foreground truncate max-w-[120px]">
+                  <span className="text-xs text-muted-foreground truncate max-w-[140px] font-mono">
                     {site.domain}
                   </span>
                 )}
-                <Badge variant="secondary" className="font-mono text-[10px] h-5 px-1.5 font-normal">
+                <Badge variant="secondary" className="font-mono text-[10px] h-5 px-1.5 font-normal bg-muted/50 border-border/50">
                   {site.timezone}
                 </Badge>
               </div>
@@ -64,7 +64,7 @@ export function SiteCard({ site }: SiteCardProps) {
           <Button
             variant="ghost"
             size="icon"
-            className="h-8 w-8 hover:bg-background/80"
+            className="h-8 w-8 hover:bg-background/80 opacity-0 group-hover:opacity-100 transition-opacity"
             onClick={copyTrackingId}
           >
             {copied ? (
@@ -75,36 +75,36 @@ export function SiteCard({ site }: SiteCardProps) {
           </Button>
         </CardHeader>
 
-        <CardContent className="flex-1 flex flex-col justify-end relative z-10 pt-4">
+        <CardContent className="flex-1 flex flex-col justify-end relative z-10 pt-6">
           {hasData ? (
-            <div className="space-y-4">
+            <div className="space-y-6">
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <p className="text-xs font-medium text-muted-foreground mb-1">Visitors (30d)</p>
-                  <p className="text-2xl font-bold tracking-tight">
+                  <p className="text-xs font-medium text-muted-foreground mb-1 uppercase tracking-wider">Visitors (30d)</p>
+                  <p className="text-3xl font-bold tracking-tight text-foreground group-hover:text-primary transition-colors">
                     {stats?.uniqueVisitors.toLocaleString()}
                   </p>
                   {stats?.visitorsChange !== undefined && (
-                    <div className={`flex items-center text-xs mt-1 ${isTrendingUp ? 'text-green-500' : 'text-red-500'}`}>
+                    <div className={`flex items-center text-xs mt-1.5 font-medium ${isTrendingUp ? 'text-green-500' : 'text-red-500'}`}>
                       <TrendingUp className={`h-3 w-3 mr-1 ${!isTrendingUp && 'rotate-180'}`} />
                       <span>{Math.abs(stats.visitorsChange).toFixed(1)}%</span>
                     </div>
                   )}
                 </div>
                 <div>
-                  <p className="text-xs font-medium text-muted-foreground mb-1">Pageviews</p>
-                  <p className="text-2xl font-bold tracking-tight">
+                  <p className="text-xs font-medium text-muted-foreground mb-1 uppercase tracking-wider">Pageviews</p>
+                  <p className="text-3xl font-bold tracking-tight text-foreground">
                     {stats?.totalPageviews.toLocaleString()}
                   </p>
                 </div>
               </div>
 
-              <div className="h-16 w-full opacity-50 group-hover:opacity-100 transition-opacity duration-500">
+              <div className="h-20 w-[calc(100%+3rem)] -mx-6 -mb-6 opacity-40 group-hover:opacity-60 transition-opacity duration-500">
                 <ResponsiveContainer width="100%" height="100%">
                   <AreaChart data={timeSeries}>
                     <defs>
                       <linearGradient id={`gradient-${site.id}`} x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="0%" stopColor="hsl(var(--primary))" stopOpacity={0.3} />
+                        <stop offset="0%" stopColor="hsl(var(--primary))" stopOpacity={0.4} />
                         <stop offset="100%" stopColor="hsl(var(--primary))" stopOpacity={0} />
                       </linearGradient>
                     </defs>
@@ -114,30 +114,21 @@ export function SiteCard({ site }: SiteCardProps) {
                       stroke="hsl(var(--primary))"
                       strokeWidth={2}
                       fill={`url(#gradient-${site.id})`}
+                      isAnimationActive={false}
                     />
                   </AreaChart>
                 </ResponsiveContainer>
               </div>
             </div>
           ) : (
-            <div className="flex flex-col items-center justify-center py-6 text-center">
+            <div className="flex flex-col items-center justify-center py-8 text-center bg-muted/20 rounded-lg border border-dashed border-border mx-1">
               <div className="p-3 bg-muted/50 rounded-full mb-3">
                 <BarChart2 className="h-5 w-5 text-muted-foreground/50" />
               </div>
-              <p className="text-sm font-medium text-muted-foreground">No data received yet</p>
-              <p className="text-xs text-muted-foreground/60 mt-1">Add script to start capturing</p>
+              <p className="text-sm font-medium text-muted-foreground">No data yet</p>
+              <p className="text-xs text-muted-foreground/60 mt-1">Add script to track</p>
             </div>
           )}
-
-          <div className="mt-4 pt-4 border-t border-border/40 flex justify-between items-center text-xs text-muted-foreground">
-            <div className="flex items-center gap-1.5 font-mono">
-              <span className="w-1.5 h-1.5 rounded-full bg-green-500/50 animate-pulse"></span>
-              ID: {site.tracking_id}
-            </div>
-            <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity text-primary font-medium">
-              Open Dashboard <ArrowUpRight className="h-3 w-3" />
-            </div>
-          </div>
         </CardContent>
       </Card>
     </Link>

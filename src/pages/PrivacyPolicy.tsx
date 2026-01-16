@@ -1,22 +1,26 @@
 import { Link } from "react-router-dom";
 import { ArrowLeft, Shield } from "lucide-react";
 
+import { Button } from "@/components/ui/button";
+
 export default function PrivacyPolicy() {
     return (
-        <div className="min-h-screen bg-base-100 font-sans">
-            <header className="sticky top-0 z-50 border-b border-base-300 bg-base-100/80 backdrop-blur-xl">
+        <div className="min-h-screen bg-background font-sans">
+            <header className="sticky top-0 z-50 border-b border-border bg-background/80 backdrop-blur-xl">
                 <div className="container mx-auto px-4 lg:px-8">
                     <div className="flex h-16 items-center justify-between">
                         <Link to="/" className="flex items-center gap-2">
                             <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary">
-                                <Shield className="h-5 w-5 text-primary-content" />
+                                <Shield className="h-5 w-5 text-primary-foreground" />
                             </div>
                             <span className="font-display text-xl font-bold">mmmetric</span>
                         </Link>
-                        <Link to="/" className="btn btn-ghost btn-sm gap-2">
-                            <ArrowLeft className="h-4 w-4" />
-                            Back to Home
-                        </Link>
+                        <Button variant="ghost" size="sm" asChild>
+                            <Link to="/">
+                                <ArrowLeft className="h-4 w-4 mr-2" />
+                                Back to Home
+                            </Link>
+                        </Button>
                     </div>
                 </div>
             </header>
@@ -24,10 +28,10 @@ export default function PrivacyPolicy() {
             <main className="container mx-auto px-4 lg:px-8 py-16 max-w-3xl">
                 <div className="mb-12">
                     <h1 className="text-4xl font-bold tracking-tight mb-4">Privacy Policy</h1>
-                    <p className="text-base-content/60">Last updated: {new Date().toLocaleDateString()}</p>
+                    <p className="text-muted-foreground">Last updated: {new Date().toLocaleDateString()}</p>
                 </div>
 
-                <div className="prose prose-lg max-w-none">
+                <div className="prose prose-lg max-w-none prose-headings:font-bold prose-h3:text-xl prose-p:text-muted-foreground">
                     <h3>1. Our Privacy Commitment</h3>
                     <p>
                         At mmmetric, we believe privacy is a fundamental human right. Our analytics platform is built
@@ -84,8 +88,8 @@ export default function PrivacyPolicy() {
                 </div>
             </main>
 
-            <footer className="border-t border-base-300 py-8 mt-16">
-                <div className="container mx-auto px-4 text-center text-sm text-base-content/50">
+            <footer className="border-t border-border py-8 mt-16">
+                <div className="container mx-auto px-4 text-center text-sm text-muted-foreground">
                     © {new Date().getFullYear()} mmmetric Analytics. All rights reserved.
                 </div>
             </footer>

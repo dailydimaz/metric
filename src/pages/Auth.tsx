@@ -2,6 +2,9 @@ import { useState, useEffect } from "react";
 import { useNavigate, useSearchParams, Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { Loader2, Shield, Mail, ArrowLeft, CheckCircle } from "lucide-react";
 import { z } from "zod";
 import mmmetricLogo from "@/assets/mmmetric-logo.png";
@@ -57,17 +60,17 @@ export default function Auth() {
   const checkMfaRequired = async (session: any) => {
     const { data: factorsData } = await supabase.auth.mfa.listFactors();
     const verifiedFactors = factorsData?.totp?.filter(f => f.status === 'verified') || [];
-    
+
     if (verifiedFactors.length > 0) {
       const { data: aalData } = await supabase.auth.mfa.getAuthenticatorAssuranceLevel();
-      
+
       if (aalData?.currentLevel === 'aal1' && aalData?.nextLevel === 'aal2') {
         setMfaFactorId(verifiedFactors[0].id);
         setShowMfaChallenge(true);
         return;
       }
     }
-    
+
     // Check for pending invite token and redirect there
     const pendingInviteToken = sessionStorage.getItem("pendingInviteToken");
     if (pendingInviteToken) {
@@ -75,7 +78,7 @@ export default function Auth() {
       navigate(`/invite/${pendingInviteToken}`);
       return;
     }
-    
+
     navigate("/dashboard");
   };
 
@@ -83,7 +86,7 @@ export default function Auth() {
     try {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return;
-      
+
       const ua = navigator.userAgent;
       let browser = "Unknown";
       let os = "Unknown";
@@ -141,7 +144,7 @@ export default function Auth() {
 
   const handleForgotPassword = async () => {
     if (!validateForm()) return;
-    
+
     setLoading(true);
 
     try {
@@ -171,13 +174,13 @@ export default function Auth() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (mode === "forgot-password") {
       return handleForgotPassword();
     }
 
     if (!validateForm()) return;
-    
+
     setLoading(true);
 
     try {
@@ -221,7 +224,7 @@ export default function Auth() {
 
         if (error) {
           await trackLogin(false);
-          
+
           if (error.message.includes("Invalid login credentials")) {
             toast({
               title: "Invalid credentials",
@@ -255,7 +258,7 @@ export default function Auth() {
 
   const handleResendEmail = async () => {
     if (!emailSentTo) return;
-    
+
     setLoading(true);
     try {
       const redirectUrl = `${window.location.origin}/`;
@@ -352,15 +355,16 @@ export default function Auth() {
               </ul>
             </div>
 
-            <button
+            <Button
               type="button"
               onClick={handleResendEmail}
-              className="btn btn-outline w-full mt-6"
+              variant="outline"
+              className="w-full mt-6"
               disabled={loading}
             >
               {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
               Resend email
-            </button>
+            </Button>
 
             <button
               type="button"
@@ -414,14 +418,14 @@ export default function Auth() {
             </div>
 
             <form onSubmit={handleMfaVerify} className="space-y-4">
-              <div className="form-control w-full">
-                <input
+              <div className="w-full space-y-2">
+                <Input
                   type="text"
                   inputMode="numeric"
                   pattern="[0-9]*"
                   maxLength={6}
                   placeholder="000000"
-                  className="input input-bordered w-full text-center text-3xl tracking-[0.5em] font-mono"
+                  className="w-full text-center text-3xl tracking-[0.5em] font-mono"
                   value={mfaCode}
                   onChange={(e) => setMfaCode(e.target.value.replace(/\D/g, ""))}
                   autoFocus
@@ -429,14 +433,14 @@ export default function Auth() {
                 />
               </div>
 
-              <button
+              <Button
                 type="submit"
-                className="btn btn-primary w-full"
+                className="w-full"
                 disabled={verifyingMfa || mfaCode.length !== 6}
               >
                 {verifyingMfa && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                 Verify
-              </button>
+              </Button>
             </form>
 
             <button
@@ -495,30 +499,26 @@ export default function Auth() {
             </p>
 
             <form onSubmit={handleSubmit} className="mt-8 space-y-4">
-              <div className="form-control w-full">
-                <label className="label">
-                  <span className="label-text">Email</span>
-                </label>
-                <input
+              <div className="w-full space-y-2">
+                <Label>Email</Label>
+                <Input
                   type="email"
                   placeholder="you@example.com"
-                  className={`input input-bordered w-full ${errors.email ? "input-error" : ""}`}
+                  className={`w-full ${errors.email ? "border-destructive" : ""}`}
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   disabled={loading}
                   required
                 />
                 {errors.email && (
-                  <label className="label">
-                    <span className="label-text-alt text-error">{errors.email}</span>
-                  </label>
+                  <p className="text-sm text-destructive">{errors.email}</p>
                 )}
               </div>
 
-              <button type="submit" className="btn btn-primary w-full" disabled={loading}>
+              <Button type="submit" className="w-full" disabled={loading}>
                 {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                 Send reset link
-              </button>
+              </Button>
             </form>
           </div>
         </div>
@@ -558,79 +558,69 @@ export default function Auth() {
 
           <form onSubmit={handleSubmit} className="mt-8 space-y-4">
             {mode === "signup" && (
-              <div className="form-control w-full">
-                <label className="label">
-                  <span className="label-text">Full name</span>
-                </label>
-                <input
+              <div className="w-full space-y-2">
+                <Label>Full name</Label>
+                <Input
                   type="text"
                   placeholder="John Doe"
-                  className={`input input-bordered w-full ${errors.fullName ? "input-error" : ""}`}
+                  className={`w-full ${errors.fullName ? "border-destructive" : ""}`}
                   value={fullName}
                   onChange={(e) => setFullName(e.target.value)}
                   disabled={loading}
                 />
                 {errors.fullName && (
-                  <label className="label">
-                    <span className="label-text-alt text-error">{errors.fullName}</span>
-                  </label>
+                  <p className="text-sm text-destructive">{errors.fullName}</p>
                 )}
               </div>
             )}
 
-            <div className="form-control w-full">
-              <label className="label">
-                <span className="label-text">Email</span>
-              </label>
-              <input
+            <div className="w-full space-y-2">
+              <Label>Email</Label>
+              <Input
                 type="email"
                 placeholder="you@example.com"
-                className={`input input-bordered w-full ${errors.email ? "input-error" : ""}`}
+                className={`w-full ${errors.email ? "border-destructive" : ""}`}
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 disabled={loading}
                 required
               />
               {errors.email && (
-                <label className="label">
-                  <span className="label-text-alt text-error">{errors.email}</span>
-                </label>
+                <p className="text-sm text-destructive">{errors.email}</p>
               )}
             </div>
 
-            <div className="form-control w-full">
-              <label className="label">
-                <span className="label-text">Password</span>
+            <div className="w-full space-y-2">
+              <div className="flex items-center justify-between">
+                <Label>Password</Label>
                 {mode === "signin" && (
                   <button
                     type="button"
                     onClick={() => setMode("forgot-password")}
-                    className="label-text-alt link link-primary"
+                    className="text-xs text-primary hover:underline font-medium"
                   >
                     Forgot password?
                   </button>
                 )}
-              </label>
-              <input
+              </div>
+              <Input
                 type="password"
                 placeholder="••••••••"
-                className={`input input-bordered w-full ${errors.password ? "input-error" : ""}`}
+                className={`w-full ${errors.password ? "border-destructive" : ""}`}
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 disabled={loading}
                 required
               />
               {errors.password && (
-                <label className="label">
-                  <span className="label-text-alt text-error">{errors.password}</span>
-                </label>
+                <p className="text-sm text-destructive">{errors.password}</p>
               )}
             </div>
 
-            <button type="submit" className="btn btn-primary w-full" disabled={loading}>
+            <Button type="submit" className="w-full" disabled={loading}>
               {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
               {mode === "signup" ? "Create account" : "Sign in"}
-            </button>
+            </Button>
           </form>
 
           <p className="mt-6 text-center text-sm text-base-content/70">
@@ -638,7 +628,7 @@ export default function Auth() {
             <button
               type="button"
               onClick={() => setMode(mode === "signup" ? "signin" : "signup")}
-              className="link link-primary font-medium"
+              className="text-primary hover:underline font-medium"
             >
               {mode === "signup" ? "Sign in" : "Sign up"}
             </button>
@@ -651,17 +641,18 @@ export default function Auth() {
           <img src={mmmetricLogo} alt="mmmetric" className="inline-flex h-20 w-20 rounded-2xl mb-8" />
           <h2 className="text-2xl font-bold">Privacy-first analytics</h2>
           <p className="mt-4 text-base-content/70">
-            Get powerful insights without compromising your users' privacy. 
+            Get powerful insights without compromising your users' privacy.
             GDPR compliant, no cookies required.
           </p>
-          <div className="stats stats-vertical sm:stats-horizontal shadow mt-8">
-            <div className="stat">
-              <div className="stat-value">10K+</div>
-              <div className="stat-desc">Websites tracked</div>
+          <div className="flex flex-col sm:flex-row gap-4 mt-8 bg-background/50 p-4 rounded-xl shadow-sm border border-border">
+            <div className="text-center sm:text-left">
+              <div className="text-2xl font-bold">10K+</div>
+              <div className="text-xs text-muted-foreground">Websites tracked</div>
             </div>
-            <div className="stat">
-              <div className="stat-value">1B+</div>
-              <div className="stat-desc">Events processed</div>
+            <div className="hidden sm:block w-px bg-border h-12"></div>
+            <div className="text-center sm:text-left">
+              <div className="text-2xl font-bold">1B+</div>
+              <div className="text-xs text-muted-foreground">Events processed</div>
             </div>
           </div>
         </div>

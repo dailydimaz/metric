@@ -3,6 +3,9 @@ import { useNavigate, Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { Loader2, KeyRound, CheckCircle } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { z } from "zod";
 import mmmetricLogo from "@/assets/mmmetric-logo.png";
 
@@ -66,9 +69,9 @@ export default function ResetPassword() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!validateForm()) return;
-    
+
     setLoading(true);
 
     try {
@@ -149,50 +152,44 @@ export default function ResetPassword() {
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-4">
-            <div className="form-control w-full">
-              <label className="label">
-                <span className="label-text">New Password</span>
-              </label>
-              <input
+            <div className="space-y-2">
+              <Label htmlFor="password">New Password</Label>
+              <Input
+                id="password"
                 type="password"
                 placeholder="••••••••"
-                className={`input input-bordered w-full ${errors.password ? "input-error" : ""}`}
+                className={errors.password ? "border-destructive focus-visible:ring-destructive" : ""}
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 disabled={loading}
                 required
               />
               {errors.password && (
-                <label className="label">
-                  <span className="label-text-alt text-error">{errors.password}</span>
-                </label>
+                <p className="text-sm text-destructive">{errors.password}</p>
               )}
             </div>
 
-            <div className="form-control w-full">
-              <label className="label">
-                <span className="label-text">Confirm Password</span>
-              </label>
-              <input
+            <div className="space-y-2">
+              <Label htmlFor="confirmPassword">Confirm Password</Label>
+              <Input
+                id="confirmPassword"
                 type="password"
                 placeholder="••••••••"
-                className={`input input-bordered w-full ${errors.confirmPassword ? "input-error" : ""}`}
+                className={errors.confirmPassword ? "border-destructive focus-visible:ring-destructive" : ""}
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
                 disabled={loading}
                 required
               />
               {errors.confirmPassword && (
-                <label className="label">
-                  <span className="label-text-alt text-error">{errors.confirmPassword}</span>
-                </label>
+                <p className="text-sm text-destructive">{errors.confirmPassword}</p>
               )}
             </div>
 
-            <button type="submit" className="btn btn-primary w-full" disabled={loading}>
+            <Button type="submit" className="w-full" disabled={loading}>
               {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
               Reset Password
-            </button>
+            </Button>
           </form>
 
           <p className="mt-6 text-center text-sm text-base-content/70">

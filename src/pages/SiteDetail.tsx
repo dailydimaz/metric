@@ -51,6 +51,16 @@ import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import {
   useAnalyticsStats,
   useAnalyticsTimeSeries,
   useTopPages,
@@ -78,10 +88,6 @@ export default function SiteDetail() {
     if (rangeParam && ["today", "7d", "30d", "90d"].includes(rangeParam)) {
       return rangeParam as DateRange;
     }
-    // TODO: Handle custom range (from/to) if DateRange type supports it, 
-    // currently DateRange is string union type "today" | "7d"... 
-    // If DateRange supports object {from, to}, we'd parse that here.
-    // For now assuming string union based on existing code.
     return "7d";
   });
 
@@ -92,13 +98,6 @@ export default function SiteDetail() {
     const os = searchParams.get("os");
     const device = searchParams.get("device");
     const url = searchParams.get("url");
-    // referrerPattern key might need mapping if URL param is just "referrer"
-    // The previous Insights.tsx didn't seem to set 'referrerPattern', let's check what it sets.
-    // It sets: params.set("referrer", insight.filters.referrerPattern) probably? 
-    // Actually Insights.tsx didn't set referrer in previous view. 
-    // Wait, let's verify Insights.tsx `handleView` implementation from previous turns... 
-    // It didn't explicitly set referrer. It set country, browser, os, device.
-    // Let's support what we can.
 
     if (country) newFilters.country = country;
     if (browser) newFilters.browser = browser;
@@ -129,6 +128,7 @@ export default function SiteDetail() {
   const [showCustomizer, setShowCustomizer] = useState(false);
   const [testStatus, setTestStatus] = useState<'idle' | 'testing' | 'success' | 'error'>('idle');
   const [breakdown, setBreakdown] = useState<{ dimension: BreakdownDimension; value: string } | null>(null);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
 
   const site = sites.find((s) => s.id === siteId);
 
@@ -214,12 +214,14 @@ export default function SiteDetail() {
     });
   };
 
-  const handleDelete = async () => {
+  const confirmDelete = async () => {
     if (!site) return;
-    if (window.confirm(`Are you sure you want to delete "${site.name}"? This action cannot be undone.`)) {
-      await deleteSite.mutateAsync(site.id);
-      navigate("/dashboard");
-    }
+    await deleteSite.mutateAsync(site.id);
+    navigate("/dashboard");
+  };
+
+  const handleDelete = () => {
+    setDeleteDialogOpen(true);
   };
 
   const handleSave = async () => {
@@ -306,9 +308,9 @@ export default function SiteDetail() {
         <div className="flex flex-col items-center justify-center py-16">
           <h2 className="text-xl font-semibold">Site not found</h2>
           <p className="mt-2 text-base-content/70">This site doesn't exist or you don't have access to it.</p>
-          <button className="btn btn-primary mt-6" onClick={() => navigate("/dashboard")}>
+          <Button className="mt-6" onClick={() => navigate("/dashboard")}>
             Back to Dashboard
-          </button>
+          </Button>
         </div>
       </DashboardLayout>
     );
@@ -402,61 +404,67 @@ export default function SiteDetail() {
 
         {/* Settings Panel (collapsible) */}
         {showSettings && (
-          <div className="card bg-base-200 animate-in">
-            <div className="card-body">
+          <div className="card bg-muted/30 border border-border animate-in fade-in slide-in-from-top-2">
+            <div className="card-body p-6">
               <div className="flex items-center justify-between">
-                <h3 className="card-title text-base">Site Settings</h3>
+                <h3 className="card-title text-base font-semibold">Site Settings</h3>
                 <div className="flex gap-2">
-                  <button className="btn btn-ghost btn-sm" onClick={() => setIsEditing(true)}>
-                    <Settings className="h-4 w-4 mr-2" />
-                    Edit
-                  </button>
-                  <button
-                    className="btn btn-error btn-outline btn-sm"
-                    onClick={handleDelete}
-                    disabled={deleteSite.isPending}
-                  >
-                    <Trash2 className="h-4 w-4 mr-2" />
-                    Delete
-                  </button>
+                  <div className="flex gap-2">
+                    <Button variant="ghost" size="sm" onClick={() => setIsEditing(true)}>
+                      <Settings className="h-4 w-4 mr-2" />
+                      Edit
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="text-destructive hover:bg-destructive/10 hover:text-destructive border-destructive/50"
+                      onClick={handleDelete}
+                      disabled={deleteSite.isPending}
+                    >
+                      <Trash2 className="h-4 w-4 mr-2" />
+                      Delete
+                    </Button>
+                  </div>
                 </div>
               </div>
 
               {/* Site Info Cards */}
               <div className="grid gap-4 md:grid-cols-3 mt-4">
                 {/* Tracking ID */}
-                <div className="bg-base-300/50 rounded-lg p-4">
-                  <h4 className="text-sm font-medium text-base-content/70">Tracking ID</h4>
+                <div className="bg-background/50 border border-border/50 rounded-lg p-4">
+                  <h4 className="text-sm font-medium text-muted-foreground">Tracking ID</h4>
                   <div className="flex items-center gap-2 mt-2">
-                    <code className="flex-1 font-mono text-sm bg-base-300 px-3 py-2 rounded-lg truncate">
+                    <code className="flex-1 font-mono text-sm bg-muted/50 px-3 py-2 rounded-lg truncate text-foreground">
                       {site.tracking_id}
                     </code>
-                    <button
-                      className="btn btn-ghost btn-sm btn-square"
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-8 w-8"
                       onClick={copyTrackingId}
                     >
                       {copied ? (
-                        <Check className="h-4 w-4 text-success" />
+                        <Check className="h-4 w-4 text-green-500" />
                       ) : (
                         <Copy className="h-4 w-4" />
                       )}
-                    </button>
+                    </Button>
                   </div>
                 </div>
 
                 {/* Timezone */}
-                <div className="bg-base-300/50 rounded-lg p-4">
-                  <h4 className="text-sm font-medium text-base-content/70">Timezone</h4>
-                  <div className="flex items-center gap-2 mt-2">
-                    <Clock className="h-4 w-4 text-base-content/70" />
+                <div className="bg-background/50 border border-border/50 rounded-lg p-4">
+                  <h4 className="text-sm font-medium text-muted-foreground">Timezone</h4>
+                  <div className="flex items-center gap-2 mt-2 text-foreground">
+                    <Clock className="h-4 w-4 text-muted-foreground" />
                     <span>{site.timezone || "UTC"}</span>
                   </div>
                 </div>
 
                 {/* Created */}
-                <div className="bg-base-300/50 rounded-lg p-4">
-                  <h4 className="text-sm font-medium text-base-content/70">Created</h4>
-                  <span className="mt-2 block">
+                <div className="bg-background/50 border border-border/50 rounded-lg p-4">
+                  <h4 className="text-sm font-medium text-muted-foreground">Created</h4>
+                  <span className="mt-2 block text-foreground">
                     {new Date(site.created_at).toLocaleDateString(undefined, {
                       year: 'numeric',
                       month: 'long',
@@ -472,33 +480,32 @@ export default function SiteDetail() {
                   <Code className="h-4 w-4" />
                   <h4 className="text-sm font-medium">Installation</h4>
                 </div>
-                <p className="text-base-content/70 text-sm">
-                  Add this script to your website's <code className="bg-base-300 px-1 rounded">&lt;head&gt;</code> tag:
+                <p className="text-muted-foreground text-sm">
+                  Add this script to your website's <code className="bg-muted px-1 rounded">&lt;head&gt;</code> tag:
                 </p>
-                <div className="mockup-code mt-2">
+                <div className="mt-2 rounded-md bg-muted p-4 font-mono text-sm overflow-x-auto border border-border text-foreground">
                   <pre><code>{`<script defer src="https://mmmetric.lovable.app/track.js" data-site="${site.tracking_id}"></script>`}</code></pre>
                 </div>
 
                 {/* Cross-Domain Tracking */}
-                <div className="mt-3 p-3 bg-base-300/30 rounded-lg">
-                  <h5 className="text-xs font-medium text-base-content/70 mb-1">Cross-Domain Tracking (optional)</h5>
-                  <p className="text-xs text-base-content/60 mb-2">
-                    To track users across multiple domains, add the <code className="bg-base-300 px-1 rounded">data-cross-domain</code> attribute:
+                <div className="mt-3 p-3 bg-muted/30 rounded-lg border border-border/30">
+                  <h5 className="text-xs font-medium text-muted-foreground mb-1">Cross-Domain Tracking (optional)</h5>
+                  <p className="text-xs text-muted-foreground/80 mb-2">
+                    To track users across multiple domains, add the <code className="bg-muted px-1 rounded">data-cross-domain</code> attribute:
                   </p>
-                  <code className="text-xs bg-base-300 px-2 py-1 rounded block overflow-x-auto">
+                  <code className="text-xs bg-muted px-2 py-1 rounded block overflow-x-auto text-foreground">
                     data-cross-domain="otherdomain.com,anotherdomain.com"
                   </code>
                 </div>
 
-                <p className="text-base-content/60 text-xs mt-2">
+                <p className="text-muted-foreground/60 text-xs mt-2">
                   This lightweight script (~1KB) tracks page views, custom events, and UTM parameters while respecting user privacy.
                 </p>
                 <div className="flex justify-end gap-2 mt-2">
-                  <button
-                    className={`btn btn-sm ${testStatus === 'success' ? 'btn-success' :
-                      testStatus === 'error' ? 'btn-error' :
-                        'btn-outline'
-                      }`}
+                  <Button
+                    size="sm"
+                    variant={testStatus === 'success' ? 'default' : testStatus === 'error' ? 'destructive' : 'outline'}
+                    className={testStatus === 'success' ? 'bg-green-600 hover:bg-green-700' : ''}
                     onClick={testConnection}
                     disabled={testStatus === 'testing'}
                   >
@@ -523,24 +530,24 @@ export default function SiteDetail() {
                         Test Connection
                       </>
                     )}
-                  </button>
-                  <button className="btn btn-primary btn-sm" onClick={copyScript}>
+                  </Button>
+                  <Button size="sm" onClick={copyScript}>
                     <Copy className="h-4 w-4 mr-2" />
                     Copy Script
-                  </button>
+                  </Button>
                 </div>
               </div>
 
               {/* Tracking Pixel */}
-              <div className="mt-4 pt-4 border-t border-base-300">
+              <div className="mt-4 pt-4 border-t border-border">
                 <div className="flex items-center gap-2 mb-2">
                   <ImageIcon className="h-4 w-4" />
                   <h4 className="text-sm font-medium">Tracking Pixel</h4>
                 </div>
-                <p className="text-base-content/70 text-sm">
+                <p className="text-muted-foreground text-sm">
                   Use this 1x1 image for tracking in emails or non-JS environments:
                 </p>
-                <div className="mockup-code mt-2">
+                <div className="mt-2 rounded-md bg-muted p-4 font-mono text-sm overflow-x-auto border border-border text-foreground">
                   <pre><code>{`<img src="${import.meta.env.VITE_SUPABASE_URL}/functions/v1/pixel?site_id=${site.tracking_id}" alt="" />`}</code></pre>
                 </div>
               </div>
@@ -678,6 +685,24 @@ export default function SiteDetail() {
           onDrillDown={(dim, val) => setBreakdown({ dimension: dim, value: val })}
         />
       )}
+
+      <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete site?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to delete <span className="font-medium text-foreground">"{site.name}"</span>?
+              This action cannot be undone. All data associated with this site will be permanently removed.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={confirmDelete} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+              Delete Site
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </DashboardLayout>
   );
 }

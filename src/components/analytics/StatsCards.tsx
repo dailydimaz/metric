@@ -1,9 +1,14 @@
 import { Eye, Users, Clock, MousePointerClick, TrendingUp, TrendingDown } from "lucide-react";
 import { StatsData } from "@/hooks/useAnalytics";
+import { Card } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { cn } from "@/lib/utils";
 
 interface StatsCardsProps {
   stats: StatsData | undefined;
   isLoading: boolean;
+  visibleMetrics?: string[];
+  showComparison?: boolean;
 }
 
 interface StatCardProps {
@@ -14,34 +19,49 @@ interface StatCardProps {
   desc?: string;
   isLoading: boolean;
   showComparison?: boolean;
+  isInverse?: boolean;
 }
 
-function StatCard({ title, value, change, icon, desc, isLoading, showComparison = true }: StatCardProps) {
+function StatCard({ title, value, change, icon, desc, isLoading, showComparison = true, isInverse }: StatCardProps) {
   const isPositive = change !== undefined && change >= 0;
+  // For standard metrics (views, visitors, etc.), positive change is Good (Green).
+  // For inverse metrics (bounce rate), positive change is Bad (Red).
+  // Default is standard. If isInverse is true, we flip the logic.
+
+  const isGood = isInverse ? !isPositive : isPositive;
+  const trendColor = isGood ? 'text-emerald-500' : 'text-rose-500';
+  const TrendIcon = isPositive ? TrendingUp : TrendingDown;
 
   return (
-    <div className="stat bg-base-100 shadow-sm border border-base-200 rounded-2xl">
-      <div className="stat-figure text-primary bg-primary/10 p-2 rounded-xl">
-        {icon}
-      </div>
-      <div className="stat-title font-medium opacity-70">{title}</div>
-      {isLoading ? (
-        <div className="skeleton h-8 w-24 my-1"></div>
-      ) : (
-        <div className="stat-value text-3xl font-bold tracking-tight">{value}</div>
-      )}
-
-      {!isLoading && change !== undefined && showComparison && (
-        <div className={`stat-desc flex items-center gap-1 font-medium ${isPositive ? 'text-success' : 'text-error'}`}>
-          {isPositive ? <TrendingUp className="h-3 w-3" /> : <TrendingDown className="h-3 w-3" />}
-          <span>{Math.abs(change).toFixed(1)}%</span>
-          <span className="text-base-content/40 font-normal ml-1">vs last period</span>
+    <Card className="p-5 rounded-xl border-border/60 bg-card/60 backdrop-blur-sm shadow-sm hover:shadow-md transition-all duration-300">
+      <div className="flex justify-between items-start mb-3">
+        <div className="p-2.5 bg-primary/10 rounded-lg text-primary">
+          {icon}
         </div>
-      )}
+        {!isLoading && change !== undefined && showComparison && (
+          <Badge variant="secondary" className={cn("text-[10px] px-1.5 py-0 h-5 font-semibold",
+            isGood ? "text-emerald-500 bg-emerald-500/10 hover:bg-emerald-500/20" : "text-rose-500 bg-rose-500/10 hover:bg-rose-500/20"
+          )}>
+            {isPositive ? <TrendingUp className="h-3 w-3 mr-1" /> : <TrendingDown className="h-3 w-3 mr-1" />}
+            {Math.abs(change).toFixed(1)}%
+          </Badge>
+        )}
+      </div>
+
+      <div className="space-y-1">
+        {isLoading ? (
+          <div className="h-8 w-24 bg-muted/20 animate-pulse rounded-md"></div>
+        ) : (
+          <div className="text-3xl font-bold tracking-tight text-foreground font-display">{value}</div>
+        )}
+
+        <div className="text-xs text-muted-foreground font-medium">{title}</div>
+      </div>
+
       {!isLoading && desc && (
-        <div className="stat-desc text-base-content/40">{desc}</div>
+        <div className="mt-2 text-[10px] text-muted-foreground/60">{desc}</div>
       )}
-    </div>
+    </Card>
   );
 }
 
@@ -51,7 +71,7 @@ function formatNumber(num: number): string {
   return num.toString();
 }
 
-export function StatsCards({ stats, isLoading, visibleMetrics, showComparison = true }: StatsCardsProps & { visibleMetrics?: string[], showComparison?: boolean }) {
+export function StatsCards({ stats, isLoading, visibleMetrics, showComparison = true }: StatsCardsProps) {
   const show = (key: string) => !visibleMetrics || visibleMetrics.includes(key);
 
   if (visibleMetrics && visibleMetrics.length === 0) return null;
@@ -63,7 +83,7 @@ export function StatsCards({ stats, isLoading, visibleMetrics, showComparison = 
           title="Total Views"
           value={formatNumber(stats?.totalPageviews || 0)}
           change={stats?.pageviewsChange}
-          icon={<Eye className="h-6 w-6" />}
+          icon={<Eye className="h-5 w-5" />}
           isLoading={isLoading}
           showComparison={showComparison}
         />
@@ -73,7 +93,7 @@ export function StatsCards({ stats, isLoading, visibleMetrics, showComparison = 
           title="Unique Visitors"
           value={formatNumber(stats?.uniqueVisitors || 0)}
           change={stats?.visitorsChange}
-          icon={<Users className="h-6 w-6" />}
+          icon={<Users className="h-5 w-5" />}
           isLoading={isLoading}
           showComparison={showComparison}
         />
@@ -83,9 +103,10 @@ export function StatsCards({ stats, isLoading, visibleMetrics, showComparison = 
           title="Bounce Rate"
           value={`${(stats?.bounceRate || 0).toFixed(1)}%`}
           desc="Single page sessions"
-          icon={<MousePointerClick className="h-6 w-6" />}
+          icon={<MousePointerClick className="h-5 w-5" />}
           isLoading={isLoading}
           showComparison={showComparison}
+          isInverse={true}
         />
       )}
       {show('avg_duration') && (
@@ -93,7 +114,7 @@ export function StatsCards({ stats, isLoading, visibleMetrics, showComparison = 
           title="Avg. Session"
           value={stats?.avgSessionDuration ? `${Math.round(stats.avgSessionDuration)}s` : "—"}
           desc="Time spent on site"
-          icon={<Clock className="h-6 w-6" />}
+          icon={<Clock className="h-5 w-5" />}
           isLoading={isLoading}
           showComparison={showComparison}
         />

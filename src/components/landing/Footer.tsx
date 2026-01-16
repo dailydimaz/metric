@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom";
 import { Github, Twitter, Mail, ArrowUpRight } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import mmmetricLogo from "@/assets/mmmetric-logo.png";
 
 const footerLinks = {
@@ -36,9 +37,9 @@ export function Footer() {
   const currentYear = new Date().getFullYear();
 
   return (
-    <footer className="relative overflow-hidden bg-base-200 border-t border-base-300">
+    <footer className="relative overflow-hidden bg-muted/30 border-t border-border">
       {/* Subtle gradient overlay */}
-      <div className="absolute inset-0 bg-gradient-to-b from-transparent to-base-300/30 pointer-events-none" />
+      <div className="absolute inset-0 bg-gradient-to-b from-transparent to-muted/50 pointer-events-none" />
 
       <div className="container mx-auto px-4 lg:px-8 py-16 relative">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-8">
@@ -49,40 +50,52 @@ export function Footer() {
               <span className="font-display text-2xl font-bold">mmmetric</span>
             </Link>
 
-            <p className="mt-6 text-base-content/60 max-w-sm leading-relaxed">
+            <p className="mt-6 text-muted-foreground max-w-sm leading-relaxed">
               Privacy-first analytics that respects your users. No cookies, no tracking across sites, just the insights you need.
             </p>
 
             {/* Social Links */}
             <div className="mt-8 flex items-center gap-3">
-              <a
-                href="#"
-                className="btn btn-circle btn-sm bg-base-300/50 border-0 hover:bg-primary hover:text-primary-content transition-all duration-300"
+              <Button
+                variant="ghost"
+                size="icon"
+                className="rounded-full bg-background hover:bg-primary hover:text-primary-foreground transition-all duration-300 shadow-sm border border-border"
                 aria-label="Twitter"
+                asChild
               >
-                <Twitter className="h-4 w-4" />
-              </a>
-              <a
-                href="#"
-                className="btn btn-circle btn-sm bg-base-300/50 border-0 hover:bg-primary hover:text-primary-content transition-all duration-300"
+                <a href="#">
+                  <Twitter className="h-4 w-4" />
+                </a>
+              </Button>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="rounded-full bg-background hover:bg-primary hover:text-primary-foreground transition-all duration-300 shadow-sm border border-border"
                 aria-label="GitHub"
+                asChild
               >
-                <Github className="h-4 w-4" />
-              </a>
-              <a
-                href="#"
-                className="btn btn-circle btn-sm bg-base-300/50 border-0 hover:bg-primary hover:text-primary-content transition-all duration-300"
+                <a href="#">
+                  <Github className="h-4 w-4" />
+                </a>
+              </Button>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="rounded-full bg-background hover:bg-primary hover:text-primary-foreground transition-all duration-300 shadow-sm border border-border"
                 aria-label="Email"
+                asChild
               >
-                <Mail className="h-4 w-4" />
-              </a>
+                <a href="#">
+                  <Mail className="h-4 w-4" />
+                </a>
+              </Button>
             </div>
           </div>
 
           {/* Links Grid */}
           <div className="lg:col-span-7 grid grid-cols-2 sm:grid-cols-4 gap-8">
             <div>
-              <h3 className="text-xs font-semibold uppercase tracking-wider text-base-content/40 mb-4">
+              <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground/60 mb-4">
                 Product
               </h3>
               <ul className="space-y-3">
@@ -90,7 +103,7 @@ export function Footer() {
                   <li key={link.label}>
                     <a
                       href={link.href}
-                      className="text-base-content/70 hover:text-primary transition-colors inline-flex items-center gap-1 group"
+                      className="text-muted-foreground hover:text-primary transition-colors inline-flex items-center gap-1 group text-sm"
                     >
                       {link.label}
                     </a>
@@ -100,7 +113,7 @@ export function Footer() {
             </div>
 
             <div>
-              <h3 className="text-xs font-semibold uppercase tracking-wider text-base-content/40 mb-4">
+              <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground/60 mb-4">
                 Resources
               </h3>
               <ul className="space-y-3">
@@ -108,7 +121,7 @@ export function Footer() {
                   <li key={link.label}>
                     <a
                       href={link.href}
-                      className="text-base-content/70 hover:text-primary transition-colors inline-flex items-center gap-1 group"
+                      className="text-muted-foreground hover:text-primary transition-colors inline-flex items-center gap-1 group text-sm"
                       {...(link.external && { target: "_blank", rel: "noopener noreferrer" })}
                     >
                       {link.label}
@@ -122,7 +135,7 @@ export function Footer() {
             </div>
 
             <div>
-              <h3 className="text-xs font-semibold uppercase tracking-wider text-base-content/40 mb-4">
+              <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground/60 mb-4">
                 Community
               </h3>
               <ul className="space-y-3">
@@ -130,7 +143,7 @@ export function Footer() {
                   <li key={link.label}>
                     <a
                       href={link.href}
-                      className="text-base-content/70 hover:text-primary transition-colors inline-flex items-center gap-1 group"
+                      className="text-muted-foreground hover:text-primary transition-colors inline-flex items-center gap-1 group text-sm"
                       {...(link.external && { target: "_blank", rel: "noopener noreferrer" })}
                     >
                       {link.label}
@@ -144,7 +157,7 @@ export function Footer() {
             </div>
 
             <div>
-              <h3 className="text-xs font-semibold uppercase tracking-wider text-base-content/40 mb-4">
+              <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground/60 mb-4">
                 Legal
               </h3>
               <ul className="space-y-3">
@@ -152,7 +165,7 @@ export function Footer() {
                   <li key={link.label}>
                     <a
                       href={link.href}
-                      className="text-base-content/70 hover:text-primary transition-colors inline-flex items-center gap-1 group"
+                      className="text-muted-foreground hover:text-primary transition-colors inline-flex items-center gap-1 group text-sm"
                       {...(link.external && { target: "_blank", rel: "noopener noreferrer" })}
                     >
                       {link.label}
@@ -168,11 +181,11 @@ export function Footer() {
         </div>
 
         {/* Bottom Bar */}
-        <div className="mt-16 pt-8 border-t border-base-300/50 flex flex-col sm:flex-row items-center justify-between gap-4">
-          <p className="text-sm text-base-content/50">
+        <div className="mt-16 pt-8 border-t border-border flex flex-col sm:flex-row items-center justify-between gap-4">
+          <p className="text-sm text-muted-foreground">
             © {currentYear} mmmetric Analytics. All rights reserved.
           </p>
-          <div className="flex items-center gap-1 text-sm text-base-content/50">
+          <div className="flex items-center gap-1 text-sm text-muted-foreground">
             <span>Built for</span>
             <span className="text-primary font-medium">privacy</span>
             <span>·</span>

@@ -1,7 +1,24 @@
 import { useState } from "react";
-import { X, Target } from "lucide-react";
+import { X, Target, Loader2 } from "lucide-react";
 import { useCreateGoal } from "@/hooks/useGoals";
 import { useToast } from "@/hooks/use-toast";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter
+} from "@/components/ui/dialog";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 interface GoalSetupProps {
   siteId: string;
@@ -13,13 +30,13 @@ export function GoalSetup({ siteId, onClose }: GoalSetupProps) {
   const [eventName, setEventName] = useState("pageview");
   const [urlMatch, setUrlMatch] = useState("");
   const [matchType, setMatchType] = useState<"exact" | "contains" | "starts_with" | "regex">("contains");
-  
+
   const createGoal = useCreateGoal();
   const { toast } = useToast();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!name.trim()) {
       toast({
         title: "Name required",
@@ -37,7 +54,7 @@ export function GoalSetup({ siteId, onClose }: GoalSetupProps) {
         url_match: urlMatch.trim() || null,
         match_type: matchType,
       });
-      
+
       toast({
         title: "Goal created",
         description: `"${name}" is now tracking conversions.`,
@@ -53,27 +70,19 @@ export function GoalSetup({ siteId, onClose }: GoalSetupProps) {
   };
 
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-      <div className="bg-base-100 rounded-xl w-full max-w-md shadow-xl">
-        <div className="flex items-center justify-between p-4 border-b border-base-300">
-          <div className="flex items-center gap-2">
-            <Target className="h-5 w-5 text-accent" />
-            <h2 className="font-semibold">Create Goal</h2>
-          </div>
-          <button className="btn btn-ghost btn-sm btn-circle" onClick={onClose}>
-            <X className="h-4 w-4" />
-          </button>
-        </div>
+    <Dialog open={true} onOpenChange={(open) => !open && onClose()}>
+      <DialogContent className="sm:max-w-md">
+        <DialogHeader>
+          <DialogTitle className="flex items-center gap-2">
+            <Target className="h-5 w-5 text-primary" />
+            Create Goal
+          </DialogTitle>
+        </DialogHeader>
 
-        <form onSubmit={handleSubmit} className="p-4 space-y-4">
-          {/* Goal Name */}
-          <div className="form-control">
-            <label className="label">
-              <span className="label-text font-medium">Goal Name</span>
-            </label>
-            <input
-              type="text"
-              className="input input-bordered"
+        <form onSubmit={handleSubmit} className="space-y-4 py-4">
+          <div className="space-y-2">
+            <Label>Goal Name</Label>
+            <Input
               placeholder="e.g., Sign Up Completed"
               value={name}
               onChange={(e) => setName(e.target.value)}
@@ -81,91 +90,76 @@ export function GoalSetup({ siteId, onClose }: GoalSetupProps) {
             />
           </div>
 
-          {/* Event Type */}
-          <div className="form-control">
-            <label className="label">
-              <span className="label-text font-medium">Event Type</span>
-            </label>
-            <select
-              className="select select-bordered"
-              value={eventName}
-              onChange={(e) => setEventName(e.target.value)}
-            >
-              <option value="pageview">Pageview</option>
-              <option value="click">Click</option>
-              <option value="signup">Sign Up</option>
-              <option value="purchase">Purchase</option>
-              <option value="download">Download</option>
-              <option value="form_submit">Form Submit</option>
-            </select>
-            <label className="label">
-              <span className="label-text-alt text-base-content/60">
-                Select the event type to track as a conversion
-              </span>
-            </label>
+          <div className="space-y-2">
+            <Label>Event Type</Label>
+            <Select value={eventName} onValueChange={setEventName}>
+              <SelectTrigger>
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="pageview">Pageview</SelectItem>
+                <SelectItem value="click">Click</SelectItem>
+                <SelectItem value="signup">Sign Up</SelectItem>
+                <SelectItem value="purchase">Purchase</SelectItem>
+                <SelectItem value="download">Download</SelectItem>
+                <SelectItem value="form_submit">Form Submit</SelectItem>
+              </SelectContent>
+            </Select>
+            <p className="text-[0.8rem] text-muted-foreground">
+              Select the event type to track as a conversion
+            </p>
           </div>
 
-          {/* URL Match (optional) */}
-          <div className="form-control">
-            <label className="label">
-              <span className="label-text font-medium">URL Pattern (optional)</span>
-            </label>
-            <input
-              type="text"
-              className="input input-bordered"
+          <div className="space-y-2">
+            <Label>URL Pattern (optional)</Label>
+            <Input
               placeholder="e.g., /thank-you"
               value={urlMatch}
               onChange={(e) => setUrlMatch(e.target.value)}
             />
           </div>
 
-          {/* Match Type */}
           {urlMatch && (
-            <div className="form-control">
-              <label className="label">
-                <span className="label-text font-medium">Match Type</span>
-              </label>
-              <select
-                className="select select-bordered"
-                value={matchType}
-                onChange={(e) => setMatchType(e.target.value as typeof matchType)}
-              >
-                <option value="contains">Contains</option>
-                <option value="exact">Exact Match</option>
-                <option value="starts_with">Starts With</option>
-                <option value="regex">Regex</option>
-              </select>
+            <div className="space-y-2">
+              <Label>Match Type</Label>
+              <Select value={matchType} onValueChange={(val: any) => setMatchType(val)}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="contains">Contains</SelectItem>
+                  <SelectItem value="exact">Exact Match</SelectItem>
+                  <SelectItem value="starts_with">Starts With</SelectItem>
+                  <SelectItem value="regex">Regex</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
           )}
 
-          {/* Preview */}
-          <div className="bg-base-200 rounded-lg p-3">
-            <p className="text-sm text-base-content/70">
+          <div className="bg-muted rounded-lg p-3 text-sm text-muted-foreground">
+            <p>
               <strong>Goal will track:</strong>{" "}
               {eventName === "pageview" ? "page views" : `${eventName} events`}
               {urlMatch && ` where URL ${matchType.replace("_", " ")} "${urlMatch}"`}
             </p>
           </div>
 
-          {/* Actions */}
-          <div className="flex justify-end gap-2 pt-2">
-            <button type="button" className="btn btn-ghost" onClick={onClose}>
+          <DialogFooter>
+            <Button type="button" variant="ghost" onClick={onClose}>
               Cancel
-            </button>
-            <button 
-              type="submit" 
-              className="btn btn-primary"
+            </Button>
+            <Button
+              type="submit"
               disabled={createGoal.isPending}
             >
-              {createGoal.isPending ? (
-                <span className="loading loading-spinner loading-sm"></span>
-              ) : (
-                "Create Goal"
+              {createGoal.isPending && (
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
               )}
-            </button>
-          </div>
+              Create Goal
+            </Button>
+          </DialogFooter>
         </form>
-      </div>
-    </div>
+      </DialogContent>
+    </Dialog>
   );
 }

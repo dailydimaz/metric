@@ -70,7 +70,7 @@ export function Pricing() {
           <h2 className="text-3xl font-bold tracking-tight sm:text-4xl">
             Simple, usage-based pricing
           </h2>
-          <p className="mt-4 text-lg text-base-content/70">
+          <p className="mt-4 text-lg text-muted-foreground">
             Start free, scale as you grow. Only pay for what you use.
           </p>
         </div>
@@ -79,27 +79,27 @@ export function Pricing() {
           {tiers.map((tier) => (
             <div
               key={tier.name}
-              className={`card border ${tier.highlighted
-                ? "border-primary bg-base-100 shadow-xl shadow-primary/10 scale-105 z-10"
-                : "bg-base-100 border-base-300"
+              className={`rounded-xl border ${tier.highlighted
+                ? "border-primary bg-card shadow-xl shadow-primary/10 scale-105 z-10"
+                : "bg-card border-border"
                 }`}
             >
               {tier.highlighted && (
                 <div className="absolute -top-4 left-1/2 -translate-x-1/2">
-                  <span className="badge badge-primary">
+                  <Badge>
                     Most Popular
-                  </span>
+                  </Badge>
                 </div>
               )}
 
-              <div className="card-body">
+              <div className="p-6">
                 <h3 className="text-lg font-semibold">{tier.name}</h3>
-                <p className="text-sm text-base-content/70">{tier.description}</p>
+                <p className="text-sm text-muted-foreground">{tier.description}</p>
 
                 <div className="mt-4">
                   <span className="text-4xl font-bold">{tier.price}</span>
                   {tier.period && (
-                    <span className="text-base-content/70">{tier.period}</span>
+                    <span className="text-muted-foreground">{tier.period}</span>
                   )}
                 </div>
 
@@ -108,13 +108,13 @@ export function Pricing() {
                 <ul className="mt-6 space-y-3">
                   {tier.features.map((feature) => (
                     <li key={feature} className="flex items-center gap-3 text-sm">
-                      <Check className="h-4 w-4 text-success flex-shrink-0" />
+                      <Check className="h-4 w-4 text-green-500 flex-shrink-0" />
                       <span>{feature}</span>
                     </li>
                   ))}
                 </ul>
 
-                <div className="card-actions mt-6">
+                <div className="mt-6">
                   {tier.href ? (
                     <Button
                       asChild
@@ -138,14 +138,14 @@ export function Pricing() {
           ))}
         </div>
 
-        <p className="mt-12 text-center text-sm text-base-content/70">
-          Need more than 1M events? <a href="mailto:sales@mmmetric.app" className="link link-primary">Contact us</a> for custom pricing.
+        <p className="mt-12 text-center text-sm text-muted-foreground">
+          Need more than 1M events? <a href="mailto:sales@mmmetric.app" className="text-primary hover:underline">Contact us</a> for custom pricing.
         </p>
 
         {/* Self-hosted option */}
         <div className="mt-16 max-w-2xl mx-auto">
-          <div className="card border border-base-300 bg-base-100/50">
-            <div className="card-body flex flex-col sm:flex-row items-center justify-between gap-4">
+          <div className="rounded-xl border border-border bg-card/50">
+            <div className="p-6 flex flex-col sm:flex-row items-center justify-between gap-4">
               <div className="flex items-center gap-4">
                 <div className="p-3 rounded-full bg-primary/10">
                   <Server className="w-6 h-6 text-primary" />
@@ -155,7 +155,7 @@ export function Pricing() {
                     Self-Hosted
                     <Badge variant="outline" className="text-xs">Open Source</Badge>
                   </h3>
-                  <p className="text-sm text-base-content/70">
+                  <p className="text-sm text-muted-foreground">
                     Deploy on your own infrastructure with unlimited everything
                   </p>
                 </div>
@@ -167,14 +167,15 @@ export function Pricing() {
                     <span className="font-semibold">Free forever</span>
                   </div>
                 </div>
-                <a
-                  href="https://github.com/dailydimaz/mmmetric"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="btn btn-outline btn-sm"
-                >
-                  View on GitHub
-                </a>
+                <Button variant="outline" size="sm" asChild>
+                  <a
+                    href="https://github.com/dailydimaz/mmmetric"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    View on GitHub
+                  </a>
+                </Button>
               </div>
             </div>
           </div>

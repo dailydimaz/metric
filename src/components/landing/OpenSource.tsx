@@ -1,13 +1,14 @@
 import { Github, Heart, Users, Star } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 export function OpenSource() {
   return (
-    <section className="py-24 bg-base-200/50">
+    <section className="py-24 bg-muted/50">
       <div className="container mx-auto px-4">
         <div className="max-w-4xl mx-auto text-center">
           {/* Badge */}
-          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-base-300/50 text-sm font-medium mb-8">
-            <Heart className="h-4 w-4 text-error" />
+          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-muted text-sm font-medium mb-8">
+            <Heart className="h-4 w-4 text-red-500" />
             <span>Open Source</span>
           </div>
 
@@ -16,65 +17,67 @@ export function OpenSource() {
             <span className="text-primary">open source</span>
           </h2>
 
-          <p className="mt-6 text-lg text-base-content/70 max-w-2xl mx-auto leading-relaxed">
+          <p className="mt-6 text-lg text-muted-foreground max-w-2xl mx-auto leading-relaxed">
             mmmetric is proudly open source and MIT licensed. Thousands of developers
             worldwide can share and contribute to make analytics better for everyone.
           </p>
 
           {/* Stats */}
           <div className="mt-12 grid grid-cols-1 sm:grid-cols-3 gap-6 max-w-2xl mx-auto">
-            <div className="card bg-base-100 border border-base-300">
-              <div className="card-body items-center py-6">
+            <div className="bg-card border border-border rounded-xl">
+              <div className="p-6 flex flex-col items-center">
                 <Github className="h-6 w-6 text-primary mb-2" />
                 <span className="text-2xl font-bold">100%</span>
-                <span className="text-sm text-base-content/70">Open Source</span>
+                <span className="text-sm text-muted-foreground">Open Source</span>
               </div>
             </div>
-            <div className="card bg-base-100 border border-base-300">
-              <div className="card-body items-center py-6">
+            <div className="bg-card border border-border rounded-xl">
+              <div className="p-6 flex flex-col items-center">
                 <Users className="h-6 w-6 text-primary mb-2" />
                 <span className="text-2xl font-bold">MIT</span>
-                <span className="text-sm text-base-content/70">Licensed</span>
+                <span className="text-sm text-muted-foreground">Licensed</span>
               </div>
             </div>
-            <div className="card bg-base-100 border border-base-300">
-              <div className="card-body items-center py-6">
+            <div className="bg-card border border-border rounded-xl">
+              <div className="p-6 flex flex-col items-center">
                 <Star className="h-6 w-6 text-primary mb-2" />
                 <span className="text-2xl font-bold">Self-host</span>
-                <span className="text-sm text-base-content/70">Your Data</span>
+                <span className="text-sm text-muted-foreground">Your Data</span>
               </div>
             </div>
           </div>
 
           {/* CTA */}
           <div className="mt-12 flex flex-col sm:flex-row items-center justify-center gap-4">
-            <a
-              href="https://github.com/dailydimaz/mmmetric"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="btn btn-outline gap-2"
-            >
-              <Github className="h-5 w-5" />
-              View on GitHub
-            </a>
-            <a
-              href="https://github.com/dailydimaz/mmmetric/blob/main/CONTRIBUTING.md"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="btn btn-ghost gap-2"
-            >
-              <Heart className="h-5 w-5" />
-              Contribute
-            </a>
+            <Button variant="outline" asChild>
+              <a
+                href="https://github.com/dailydimaz/mmmetric"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                <Github className="h-5 w-5 mr-2" />
+                View on GitHub
+              </a>
+            </Button>
+            <Button variant="ghost" asChild>
+              <a
+                href="https://github.com/dailydimaz/mmmetric/blob/main/CONTRIBUTING.md"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                <Heart className="h-5 w-5 mr-2" />
+                Contribute
+              </a>
+            </Button>
           </div>
 
           {/* Quote */}
-          <div className="mt-16 p-8 rounded-2xl bg-base-100 border border-base-300 max-w-2xl mx-auto">
-            <blockquote className="text-lg italic text-base-content/80">
+          <div className="mt-16 p-8 rounded-2xl bg-card border border-border max-w-2xl mx-auto">
+            <blockquote className="text-lg italic text-muted-foreground">
               "Open source allows everyone to verify exactly how their data is handled.
               No black boxes, no hidden tracking, just transparent analytics."
             </blockquote>
-            <p className="mt-4 text-sm text-base-content/60">
+            <p className="mt-4 text-sm text-muted-foreground/60">
               — Built with privacy in mind
             </p>
           </div>

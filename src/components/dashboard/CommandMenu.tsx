@@ -105,15 +105,16 @@ export function CommandMenu() {
                             key={site.id}
                             value={site.name} // Include name for searching
                             onSelect={() => runCommand(() => navigate(`/dashboard/sites/${site.id}`))}
+                            className="cursor-pointer"
                         >
-                            <Globe className="mr-2 h-4 w-4" />
+                            <Globe className="mr-2 h-4 w-4 text-muted-foreground" />
                             <span>{site.name}</span>
-                            <span className="ml-2 text-xs text-muted-foreground truncate max-w-[100px]">
+                            <span className="ml-auto text-xs text-muted-foreground truncate max-w-[100px] font-mono">
                                 {site.domain}
                             </span>
                         </CommandItem>
                     ))}
-                    <CommandItem onSelect={() => runCommand(() => navigate("/dashboard"))}>
+                    <CommandItem onSelect={() => runCommand(() => navigate("/dashboard"))} className="text-primary cursor-pointer font-medium">
                         <Plus className="mr-2 h-4 w-4" />
                         <span>Add New Site</span>
                     </CommandItem>

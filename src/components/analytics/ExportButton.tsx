@@ -4,6 +4,13 @@ import { DateRange } from "@/hooks/useAnalytics";
 import { fetchExportData, exportToCSV, exportToJSON } from "@/utils/analyticsExport";
 import { useToast } from "@/hooks/use-toast";
 import { isBillingEnabled } from "@/lib/billing";
+import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 interface ExportButtonProps {
   siteId: string;
@@ -27,7 +34,7 @@ export function ExportButton({ siteId, siteName, dateRange }: ExportButtonProps)
 
     try {
       const data = await fetchExportData(siteId, dateRange);
-      
+
       if (data.length === 0) {
         toast({
           title: "No data to export",
@@ -62,39 +69,32 @@ export function ExportButton({ siteId, siteName, dateRange }: ExportButtonProps)
   };
 
   return (
-    <div className="dropdown dropdown-end">
-      <button 
-        tabIndex={0}
-        className="btn btn-ghost btn-sm"
-        onClick={() => setDropdownOpen(!dropdownOpen)}
-        disabled={isExporting}
-      >
-        {isExporting ? (
-          <span className="loading loading-spinner loading-sm"></span>
-        ) : (
-          <Download className="h-4 w-4" />
-        )}
-        Export
-      </button>
-      {dropdownOpen && (
-        <ul 
-          tabIndex={0} 
-          className="dropdown-content z-[1] menu p-2 shadow-lg bg-base-100 rounded-box w-52 border border-base-300"
+
+    <DropdownMenu open={dropdownOpen} onOpenChange={setDropdownOpen}>
+      <DropdownMenuTrigger asChild>
+        <Button
+          variant="ghost"
+          size="sm"
+          disabled={isExporting}
         >
-          <li>
-            <button onClick={() => handleExport("csv")} className="flex items-center gap-2">
-              <FileSpreadsheet className="h-4 w-4" />
-              Export as CSV
-            </button>
-          </li>
-          <li>
-            <button onClick={() => handleExport("json")} className="flex items-center gap-2">
-              <FileJson className="h-4 w-4" />
-              Export as JSON
-            </button>
-          </li>
-        </ul>
-      )}
-    </div>
+          {isExporting ? (
+            <span className="loading loading-spinner loading-sm mr-2"></span>
+          ) : (
+            <Download className="h-4 w-4 mr-2" />
+          )}
+          Export
+        </Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="end">
+        <DropdownMenuItem onClick={() => handleExport("csv")}>
+          <FileSpreadsheet className="h-4 w-4 mr-2" />
+          Export as CSV
+        </DropdownMenuItem>
+        <DropdownMenuItem onClick={() => handleExport("json")}>
+          <FileJson className="h-4 w-4 mr-2" />
+          Export as JSON
+        </DropdownMenuItem>
+      </DropdownMenuContent>
+    </DropdownMenu>
   );
 }

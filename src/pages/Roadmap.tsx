@@ -42,6 +42,8 @@ import {
   LayoutTemplate,
   Bell,
 } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 
 interface Feature {
   name: string;
@@ -425,10 +427,12 @@ const categoryLabels = {
 };
 
 const difficultyBadge = {
-  easy: "badge-success",
-  medium: "badge-warning",
-  hard: "badge-error",
+  easy: "bg-green-500 hover:bg-green-600 border-none text-white",
+  medium: "bg-yellow-500 hover:bg-yellow-600 border-none text-white",
+  hard: "bg-red-500 hover:bg-red-600 border-none text-white",
 };
+
+
 
 export default function Roadmap() {
   const implementedCount = features.filter((f) => f.implemented).length;
@@ -436,21 +440,23 @@ export default function Roadmap() {
   const progress = Math.round((implementedCount / totalCount) * 100);
 
   return (
-    <div className="min-h-screen bg-base-100">
+    <div className="min-h-screen bg-background text-foreground">
       {/* Header */}
-      <header className="sticky top-0 z-50 border-b border-base-300 bg-base-100/80 backdrop-blur-xl">
+      <header className="sticky top-0 z-50 border-b border-border bg-background/80 backdrop-blur-xl">
         <div className="container mx-auto px-4 lg:px-8">
           <div className="flex h-16 items-center justify-between">
             <Link to="/" className="flex items-center gap-2">
               <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary">
-                <BarChart3 className="h-5 w-5 text-primary-content" />
+                <BarChart3 className="h-5 w-5 text-primary-foreground" />
               </div>
               <span className="font-display text-xl font-bold">mmmetric</span>
             </Link>
-            <Link to="/" className="btn btn-ghost btn-sm gap-2">
-              <ArrowLeft className="h-4 w-4" />
-              Back to Home
-            </Link>
+            <Button variant="ghost" size="sm" asChild>
+              <Link to="/">
+                <ArrowLeft className="h-4 w-4 mr-2" />
+                Back to Home
+              </Link>
+            </Button>
           </div>
         </div>
       </header>
@@ -466,49 +472,49 @@ export default function Roadmap() {
             Building the Future of
             <span className="text-primary"> Privacy Analytics</span>
           </h1>
-          <p className="text-lg text-base-content/70 mb-8">
+          <p className="text-lg text-muted-foreground mb-8">
             We're building a comprehensive analytics platform. Here's our progress and what's coming next.
           </p>
 
           {/* Progress Bar */}
-          <div className="bg-base-200 rounded-2xl p-6 max-w-md mx-auto">
+          <div className="bg-muted/50 rounded-2xl p-6 max-w-md mx-auto">
             <div className="flex items-center justify-between mb-3">
               <span className="text-sm font-medium">Overall Progress</span>
               <span className="text-sm font-bold text-primary">
                 {implementedCount}/{totalCount} features
               </span>
             </div>
-            <div className="w-full bg-base-300 rounded-full h-3">
+            <div className="w-full bg-muted rounded-full h-3">
               <div
                 className="bg-gradient-to-r from-primary to-secondary h-3 rounded-full transition-all duration-500"
                 style={{ width: `${progress}%` }}
               />
             </div>
-            <p className="text-xs text-base-content/50 mt-2">{progress}% complete</p>
+            <p className="text-xs text-muted-foreground mt-2">{progress}% complete</p>
           </div>
         </div>
 
         {/* Legend */}
         <div className="flex flex-wrap items-center justify-center gap-4 mb-8">
           <div className="flex items-center gap-2 text-sm">
-            <div className="w-3 h-3 rounded-full bg-success"></div>
+            <div className="w-3 h-3 rounded-full bg-green-500"></div>
             <span>Easy</span>
           </div>
           <div className="flex items-center gap-2 text-sm">
-            <div className="w-3 h-3 rounded-full bg-warning"></div>
+            <div className="w-3 h-3 rounded-full bg-yellow-500"></div>
             <span>Medium</span>
           </div>
           <div className="flex items-center gap-2 text-sm">
-            <div className="w-3 h-3 rounded-full bg-error"></div>
+            <div className="w-3 h-3 rounded-full bg-red-500"></div>
             <span>Hard</span>
           </div>
           <div className="divider divider-horizontal"></div>
           <div className="flex items-center gap-2 text-sm">
-            <Check className="h-4 w-4 text-success" />
+            <Check className="h-4 w-4 text-green-500" />
             <span>Implemented</span>
           </div>
           <div className="flex items-center gap-2 text-sm">
-            <Clock className="h-4 w-4 text-base-content/50" />
+            <Clock className="h-4 w-4 text-muted-foreground" />
             <span>Planned</span>
           </div>
         </div>
@@ -532,11 +538,11 @@ export default function Roadmap() {
                 {/* Status indicator */}
                 <div className="absolute top-3 right-3">
                   {feature.implemented ? (
-                    <div className="flex h-6 w-6 items-center justify-center rounded-full bg-success text-success-content">
+                    <div className="flex h-6 w-6 items-center justify-center rounded-full bg-green-100 text-green-700">
                       <Check className="h-4 w-4" />
                     </div>
                   ) : (
-                    <div className="flex h-6 w-6 items-center justify-center rounded-full bg-base-300 text-base-content/50">
+                    <div className="flex h-6 w-6 items-center justify-center rounded-full bg-muted text-muted-foreground">
                       <Clock className="h-4 w-4" />
                     </div>
                   )}
@@ -546,7 +552,7 @@ export default function Roadmap() {
                 <div
                   className={`
                   flex h-10 w-10 items-center justify-center rounded-xl mb-3
-                  ${feature.implemented ? "bg-primary/20 text-primary" : "bg-base-300 text-base-content/50"}
+                  ${feature.implemented ? "bg-primary/20 text-primary" : "bg-muted text-muted-foreground"}
                 `}
                 >
                   <Icon className="h-5 w-5" />
@@ -554,12 +560,12 @@ export default function Roadmap() {
 
                 {/* Content */}
                 <h3 className="font-semibold mb-1">{feature.name}</h3>
-                <p className="text-sm text-base-content/60 mb-3 line-clamp-2">{feature.description}</p>
+                <p className="text-sm text-muted-foreground mb-3 line-clamp-2">{feature.description}</p>
 
                 {/* Badges */}
                 <div className="flex items-center gap-2 flex-wrap">
-                  <span className={`badge badge-sm ${difficultyBadge[feature.difficulty]}`}>{feature.difficulty}</span>
-                  <span className="badge badge-sm badge-outline">{categoryLabels[feature.category]}</span>
+                  <Badge variant={feature.difficulty === 'easy' ? 'default' : feature.difficulty === 'medium' ? 'secondary' : 'destructive'} className={feature.difficulty === 'easy' ? 'bg-green-500 hover:bg-green-600' : feature.difficulty === 'medium' ? 'bg-yellow-500 hover:bg-yellow-600' : ''}>{feature.difficulty}</Badge>
+                  <Badge variant="outline">{categoryLabels[feature.category]}</Badge>
                 </div>
               </div>
             );
@@ -572,11 +578,11 @@ export default function Roadmap() {
             const categoryFeatures = features.filter((f) => f.category === (key as keyof typeof categoryLabels));
             const implemented = categoryFeatures.filter((f) => f.implemented).length;
             return (
-              <div key={key} className="bg-base-200 rounded-xl p-4 text-center">
+              <div key={key} className="bg-muted/50 rounded-xl p-4 text-center">
                 <div className="text-2xl font-bold text-primary">
                   {implemented}/{categoryFeatures.length}
                 </div>
-                <div className="text-sm text-base-content/60">{label}</div>
+                <div className="text-sm text-muted-foreground">{label}</div>
               </div>
             );
           })}
@@ -585,28 +591,31 @@ export default function Roadmap() {
         {/* CTA Section */}
         <div className="mt-16 text-center">
           <h2 className="text-2xl font-bold mb-4">Want to contribute?</h2>
-          <p className="text-base-content/70 mb-6 max-w-lg mx-auto">
+          <p className="text-muted-foreground mb-6 max-w-lg mx-auto">
             mmmetric is open source. Help us build the best privacy-first analytics platform.
           </p>
           <div className="flex items-center justify-center gap-4">
-            <a
-              href="https://github.com/dailydimaz/mmmetric"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="btn btn-primary"
-            >
-              View on GitHub
-            </a>
-            <Link to="/auth" className="btn btn-outline">
-              Get Started Free
-            </Link>
+            <Button asChild>
+              <a
+                href="https://github.com/dailydimaz/mmmetric"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                View on GitHub
+              </a>
+            </Button>
+            <Button variant="outline" asChild>
+              <Link to="/auth">
+                Get Started Free
+              </Link>
+            </Button>
           </div>
         </div>
       </main>
 
       {/* Simple Footer */}
-      <footer className="border-t border-base-300 py-8 mt-16">
-        <div className="container mx-auto px-4 text-center text-sm text-base-content/50">
+      <footer className="border-t border-border py-8 mt-16">
+        <div className="container mx-auto px-4 text-center text-sm text-muted-foreground">
           © {new Date().getFullYear()} mmmetric Analytics. All rights reserved.
         </div>
       </footer>
