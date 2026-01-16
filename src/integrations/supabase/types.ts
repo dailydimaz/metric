@@ -14,6 +14,278 @@ export type Database = {
   }
   public: {
     Tables: {
+      analytics_aggregation_watermark: {
+        Row: {
+          last_aggregated_at: string
+          site_id: string
+          updated_at: string
+        }
+        Insert: {
+          last_aggregated_at?: string
+          site_id: string
+          updated_at?: string
+        }
+        Update: {
+          last_aggregated_at?: string
+          site_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "analytics_aggregation_watermark_site_id_fkey"
+            columns: ["site_id"]
+            isOneToOne: true
+            referencedRelation: "sites"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      analytics_devices_hourly: {
+        Row: {
+          browser: string | null
+          created_at: string
+          device_type: string | null
+          hour_timestamp: string
+          id: string
+          os: string | null
+          site_id: string
+          unique_visitors: number
+          visits: number
+        }
+        Insert: {
+          browser?: string | null
+          created_at?: string
+          device_type?: string | null
+          hour_timestamp: string
+          id?: string
+          os?: string | null
+          site_id: string
+          unique_visitors?: number
+          visits?: number
+        }
+        Update: {
+          browser?: string | null
+          created_at?: string
+          device_type?: string | null
+          hour_timestamp?: string
+          id?: string
+          os?: string | null
+          site_id?: string
+          unique_visitors?: number
+          visits?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "analytics_devices_hourly_site_id_fkey"
+            columns: ["site_id"]
+            isOneToOne: false
+            referencedRelation: "sites"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      analytics_geo_hourly: {
+        Row: {
+          city: string | null
+          country: string
+          created_at: string
+          hour_timestamp: string
+          id: string
+          site_id: string
+          unique_visitors: number
+          visits: number
+        }
+        Insert: {
+          city?: string | null
+          country: string
+          created_at?: string
+          hour_timestamp: string
+          id?: string
+          site_id: string
+          unique_visitors?: number
+          visits?: number
+        }
+        Update: {
+          city?: string | null
+          country?: string
+          created_at?: string
+          hour_timestamp?: string
+          id?: string
+          site_id?: string
+          unique_visitors?: number
+          visits?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "analytics_geo_hourly_site_id_fkey"
+            columns: ["site_id"]
+            isOneToOne: false
+            referencedRelation: "sites"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      analytics_hourly: {
+        Row: {
+          bounces: number
+          created_at: string
+          hour_timestamp: string
+          id: string
+          pageviews: number
+          sessions: number
+          site_id: string
+          total_session_duration: number
+          unique_visitors: number
+          updated_at: string
+        }
+        Insert: {
+          bounces?: number
+          created_at?: string
+          hour_timestamp: string
+          id?: string
+          pageviews?: number
+          sessions?: number
+          site_id: string
+          total_session_duration?: number
+          unique_visitors?: number
+          updated_at?: string
+        }
+        Update: {
+          bounces?: number
+          created_at?: string
+          hour_timestamp?: string
+          id?: string
+          pageviews?: number
+          sessions?: number
+          site_id?: string
+          total_session_duration?: number
+          unique_visitors?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "analytics_hourly_site_id_fkey"
+            columns: ["site_id"]
+            isOneToOne: false
+            referencedRelation: "sites"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      analytics_languages_hourly: {
+        Row: {
+          created_at: string
+          hour_timestamp: string
+          id: string
+          language: string
+          site_id: string
+          unique_visitors: number
+          visits: number
+        }
+        Insert: {
+          created_at?: string
+          hour_timestamp: string
+          id?: string
+          language: string
+          site_id: string
+          unique_visitors?: number
+          visits?: number
+        }
+        Update: {
+          created_at?: string
+          hour_timestamp?: string
+          id?: string
+          language?: string
+          site_id?: string
+          unique_visitors?: number
+          visits?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "analytics_languages_hourly_site_id_fkey"
+            columns: ["site_id"]
+            isOneToOne: false
+            referencedRelation: "sites"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      analytics_pages_hourly: {
+        Row: {
+          created_at: string
+          hour_timestamp: string
+          id: string
+          pageviews: number
+          site_id: string
+          unique_visitors: number
+          url: string
+        }
+        Insert: {
+          created_at?: string
+          hour_timestamp: string
+          id?: string
+          pageviews?: number
+          site_id: string
+          unique_visitors?: number
+          url: string
+        }
+        Update: {
+          created_at?: string
+          hour_timestamp?: string
+          id?: string
+          pageviews?: number
+          site_id?: string
+          unique_visitors?: number
+          url?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "analytics_pages_hourly_site_id_fkey"
+            columns: ["site_id"]
+            isOneToOne: false
+            referencedRelation: "sites"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      analytics_referrers_hourly: {
+        Row: {
+          created_at: string
+          hour_timestamp: string
+          id: string
+          referrer: string
+          site_id: string
+          unique_visitors: number
+          visits: number
+        }
+        Insert: {
+          created_at?: string
+          hour_timestamp: string
+          id?: string
+          referrer: string
+          site_id: string
+          unique_visitors?: number
+          visits?: number
+        }
+        Update: {
+          created_at?: string
+          hour_timestamp?: string
+          id?: string
+          referrer?: string
+          site_id?: string
+          unique_visitors?: number
+          visits?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "analytics_referrers_hourly_site_id_fkey"
+            columns: ["site_id"]
+            isOneToOne: false
+            referencedRelation: "sites"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       api_keys: {
         Row: {
           created_at: string
@@ -179,6 +451,1086 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      events_default: {
+        Row: {
+          browser: string | null
+          city: string | null
+          country: string | null
+          created_at: string
+          device_type: string | null
+          event_name: string
+          id: string
+          language: string | null
+          os: string | null
+          properties: Json | null
+          referrer: string | null
+          session_id: string | null
+          site_id: string
+          url: string | null
+          visitor_id: string | null
+        }
+        Insert: {
+          browser?: string | null
+          city?: string | null
+          country?: string | null
+          created_at?: string
+          device_type?: string | null
+          event_name?: string
+          id?: string
+          language?: string | null
+          os?: string | null
+          properties?: Json | null
+          referrer?: string | null
+          session_id?: string | null
+          site_id: string
+          url?: string | null
+          visitor_id?: string | null
+        }
+        Update: {
+          browser?: string | null
+          city?: string | null
+          country?: string | null
+          created_at?: string
+          device_type?: string | null
+          event_name?: string
+          id?: string
+          language?: string | null
+          os?: string | null
+          properties?: Json | null
+          referrer?: string | null
+          session_id?: string | null
+          site_id?: string
+          url?: string | null
+          visitor_id?: string | null
+        }
+        Relationships: []
+      }
+      events_partitioned: {
+        Row: {
+          browser: string | null
+          city: string | null
+          country: string | null
+          created_at: string
+          device_type: string | null
+          event_name: string
+          id: string
+          language: string | null
+          os: string | null
+          properties: Json | null
+          referrer: string | null
+          session_id: string | null
+          site_id: string
+          url: string | null
+          visitor_id: string | null
+        }
+        Insert: {
+          browser?: string | null
+          city?: string | null
+          country?: string | null
+          created_at?: string
+          device_type?: string | null
+          event_name?: string
+          id?: string
+          language?: string | null
+          os?: string | null
+          properties?: Json | null
+          referrer?: string | null
+          session_id?: string | null
+          site_id: string
+          url?: string | null
+          visitor_id?: string | null
+        }
+        Update: {
+          browser?: string | null
+          city?: string | null
+          country?: string | null
+          created_at?: string
+          device_type?: string | null
+          event_name?: string
+          id?: string
+          language?: string | null
+          os?: string | null
+          properties?: Json | null
+          referrer?: string | null
+          session_id?: string | null
+          site_id?: string
+          url?: string | null
+          visitor_id?: string | null
+        }
+        Relationships: []
+      }
+      events_y2025m01: {
+        Row: {
+          browser: string | null
+          city: string | null
+          country: string | null
+          created_at: string
+          device_type: string | null
+          event_name: string
+          id: string
+          language: string | null
+          os: string | null
+          properties: Json | null
+          referrer: string | null
+          session_id: string | null
+          site_id: string
+          url: string | null
+          visitor_id: string | null
+        }
+        Insert: {
+          browser?: string | null
+          city?: string | null
+          country?: string | null
+          created_at?: string
+          device_type?: string | null
+          event_name?: string
+          id?: string
+          language?: string | null
+          os?: string | null
+          properties?: Json | null
+          referrer?: string | null
+          session_id?: string | null
+          site_id: string
+          url?: string | null
+          visitor_id?: string | null
+        }
+        Update: {
+          browser?: string | null
+          city?: string | null
+          country?: string | null
+          created_at?: string
+          device_type?: string | null
+          event_name?: string
+          id?: string
+          language?: string | null
+          os?: string | null
+          properties?: Json | null
+          referrer?: string | null
+          session_id?: string | null
+          site_id?: string
+          url?: string | null
+          visitor_id?: string | null
+        }
+        Relationships: []
+      }
+      events_y2025m02: {
+        Row: {
+          browser: string | null
+          city: string | null
+          country: string | null
+          created_at: string
+          device_type: string | null
+          event_name: string
+          id: string
+          language: string | null
+          os: string | null
+          properties: Json | null
+          referrer: string | null
+          session_id: string | null
+          site_id: string
+          url: string | null
+          visitor_id: string | null
+        }
+        Insert: {
+          browser?: string | null
+          city?: string | null
+          country?: string | null
+          created_at?: string
+          device_type?: string | null
+          event_name?: string
+          id?: string
+          language?: string | null
+          os?: string | null
+          properties?: Json | null
+          referrer?: string | null
+          session_id?: string | null
+          site_id: string
+          url?: string | null
+          visitor_id?: string | null
+        }
+        Update: {
+          browser?: string | null
+          city?: string | null
+          country?: string | null
+          created_at?: string
+          device_type?: string | null
+          event_name?: string
+          id?: string
+          language?: string | null
+          os?: string | null
+          properties?: Json | null
+          referrer?: string | null
+          session_id?: string | null
+          site_id?: string
+          url?: string | null
+          visitor_id?: string | null
+        }
+        Relationships: []
+      }
+      events_y2025m03: {
+        Row: {
+          browser: string | null
+          city: string | null
+          country: string | null
+          created_at: string
+          device_type: string | null
+          event_name: string
+          id: string
+          language: string | null
+          os: string | null
+          properties: Json | null
+          referrer: string | null
+          session_id: string | null
+          site_id: string
+          url: string | null
+          visitor_id: string | null
+        }
+        Insert: {
+          browser?: string | null
+          city?: string | null
+          country?: string | null
+          created_at?: string
+          device_type?: string | null
+          event_name?: string
+          id?: string
+          language?: string | null
+          os?: string | null
+          properties?: Json | null
+          referrer?: string | null
+          session_id?: string | null
+          site_id: string
+          url?: string | null
+          visitor_id?: string | null
+        }
+        Update: {
+          browser?: string | null
+          city?: string | null
+          country?: string | null
+          created_at?: string
+          device_type?: string | null
+          event_name?: string
+          id?: string
+          language?: string | null
+          os?: string | null
+          properties?: Json | null
+          referrer?: string | null
+          session_id?: string | null
+          site_id?: string
+          url?: string | null
+          visitor_id?: string | null
+        }
+        Relationships: []
+      }
+      events_y2025m04: {
+        Row: {
+          browser: string | null
+          city: string | null
+          country: string | null
+          created_at: string
+          device_type: string | null
+          event_name: string
+          id: string
+          language: string | null
+          os: string | null
+          properties: Json | null
+          referrer: string | null
+          session_id: string | null
+          site_id: string
+          url: string | null
+          visitor_id: string | null
+        }
+        Insert: {
+          browser?: string | null
+          city?: string | null
+          country?: string | null
+          created_at?: string
+          device_type?: string | null
+          event_name?: string
+          id?: string
+          language?: string | null
+          os?: string | null
+          properties?: Json | null
+          referrer?: string | null
+          session_id?: string | null
+          site_id: string
+          url?: string | null
+          visitor_id?: string | null
+        }
+        Update: {
+          browser?: string | null
+          city?: string | null
+          country?: string | null
+          created_at?: string
+          device_type?: string | null
+          event_name?: string
+          id?: string
+          language?: string | null
+          os?: string | null
+          properties?: Json | null
+          referrer?: string | null
+          session_id?: string | null
+          site_id?: string
+          url?: string | null
+          visitor_id?: string | null
+        }
+        Relationships: []
+      }
+      events_y2025m05: {
+        Row: {
+          browser: string | null
+          city: string | null
+          country: string | null
+          created_at: string
+          device_type: string | null
+          event_name: string
+          id: string
+          language: string | null
+          os: string | null
+          properties: Json | null
+          referrer: string | null
+          session_id: string | null
+          site_id: string
+          url: string | null
+          visitor_id: string | null
+        }
+        Insert: {
+          browser?: string | null
+          city?: string | null
+          country?: string | null
+          created_at?: string
+          device_type?: string | null
+          event_name?: string
+          id?: string
+          language?: string | null
+          os?: string | null
+          properties?: Json | null
+          referrer?: string | null
+          session_id?: string | null
+          site_id: string
+          url?: string | null
+          visitor_id?: string | null
+        }
+        Update: {
+          browser?: string | null
+          city?: string | null
+          country?: string | null
+          created_at?: string
+          device_type?: string | null
+          event_name?: string
+          id?: string
+          language?: string | null
+          os?: string | null
+          properties?: Json | null
+          referrer?: string | null
+          session_id?: string | null
+          site_id?: string
+          url?: string | null
+          visitor_id?: string | null
+        }
+        Relationships: []
+      }
+      events_y2025m06: {
+        Row: {
+          browser: string | null
+          city: string | null
+          country: string | null
+          created_at: string
+          device_type: string | null
+          event_name: string
+          id: string
+          language: string | null
+          os: string | null
+          properties: Json | null
+          referrer: string | null
+          session_id: string | null
+          site_id: string
+          url: string | null
+          visitor_id: string | null
+        }
+        Insert: {
+          browser?: string | null
+          city?: string | null
+          country?: string | null
+          created_at?: string
+          device_type?: string | null
+          event_name?: string
+          id?: string
+          language?: string | null
+          os?: string | null
+          properties?: Json | null
+          referrer?: string | null
+          session_id?: string | null
+          site_id: string
+          url?: string | null
+          visitor_id?: string | null
+        }
+        Update: {
+          browser?: string | null
+          city?: string | null
+          country?: string | null
+          created_at?: string
+          device_type?: string | null
+          event_name?: string
+          id?: string
+          language?: string | null
+          os?: string | null
+          properties?: Json | null
+          referrer?: string | null
+          session_id?: string | null
+          site_id?: string
+          url?: string | null
+          visitor_id?: string | null
+        }
+        Relationships: []
+      }
+      events_y2025m07: {
+        Row: {
+          browser: string | null
+          city: string | null
+          country: string | null
+          created_at: string
+          device_type: string | null
+          event_name: string
+          id: string
+          language: string | null
+          os: string | null
+          properties: Json | null
+          referrer: string | null
+          session_id: string | null
+          site_id: string
+          url: string | null
+          visitor_id: string | null
+        }
+        Insert: {
+          browser?: string | null
+          city?: string | null
+          country?: string | null
+          created_at?: string
+          device_type?: string | null
+          event_name?: string
+          id?: string
+          language?: string | null
+          os?: string | null
+          properties?: Json | null
+          referrer?: string | null
+          session_id?: string | null
+          site_id: string
+          url?: string | null
+          visitor_id?: string | null
+        }
+        Update: {
+          browser?: string | null
+          city?: string | null
+          country?: string | null
+          created_at?: string
+          device_type?: string | null
+          event_name?: string
+          id?: string
+          language?: string | null
+          os?: string | null
+          properties?: Json | null
+          referrer?: string | null
+          session_id?: string | null
+          site_id?: string
+          url?: string | null
+          visitor_id?: string | null
+        }
+        Relationships: []
+      }
+      events_y2025m08: {
+        Row: {
+          browser: string | null
+          city: string | null
+          country: string | null
+          created_at: string
+          device_type: string | null
+          event_name: string
+          id: string
+          language: string | null
+          os: string | null
+          properties: Json | null
+          referrer: string | null
+          session_id: string | null
+          site_id: string
+          url: string | null
+          visitor_id: string | null
+        }
+        Insert: {
+          browser?: string | null
+          city?: string | null
+          country?: string | null
+          created_at?: string
+          device_type?: string | null
+          event_name?: string
+          id?: string
+          language?: string | null
+          os?: string | null
+          properties?: Json | null
+          referrer?: string | null
+          session_id?: string | null
+          site_id: string
+          url?: string | null
+          visitor_id?: string | null
+        }
+        Update: {
+          browser?: string | null
+          city?: string | null
+          country?: string | null
+          created_at?: string
+          device_type?: string | null
+          event_name?: string
+          id?: string
+          language?: string | null
+          os?: string | null
+          properties?: Json | null
+          referrer?: string | null
+          session_id?: string | null
+          site_id?: string
+          url?: string | null
+          visitor_id?: string | null
+        }
+        Relationships: []
+      }
+      events_y2025m09: {
+        Row: {
+          browser: string | null
+          city: string | null
+          country: string | null
+          created_at: string
+          device_type: string | null
+          event_name: string
+          id: string
+          language: string | null
+          os: string | null
+          properties: Json | null
+          referrer: string | null
+          session_id: string | null
+          site_id: string
+          url: string | null
+          visitor_id: string | null
+        }
+        Insert: {
+          browser?: string | null
+          city?: string | null
+          country?: string | null
+          created_at?: string
+          device_type?: string | null
+          event_name?: string
+          id?: string
+          language?: string | null
+          os?: string | null
+          properties?: Json | null
+          referrer?: string | null
+          session_id?: string | null
+          site_id: string
+          url?: string | null
+          visitor_id?: string | null
+        }
+        Update: {
+          browser?: string | null
+          city?: string | null
+          country?: string | null
+          created_at?: string
+          device_type?: string | null
+          event_name?: string
+          id?: string
+          language?: string | null
+          os?: string | null
+          properties?: Json | null
+          referrer?: string | null
+          session_id?: string | null
+          site_id?: string
+          url?: string | null
+          visitor_id?: string | null
+        }
+        Relationships: []
+      }
+      events_y2025m10: {
+        Row: {
+          browser: string | null
+          city: string | null
+          country: string | null
+          created_at: string
+          device_type: string | null
+          event_name: string
+          id: string
+          language: string | null
+          os: string | null
+          properties: Json | null
+          referrer: string | null
+          session_id: string | null
+          site_id: string
+          url: string | null
+          visitor_id: string | null
+        }
+        Insert: {
+          browser?: string | null
+          city?: string | null
+          country?: string | null
+          created_at?: string
+          device_type?: string | null
+          event_name?: string
+          id?: string
+          language?: string | null
+          os?: string | null
+          properties?: Json | null
+          referrer?: string | null
+          session_id?: string | null
+          site_id: string
+          url?: string | null
+          visitor_id?: string | null
+        }
+        Update: {
+          browser?: string | null
+          city?: string | null
+          country?: string | null
+          created_at?: string
+          device_type?: string | null
+          event_name?: string
+          id?: string
+          language?: string | null
+          os?: string | null
+          properties?: Json | null
+          referrer?: string | null
+          session_id?: string | null
+          site_id?: string
+          url?: string | null
+          visitor_id?: string | null
+        }
+        Relationships: []
+      }
+      events_y2025m11: {
+        Row: {
+          browser: string | null
+          city: string | null
+          country: string | null
+          created_at: string
+          device_type: string | null
+          event_name: string
+          id: string
+          language: string | null
+          os: string | null
+          properties: Json | null
+          referrer: string | null
+          session_id: string | null
+          site_id: string
+          url: string | null
+          visitor_id: string | null
+        }
+        Insert: {
+          browser?: string | null
+          city?: string | null
+          country?: string | null
+          created_at?: string
+          device_type?: string | null
+          event_name?: string
+          id?: string
+          language?: string | null
+          os?: string | null
+          properties?: Json | null
+          referrer?: string | null
+          session_id?: string | null
+          site_id: string
+          url?: string | null
+          visitor_id?: string | null
+        }
+        Update: {
+          browser?: string | null
+          city?: string | null
+          country?: string | null
+          created_at?: string
+          device_type?: string | null
+          event_name?: string
+          id?: string
+          language?: string | null
+          os?: string | null
+          properties?: Json | null
+          referrer?: string | null
+          session_id?: string | null
+          site_id?: string
+          url?: string | null
+          visitor_id?: string | null
+        }
+        Relationships: []
+      }
+      events_y2025m12: {
+        Row: {
+          browser: string | null
+          city: string | null
+          country: string | null
+          created_at: string
+          device_type: string | null
+          event_name: string
+          id: string
+          language: string | null
+          os: string | null
+          properties: Json | null
+          referrer: string | null
+          session_id: string | null
+          site_id: string
+          url: string | null
+          visitor_id: string | null
+        }
+        Insert: {
+          browser?: string | null
+          city?: string | null
+          country?: string | null
+          created_at?: string
+          device_type?: string | null
+          event_name?: string
+          id?: string
+          language?: string | null
+          os?: string | null
+          properties?: Json | null
+          referrer?: string | null
+          session_id?: string | null
+          site_id: string
+          url?: string | null
+          visitor_id?: string | null
+        }
+        Update: {
+          browser?: string | null
+          city?: string | null
+          country?: string | null
+          created_at?: string
+          device_type?: string | null
+          event_name?: string
+          id?: string
+          language?: string | null
+          os?: string | null
+          properties?: Json | null
+          referrer?: string | null
+          session_id?: string | null
+          site_id?: string
+          url?: string | null
+          visitor_id?: string | null
+        }
+        Relationships: []
+      }
+      events_y2026m01: {
+        Row: {
+          browser: string | null
+          city: string | null
+          country: string | null
+          created_at: string
+          device_type: string | null
+          event_name: string
+          id: string
+          language: string | null
+          os: string | null
+          properties: Json | null
+          referrer: string | null
+          session_id: string | null
+          site_id: string
+          url: string | null
+          visitor_id: string | null
+        }
+        Insert: {
+          browser?: string | null
+          city?: string | null
+          country?: string | null
+          created_at?: string
+          device_type?: string | null
+          event_name?: string
+          id?: string
+          language?: string | null
+          os?: string | null
+          properties?: Json | null
+          referrer?: string | null
+          session_id?: string | null
+          site_id: string
+          url?: string | null
+          visitor_id?: string | null
+        }
+        Update: {
+          browser?: string | null
+          city?: string | null
+          country?: string | null
+          created_at?: string
+          device_type?: string | null
+          event_name?: string
+          id?: string
+          language?: string | null
+          os?: string | null
+          properties?: Json | null
+          referrer?: string | null
+          session_id?: string | null
+          site_id?: string
+          url?: string | null
+          visitor_id?: string | null
+        }
+        Relationships: []
+      }
+      events_y2026m02: {
+        Row: {
+          browser: string | null
+          city: string | null
+          country: string | null
+          created_at: string
+          device_type: string | null
+          event_name: string
+          id: string
+          language: string | null
+          os: string | null
+          properties: Json | null
+          referrer: string | null
+          session_id: string | null
+          site_id: string
+          url: string | null
+          visitor_id: string | null
+        }
+        Insert: {
+          browser?: string | null
+          city?: string | null
+          country?: string | null
+          created_at?: string
+          device_type?: string | null
+          event_name?: string
+          id?: string
+          language?: string | null
+          os?: string | null
+          properties?: Json | null
+          referrer?: string | null
+          session_id?: string | null
+          site_id: string
+          url?: string | null
+          visitor_id?: string | null
+        }
+        Update: {
+          browser?: string | null
+          city?: string | null
+          country?: string | null
+          created_at?: string
+          device_type?: string | null
+          event_name?: string
+          id?: string
+          language?: string | null
+          os?: string | null
+          properties?: Json | null
+          referrer?: string | null
+          session_id?: string | null
+          site_id?: string
+          url?: string | null
+          visitor_id?: string | null
+        }
+        Relationships: []
+      }
+      events_y2026m03: {
+        Row: {
+          browser: string | null
+          city: string | null
+          country: string | null
+          created_at: string
+          device_type: string | null
+          event_name: string
+          id: string
+          language: string | null
+          os: string | null
+          properties: Json | null
+          referrer: string | null
+          session_id: string | null
+          site_id: string
+          url: string | null
+          visitor_id: string | null
+        }
+        Insert: {
+          browser?: string | null
+          city?: string | null
+          country?: string | null
+          created_at?: string
+          device_type?: string | null
+          event_name?: string
+          id?: string
+          language?: string | null
+          os?: string | null
+          properties?: Json | null
+          referrer?: string | null
+          session_id?: string | null
+          site_id: string
+          url?: string | null
+          visitor_id?: string | null
+        }
+        Update: {
+          browser?: string | null
+          city?: string | null
+          country?: string | null
+          created_at?: string
+          device_type?: string | null
+          event_name?: string
+          id?: string
+          language?: string | null
+          os?: string | null
+          properties?: Json | null
+          referrer?: string | null
+          session_id?: string | null
+          site_id?: string
+          url?: string | null
+          visitor_id?: string | null
+        }
+        Relationships: []
+      }
+      events_y2026m04: {
+        Row: {
+          browser: string | null
+          city: string | null
+          country: string | null
+          created_at: string
+          device_type: string | null
+          event_name: string
+          id: string
+          language: string | null
+          os: string | null
+          properties: Json | null
+          referrer: string | null
+          session_id: string | null
+          site_id: string
+          url: string | null
+          visitor_id: string | null
+        }
+        Insert: {
+          browser?: string | null
+          city?: string | null
+          country?: string | null
+          created_at?: string
+          device_type?: string | null
+          event_name?: string
+          id?: string
+          language?: string | null
+          os?: string | null
+          properties?: Json | null
+          referrer?: string | null
+          session_id?: string | null
+          site_id: string
+          url?: string | null
+          visitor_id?: string | null
+        }
+        Update: {
+          browser?: string | null
+          city?: string | null
+          country?: string | null
+          created_at?: string
+          device_type?: string | null
+          event_name?: string
+          id?: string
+          language?: string | null
+          os?: string | null
+          properties?: Json | null
+          referrer?: string | null
+          session_id?: string | null
+          site_id?: string
+          url?: string | null
+          visitor_id?: string | null
+        }
+        Relationships: []
+      }
+      events_y2026m05: {
+        Row: {
+          browser: string | null
+          city: string | null
+          country: string | null
+          created_at: string
+          device_type: string | null
+          event_name: string
+          id: string
+          language: string | null
+          os: string | null
+          properties: Json | null
+          referrer: string | null
+          session_id: string | null
+          site_id: string
+          url: string | null
+          visitor_id: string | null
+        }
+        Insert: {
+          browser?: string | null
+          city?: string | null
+          country?: string | null
+          created_at?: string
+          device_type?: string | null
+          event_name?: string
+          id?: string
+          language?: string | null
+          os?: string | null
+          properties?: Json | null
+          referrer?: string | null
+          session_id?: string | null
+          site_id: string
+          url?: string | null
+          visitor_id?: string | null
+        }
+        Update: {
+          browser?: string | null
+          city?: string | null
+          country?: string | null
+          created_at?: string
+          device_type?: string | null
+          event_name?: string
+          id?: string
+          language?: string | null
+          os?: string | null
+          properties?: Json | null
+          referrer?: string | null
+          session_id?: string | null
+          site_id?: string
+          url?: string | null
+          visitor_id?: string | null
+        }
+        Relationships: []
+      }
+      events_y2026m06: {
+        Row: {
+          browser: string | null
+          city: string | null
+          country: string | null
+          created_at: string
+          device_type: string | null
+          event_name: string
+          id: string
+          language: string | null
+          os: string | null
+          properties: Json | null
+          referrer: string | null
+          session_id: string | null
+          site_id: string
+          url: string | null
+          visitor_id: string | null
+        }
+        Insert: {
+          browser?: string | null
+          city?: string | null
+          country?: string | null
+          created_at?: string
+          device_type?: string | null
+          event_name?: string
+          id?: string
+          language?: string | null
+          os?: string | null
+          properties?: Json | null
+          referrer?: string | null
+          session_id?: string | null
+          site_id: string
+          url?: string | null
+          visitor_id?: string | null
+        }
+        Update: {
+          browser?: string | null
+          city?: string | null
+          country?: string | null
+          created_at?: string
+          device_type?: string | null
+          event_name?: string
+          id?: string
+          language?: string | null
+          os?: string | null
+          properties?: Json | null
+          referrer?: string | null
+          session_id?: string | null
+          site_id?: string
+          url?: string | null
+          visitor_id?: string | null
+        }
+        Relationships: []
       }
       funnels: {
         Row: {
