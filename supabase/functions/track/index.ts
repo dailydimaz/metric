@@ -343,24 +343,44 @@ serve(async (req) => {
       console.log(`No origin header present for ${event_name} event - likely sendBeacon`);
     }
 
-    // Insert the event
+    // Insert the event into both tables (dual-write for migration)
+    // The original events table for backwards compatibility
+    // The partitioned table for high-performance queries
+    const eventData = {
+      site_id: site.id,
+      event_name,
+      url,
+      referrer,
+      visitor_id,
+      session_id,
+      browser,
+      os,
+      device_type,
+      country: geoCountry,
+      city: geoCity,
+      language: primaryLanguage,
+      properties,
+    };
+
+    // Insert into original events table
     const { error: insertError } = await supabase
       .from('events')
-      .insert({
-        site_id: site.id,
-        event_name,
-        url,
-        referrer,
-        visitor_id,
-        session_id,
-        browser,
-        os,
-        device_type,
-        country: geoCountry,
-        city: geoCity,
-        language: primaryLanguage,
-        properties,
-      });
+      .insert(eventData);
+
+    // Also insert into partitioned table (non-blocking, don't fail if this fails)
+    // Use async IIFE to handle this in background
+    (async () => {
+      try {
+        const { error } = await supabase
+          .from('events_partitioned')
+          .insert(eventData);
+        if (error) {
+          console.warn('Failed to insert into partitioned table:', error.code);
+        }
+      } catch (e: unknown) {
+        console.warn('Partitioned table insert exception:', e);
+      }
+    })();
 
     if (insertError) {
       // Log only error code, not full details to prevent schema leakage

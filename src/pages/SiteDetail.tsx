@@ -110,13 +110,36 @@ export default function SiteDetail() {
 
   const [showComparison, setShowComparison] = useState(true);
 
-  // Widget visibility helper
-  const widgetsParam = searchParams.get("widgets");
-  const visibleWidgets = widgetsParam ? new Set(widgetsParam.split(",")) : null;
+  // Widget visibility - load from localStorage first, then URL params
+  const [visibleWidgets, setVisibleWidgets] = useState<Set<string> | null>(() => {
+    // First check localStorage for saved preferences
+    if (siteId) {
+      try {
+        const saved = localStorage.getItem(`mmmetric_dashboard_${siteId}`);
+        if (saved) {
+          const widgets = JSON.parse(saved);
+          return new Set(widgets);
+        }
+      } catch (e) {
+        console.warn("Failed to load dashboard config:", e);
+      }
+    }
+    // Fall back to URL params
+    const widgetsParam = searchParams.get("widgets");
+    return widgetsParam ? new Set(widgetsParam.split(",")) : null;
+  });
 
   const shouldShow = (widgetKey: string) => {
     if (!visibleWidgets) return true;
     return visibleWidgets.has(widgetKey);
+  };
+
+  const handleApplyWidgets = (widgets: string[] | null) => {
+    if (widgets === null) {
+      setVisibleWidgets(null);
+    } else {
+      setVisibleWidgets(new Set(widgets));
+    }
   };
 
   const [copied, setCopied] = useState(false);
@@ -576,7 +599,7 @@ export default function SiteDetail() {
               <StatsCards
                 stats={stats}
                 isLoading={statsLoading}
-                visibleMetrics={widgetsParam ? widgetsParam.split(',') : undefined}
+                visibleMetrics={visibleWidgets ? Array.from(visibleWidgets) : undefined}
                 showComparison={showComparison}
               />
             )}
@@ -662,15 +685,8 @@ export default function SiteDetail() {
         open={showCustomizer}
         onOpenChange={setShowCustomizer}
         currentWidgets={visibleWidgets}
-        onApply={(widgets) => {
-          const newParams = new URLSearchParams(searchParams);
-          if (widgets) {
-            newParams.set("widgets", widgets.join(","));
-          } else {
-            newParams.delete("widgets");
-          }
-          navigate(`/dashboard/sites/${site.id}?${newParams.toString()}`);
-        }}
+        siteId={siteId}
+        onApply={handleApplyWidgets}
       />
 
       {/* Breakdown Panel */}
