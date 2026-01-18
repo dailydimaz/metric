@@ -141,66 +141,69 @@
 /* CSS Variables */
 @layer base {
   :root {
-    /* Clean, professional color palette */
+    /* Clean, professional color palette - Refined for Premium Feel */
     /* Light Mode */
-    --background: 0 0% 99%;
-    --foreground: 220 20% 10%;
+    --background: 210 20% 98%;
+    /* Slightly cooler/greyer off-white */
+    --foreground: 224 71% 4%;
+    /* Deep navy almost black */
 
     --card: 0 0% 100%;
-    --card-foreground: 220 20% 10%;
+    --card-foreground: 224 71% 4%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 220 20% 10%;
+    --popover-foreground: 224 71% 4%;
 
-    /* Primary - Deep indigo blue */
-    --primary: 239 84% 67%;
-    --primary-foreground: 0 0% 100%;
+    /* Primary - Vibrant but deep Indigo/Violet */
+    --primary: 262 83% 58%;
+    /* More purple/modern tech feel */
+    --primary-foreground: 210 20% 98%;
 
-    /* Secondary - Light gray */
+    /* Secondary - Very subtle grey */
     --secondary: 220 14% 96%;
-    --secondary-foreground: 220 20% 10%;
+    --secondary-foreground: 220.9 39.3% 11%;
 
     --muted: 220 14% 96%;
-    --muted-foreground: 220 10% 45%;
+    --muted-foreground: 220 8.9% 46.1%;
 
-    /* Accent - Soft blue */
-    --accent: 220 90% 96%;
-    --accent-foreground: 230 80% 45%;
+    /* Accent - Soft Lavender/Blue */
+    --accent: 262 83% 97%;
+    --accent-foreground: 262 83% 58%;
 
-    --destructive: 0 72% 51%;
-    --destructive-foreground: 0 0% 100%;
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 210 20% 98%;
 
     --border: 220 13% 91%;
     --input: 220 13% 91%;
-    --ring: 220 14% 96%;
+    --ring: 262 83% 58%;
 
     --radius: 0.75rem;
 
     /* Success / Warning / Info */
-    --success: 142 70% 45%;
+    --success: 151 55% 42%;
     --success-foreground: 0 0% 100%;
-    --warning: 38 92% 50%;
+    --warning: 32 95% 44%;
     --warning-foreground: 0 0% 100%;
-    --info: 200 98% 39%;
+    --info: 221 83% 53%;
     --info-foreground: 0 0% 100%;
 
-    /* Sidebar - Premium Darker Tone */
-    --sidebar-background: 240 5% 96%;
+    /* Sidebar - Glassy/Premium */
+    --sidebar-background: 210 20% 98%;
     /* Slightly darker than main bg for contrast */
-    --sidebar-foreground: 240 4% 16%;
-    --sidebar-primary: 240 5.9% 10%;
+    --sidebar-foreground: 240 5.3% 26.1%;
+    --sidebar-primary: 262 83% 58%;
     --sidebar-primary-foreground: 0 0% 98%;
-    --sidebar-accent: 240 4.8% 95.9%;
-    --sidebar-accent-foreground: 240 5.9% 10%;
+    --sidebar-accent: 262 83% 97%;
+    --sidebar-accent-foreground: 262 83% 58%;
     --sidebar-border: 220 13% 91%;
-    --sidebar-ring: 217.2 91.2% 59.8%;
+    --sidebar-ring: 262 83% 58%;
 
-    /* Chart colors */
-    --chart-1: 230 80% 55%;
-    --chart-2: 142 76% 45%;
-    --chart-3: 38 92% 50%;
-    --chart-4: 280 65% 60%;
-    --chart-5: 200 98% 45%;
+    /* Chart colors - Vivid and distinct */
+    --chart-1: 262 83% 58%;
+    --chart-2: 173 58% 39%;
+    --chart-3: 197 37% 24%;
+    --chart-4: 43 74% 66%;
+    --chart-5: 27 87% 67%;
   }
 
   .dark {

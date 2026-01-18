@@ -37,74 +37,79 @@ export function SiteCard({ site }: SiteCardProps) {
 
   return (
     <Link to={`/dashboard/sites/${site.id}`}>
-      <Card className="hover:shadow-2xl transition-all duration-500 border-border/60 bg-card hover:border-primary/20 group cursor-pointer relative overflow-hidden h-full flex flex-col hover:-translate-y-1">
+      <Card className="group relative overflow-hidden transition-all duration-500 hover:shadow-2xl hover:shadow-primary/10 border-border/50 bg-gradient-to-br from-card to-card/50 hover:border-primary/20 h-full flex flex-col">
+        {/* Hover Gradient Background */}
         <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
 
-        <CardHeader className="flex flex-row items-start justify-between space-y-0 pb-2 relative z-10">
-          <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10 text-primary group-hover:scale-105 group-hover:bg-primary group-hover:text-primary-foreground transition-all duration-300 shadow-sm">
-              <Globe className="h-5 w-5" />
+        <CardHeader className="relative z-10 flex flex-row items-start justify-between pb-2 space-y-0">
+          <div className="flex items-center gap-4">
+            <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary shadow-sm group-hover:scale-105 group-hover:bg-primary group-hover:text-primary-foreground transition-all duration-300">
+              <Globe className="h-6 w-6" />
             </div>
-            <div>
-              <h3 className="font-semibold text-lg leading-none tracking-tight group-hover:text-primary transition-colors">
+            <div className="space-y-1">
+              <h3 className="font-bold text-xl leading-none tracking-tight group-hover:text-primary transition-colors">
                 {site.name}
               </h3>
-              <div className="flex items-center gap-2 mt-1.5">
+              <div className="flex items-center gap-2">
                 {site.domain && (
-                  <span className="text-xs text-muted-foreground truncate max-w-[140px] font-mono">
+                  <span className="text-xs text-muted-foreground truncate max-w-[150px] font-mono bg-muted/50 px-1.5 py-0.5 rounded">
                     {site.domain}
                   </span>
                 )}
-                <Badge variant="secondary" className="font-mono text-[10px] h-5 px-1.5 font-normal bg-muted/50 border-border/50">
+                <Badge variant="outline" className="text-[10px] h-5 px-1.5 font-normal border-border bg-background/50 backdrop-blur-sm">
                   {site.timezone}
                 </Badge>
               </div>
             </div>
           </div>
-          <Button
-            variant="ghost"
-            size="icon"
-            className="h-8 w-8 hover:bg-background/80 opacity-0 group-hover:opacity-100 transition-opacity"
-            onClick={copyTrackingId}
-          >
-            {copied ? (
-              <Check className="h-4 w-4 text-green-500" />
-            ) : (
-              <Copy className="h-4 w-4 text-muted-foreground" />
-            )}
-          </Button>
+
+          <div className="flex items-center gap-2">
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-8 w-8 text-muted-foreground hover:text-foreground opacity-0 group-hover:opacity-100 transition-opacity -mr-2"
+              onClick={copyTrackingId}
+            >
+              {copied ? (
+                <Check className="h-4 w-4 text-green-500" />
+              ) : (
+                <Copy className="h-4 w-4" />
+              )}
+            </Button>
+            <ArrowUpRight className="h-4 w-4 text-muted-foreground/50 opacity-0 group-hover:opacity-100 transition-all transform translate-x-2 group-hover:translate-x-0" />
+          </div>
         </CardHeader>
 
-        <CardContent className="flex-1 flex flex-col justify-end relative z-10 pt-6">
+        <CardContent className="relative z-10 flex-1 flex flex-col justify-end pt-4">
           {hasData ? (
             <div className="space-y-6">
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <p className="text-xs font-medium text-muted-foreground mb-1 uppercase tracking-wider">Visitors (30d)</p>
-                  <p className="text-3xl font-bold tracking-tight text-foreground group-hover:text-primary transition-colors">
+              <div className="grid grid-cols-2 gap-6">
+                <div className="space-y-1">
+                  <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Visitors</p>
+                  <p className="text-3xl font-bold tracking-tight text-foreground">
                     {stats?.uniqueVisitors.toLocaleString()}
                   </p>
                   {stats?.visitorsChange !== undefined && (
-                    <div className={`flex items-center text-xs mt-1.5 font-medium ${isTrendingUp ? 'text-green-500' : 'text-red-500'}`}>
+                    <div className={`flex items-center text-xs font-medium ${isTrendingUp ? 'text-emerald-600 bg-emerald-500/10' : 'text-red-600 bg-red-500/10'} w-fit px-1.5 py-0.5 rounded-full`}>
                       <TrendingUp className={`h-3 w-3 mr-1 ${!isTrendingUp && 'rotate-180'}`} />
                       <span>{Math.abs(stats.visitorsChange).toFixed(1)}%</span>
                     </div>
                   )}
                 </div>
-                <div>
-                  <p className="text-xs font-medium text-muted-foreground mb-1 uppercase tracking-wider">Pageviews</p>
+                <div className="space-y-1">
+                  <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Pageviews</p>
                   <p className="text-3xl font-bold tracking-tight text-foreground">
                     {stats?.totalPageviews.toLocaleString()}
                   </p>
                 </div>
               </div>
 
-              <div className="h-20 w-[calc(100%+3rem)] -mx-6 -mb-6 opacity-40 group-hover:opacity-60 transition-opacity duration-500">
+              <div className="h-24 w-[calc(100%+3rem)] -mx-6 -mb-6 opacity-50 group-hover:opacity-80 transition-opacity duration-500">
                 <ResponsiveContainer width="100%" height="100%">
                   <AreaChart data={timeSeries}>
                     <defs>
                       <linearGradient id={`gradient-${site.id}`} x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="0%" stopColor="hsl(var(--primary))" stopOpacity={0.4} />
+                        <stop offset="0%" stopColor="hsl(var(--primary))" stopOpacity={0.5} />
                         <stop offset="100%" stopColor="hsl(var(--primary))" stopOpacity={0} />
                       </linearGradient>
                     </defs>
@@ -121,12 +126,12 @@ export function SiteCard({ site }: SiteCardProps) {
               </div>
             </div>
           ) : (
-            <div className="flex flex-col items-center justify-center py-8 text-center bg-muted/20 rounded-lg border border-dashed border-border mx-1">
-              <div className="p-3 bg-muted/50 rounded-full mb-3">
-                <BarChart2 className="h-5 w-5 text-muted-foreground/50" />
+            <div className="flex flex-col items-center justify-center py-10 text-center bg-muted/30 rounded-xl border border-dashed border-border/60 mx-1 group-hover:bg-muted/50 transition-colors">
+              <div className="p-3 bg-background rounded-full mb-3 shadow-sm ring-1 ring-border/50">
+                <BarChart2 className="h-5 w-5 text-muted-foreground" />
               </div>
-              <p className="text-sm font-medium text-muted-foreground">No data yet</p>
-              <p className="text-xs text-muted-foreground/60 mt-1">Add script to track</p>
+              <p className="text-sm font-medium text-foreground">No data yet</p>
+              <p className="text-xs text-muted-foreground mt-1">Add script to start tracking</p>
             </div>
           )}
         </CardContent>

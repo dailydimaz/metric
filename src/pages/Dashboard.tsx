@@ -12,6 +12,7 @@ import { Link } from "react-router-dom";
 import { useInsights } from "@/hooks/useInsights";
 import { isOverLimit } from "@/lib/billing";
 import { Button } from "@/components/ui/button";
+import { motion } from "framer-motion";
 
 export default function Dashboard() {
   const { user, loading: authLoading } = useAuth();
@@ -47,26 +48,53 @@ export default function Dashboard() {
     return null;
   }
 
+  const container = {
+    hidden: { opacity: 0 },
+    show: {
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.1
+      }
+    }
+  };
+
+  const item = {
+    hidden: { opacity: 0, y: 20 },
+    show: { opacity: 1, y: 0 }
+  };
+
   return (
     <DashboardLayout>
-      <div className="space-y-8">
+      <motion.div
+        variants={container}
+        initial="hidden"
+        animate="show"
+        className="space-y-8"
+      >
         {/* Usage Alert */}
-        <UsageAlert />
+        <motion.div variants={item}>
+          <UsageAlert />
+        </motion.div>
 
         {/* Header */}
-        <div className="flex items-center justify-between">
+        <motion.div variants={item} className="flex items-center justify-between">
           <div>
-            <h1 className="text-3xl font-bold tracking-tight">Dashboard</h1>
-            <div className="flex items-center gap-2 text-muted-foreground mt-1">
+            <h1 className="text-3xl font-bold tracking-tight bg-gradient-to-r from-foreground to-foreground/60 bg-clip-text text-transparent">
+              Dashboard
+            </h1>
+            <div className="flex items-center gap-2 text-muted-foreground mt-2">
               <p>Manage your sites and view analytics</p>
-              <span>•</span>
-              <span className="text-xs bg-muted px-2 py-0.5 rounded-full">Last 30 Days</span>
+              <span className="text-border">•</span>
+              <span className="text-xs bg-primary/5 text-primary px-2.5 py-0.5 rounded-full font-medium border border-primary/10">
+                Last 30 Days
+              </span>
             </div>
           </div>
           <Button
             onClick={() => setCreateDialogOpen(true)}
             disabled={!canCreateSite}
-            className="shadow-sm gap-2"
+            className="shadow-lg hover:shadow-xl hover:shadow-primary/20 transition-all duration-300 gap-2"
+            size="lg"
           >
             {canCreateSite ? (
               <>
@@ -80,62 +108,65 @@ export default function Dashboard() {
               </>
             )}
           </Button>
-        </div>
+        </motion.div>
 
         {/* Sites Grid */}
-        {sites.length > 0 ? (
-          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-            {sites.map((site) => (
-              <SiteCard key={site.id} site={site} />
-            ))}
-          </div>
-        ) : (
-          /* Empty State */
-          <div className="flex flex-col items-center justify-center rounded-xl border border-dashed border-border bg-muted/30 py-16">
-            <div className="flex h-16 w-16 items-center justify-center rounded-full bg-primary/10 text-primary mb-4">
-              <BarChart3 className="h-8 w-8" />
+        <motion.div variants={item}>
+          {sites.length > 0 ? (
+            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+              {sites.map((site) => (
+                <SiteCard key={site.id} site={site} />
+              ))}
             </div>
-            <h2 className="text-xl font-semibold">No sites yet</h2>
-            <p className="mt-2 text-muted-foreground text-center max-w-sm">
-              Create your first site to start tracking analytics
-            </p>
-            <Button
-              className="mt-6"
-              onClick={() => setCreateDialogOpen(true)}
-            >
-              <Plus className="mr-2 h-4 w-4" />
-              Create your first site
-            </Button>
-          </div>
-        )}
+          ) : (
+            /* Empty State */
+            <div className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-border/60 bg-muted/20 py-20 px-6 animate-fade-in-up">
+              <div className="flex h-20 w-20 items-center justify-center rounded-full bg-primary/5 text-primary mb-6 shadow-sm ring-1 ring-primary/10">
+                <BarChart3 className="h-10 w-10" />
+              </div>
+              <h2 className="text-2xl font-semibold mb-2">No sites yet</h2>
+              <p className="text-muted-foreground text-center max-w-sm mb-8 text-lg">
+                Create your first site to start tracking analytics and insights.
+              </p>
+              <Button
+                size="lg"
+                className="shadow-lg shadow-primary/20"
+                onClick={() => setCreateDialogOpen(true)}
+              >
+                <Plus className="mr-2 h-5 w-5" />
+                Create your first site
+              </Button>
+            </div>
+          )}
+        </motion.div>
 
         {/* Insights Quick Link Card */}
         {firstSite && (
-          <div className="mt-8 rounded-xl border border-border bg-card p-6">
+          <motion.div variants={item} className="mt-8 rounded-2xl border border-border/60 bg-gradient-to-br from-card to-muted/20 p-8 shadow-sm">
             <div className="flex items-center justify-between">
-              <div className="flex items-center gap-4">
-                <div className="flex h-12 w-12 items-center justify-center rounded-full bg-primary/10 text-primary">
-                  <Lightbulb className="h-6 w-6" />
+              <div className="flex items-center gap-6">
+                <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-primary/10 text-primary shadow-inner">
+                  <Lightbulb className="h-7 w-7" />
                 </div>
                 <div>
-                  <h3 className="font-semibold text-lg">Insights</h3>
-                  <p className="text-sm text-muted-foreground">
+                  <h3 className="font-semibold text-xl mb-1">Insights</h3>
+                  <p className="text-muted-foreground">
                     {hasInsights
-                      ? `You have ${insights.length} saved report${insights.length === 1 ? "" : "s"}`
-                      : "Create custom reports with saved filters and date ranges"}
+                      ? `You have ${insights.length} saved report${insights.length === 1 ? "" : "s"} ready to view.`
+                      : "Create custom reports with saved filters and date ranges."}
                   </p>
                 </div>
               </div>
               <Link to={`/dashboard/sites/${firstSite.id}/insights`}>
-                <Button variant={hasInsights ? "outline" : "default"} className="gap-2">
+                <Button variant={hasInsights ? "outline" : "default"} className="gap-2 h-11 px-6 text-base shadow-sm">
                   {hasInsights ? "View Insights" : "Create First Report"}
                   <ArrowRight className="h-4 w-4" />
                 </Button>
               </Link>
             </div>
-          </div>
+          </motion.div>
         )}
-      </div>
+      </motion.div>
 
       <CreateSiteDialog
         open={createDialogOpen}
