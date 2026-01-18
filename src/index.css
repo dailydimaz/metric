@@ -143,39 +143,38 @@
   :root {
     /* Clean, professional color palette - Refined for Premium Feel */
     /* Light Mode */
-    --background: 210 20% 98%;
-    /* Slightly cooler/greyer off-white */
-    --foreground: 224 71% 4%;
-    /* Deep navy almost black */
+    --background: 0 0% 100%;
+    /* Pure white for a cleaner look */
+    --foreground: 222.2 84% 4.9%;
+    /* Slate 950 */
 
     --card: 0 0% 100%;
-    --card-foreground: 224 71% 4%;
+    --card-foreground: 222.2 84% 4.9%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 224 71% 4%;
+    --popover-foreground: 222.2 84% 4.9%;
 
-    /* Primary - Vibrant but deep Indigo/Violet */
-    --primary: 262 83% 58%;
-    /* More purple/modern tech feel */
-    --primary-foreground: 210 20% 98%;
+    /* Primary - Standard Professional Blue */
+    --primary: 221.2 83.2% 53.3%;
+    --primary-foreground: 210 40% 98%;
 
     /* Secondary - Very subtle grey */
-    --secondary: 220 14% 96%;
-    --secondary-foreground: 220.9 39.3% 11%;
+    --secondary: 210 40% 96.1%;
+    --secondary-foreground: 222.2 47.4% 11.2%;
 
-    --muted: 220 14% 96%;
-    --muted-foreground: 220 8.9% 46.1%;
+    --muted: 210 40% 96.1%;
+    --muted-foreground: 215.4 16.3% 46.9%;
 
-    /* Accent - Soft Lavender/Blue */
-    --accent: 262 83% 97%;
-    --accent-foreground: 262 83% 58%;
+    /* Accent - Soft Blue/Grey */
+    --accent: 210 40% 96.1%;
+    --accent-foreground: 222.2 47.4% 11.2%;
 
     --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 20% 98%;
+    --destructive-foreground: 210 40% 98%;
 
-    --border: 220 13% 91%;
-    --input: 220 13% 91%;
-    --ring: 262 83% 58%;
+    --border: 214.3 31.8% 91.4%;
+    --input: 214.3 31.8% 91.4%;
+    --ring: 221.2 83.2% 53.3%;
 
     --radius: 0.75rem;
 
@@ -188,22 +187,27 @@
     --info-foreground: 0 0% 100%;
 
     /* Sidebar - Glassy/Premium */
-    --sidebar-background: 210 20% 98%;
-    /* Slightly darker than main bg for contrast */
-    --sidebar-foreground: 240 5.3% 26.1%;
-    --sidebar-primary: 262 83% 58%;
-    --sidebar-primary-foreground: 0 0% 98%;
-    --sidebar-accent: 262 83% 97%;
-    --sidebar-accent-foreground: 262 83% 58%;
-    --sidebar-border: 220 13% 91%;
-    --sidebar-ring: 262 83% 58%;
+    --sidebar-background: 210 40% 98%;
+    /* Slightly off-white/cool grey */
+    --sidebar-foreground: 222.2 84% 4.9%;
+    --sidebar-primary: 221.2 83.2% 53.3%;
+    --sidebar-primary-foreground: 210 40% 98%;
+    --sidebar-accent: 210 40% 96.1%;
+    --sidebar-accent-foreground: 221.2 83.2% 53.3%;
+    --sidebar-border: 214.3 31.8% 91.4%;
+    --sidebar-ring: 221.2 83.2% 53.3%;
 
-    /* Chart colors - Vivid and distinct */
-    --chart-1: 262 83% 58%;
+    /* Chart colors - Professional standard */
+    --chart-1: 221.2 83.2% 53.3%;
+    /* Blue */
     --chart-2: 173 58% 39%;
+    /* Teal */
     --chart-3: 197 37% 24%;
+    /* Navy */
     --chart-4: 43 74% 66%;
+    /* Amber/Gold */
     --chart-5: 27 87% 67%;
+    /* Orange */
   }
 
   .dark {

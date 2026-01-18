@@ -52,10 +52,7 @@ const getNavItems = (siteId: string | null, billingEnabled: boolean) => {
   // URL Builder is always available
   items.push({ icon: Link2, label: "URL Builder", href: "/tools/campaign-builder" });
 
-  // Add Settings item if on a site page
-  if (siteId) {
-    items.push({ icon: Settings, label: "Site Settings", href: `/dashboard/sites/${siteId}/settings`, siteSpecific: true });
-  }
+
 
   return items;
 };
