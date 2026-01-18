@@ -1,6 +1,8 @@
 import { formatDistanceToNow } from "date-fns";
 import { Activity, Globe, MousePointer, ExternalLink, AlertCircle } from "lucide-react";
 import { useRealtimeAnalytics } from "@/hooks/useRealtimeAnalytics";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 
 interface RealtimeActivityFeedProps {
   siteId: string;
@@ -23,18 +25,18 @@ function getEventIcon(eventName: string) {
   }
 }
 
-function getEventBadgeColor(eventName: string) {
+function getEventBadgeVariant(eventName: string): "default" | "secondary" | "destructive" | "outline" {
   switch (eventName) {
     case "pageview":
-      return "badge-primary";
+      return "default";
     case "click":
-      return "badge-secondary";
+      return "secondary";
     case "outbound":
-      return "badge-accent";
+      return "outline";
     case "404":
-      return "badge-error";
+      return "destructive";
     default:
-      return "badge-neutral";
+      return "outline";
   }
 }
 
@@ -42,30 +44,30 @@ export function RealtimeActivityFeed({ siteId }: RealtimeActivityFeedProps) {
   const { recentEvents, isConnected } = useRealtimeAnalytics(siteId);
 
   return (
-    <div className="card bg-base-100 shadow-sm border border-base-200 h-full">
-      <div className="card-body p-0">
-        <div className="flex items-center justify-between p-4 border-b border-base-200">
-          <div className="flex items-center gap-2">
-            <div className={`p-2 rounded-lg ${isConnected ? 'bg-success/10 text-success' : 'bg-base-200'}`}>
-              <Activity className="h-4 w-4" />
-            </div>
-            <h3 className="font-semibold text-base">Live Feed</h3>
+    <Card className="h-full flex flex-col">
+      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 border-b border-border/50">
+        <div className="flex items-center gap-2">
+          <div className={`p-2 rounded-lg ${isConnected ? 'bg-success/10 text-success' : 'bg-muted text-muted-foreground'}`}>
+            <Activity className="h-4 w-4" />
           </div>
-          {isConnected && (
-            <div className="flex items-center gap-2">
-              <span className="relative flex h-2 w-2">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-success opacity-75"></span>
-                <span className="relative inline-flex rounded-full h-2 w-2 bg-success"></span>
-              </span>
-              <span className="text-xs font-medium text-success uppercase tracking-wider">Live</span>
-            </div>
-          )}
+          <CardTitle className="text-base font-semibold">Live Feed</CardTitle>
         </div>
+        {isConnected && (
+          <div className="flex items-center gap-2">
+            <span className="relative flex h-2 w-2">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-success opacity-75"></span>
+              <span className="relative inline-flex rounded-full h-2 w-2 bg-success"></span>
+            </span>
+            <span className="text-xs font-medium text-success uppercase tracking-wider">Live</span>
+          </div>
+        )}
+      </CardHeader>
 
-        <div className="overflow-y-auto max-h-[400px]">
+      <CardContent className="p-0 flex-1 min-h-0 relative">
+        <div className="absolute inset-0 overflow-y-auto">
           {recentEvents.length === 0 ? (
-            <div className="flex flex-col items-center justify-center py-12 text-base-content/40">
-              <div className="loading loading-dots loading-sm mb-2"></div>
+            <div className="flex flex-col items-center justify-center h-full text-muted-foreground/40">
+              <div className="loading loading-dots loading-sm mb-2 opacity-50"></div>
               <p className="text-sm">Waiting for incoming events...</p>
             </div>
           ) : (
@@ -73,39 +75,39 @@ export function RealtimeActivityFeed({ siteId }: RealtimeActivityFeedProps) {
               {recentEvents.slice(0, MAX_DISPLAYED_EVENTS).map((event) => (
                 <div
                   key={event.id}
-                  className="group flex items-start gap-3 p-3 hover:bg-base-200 transition-all border-b border-base-100 last:border-0 animate-in fade-in slide-in-from-top-2 duration-300"
+                  className="group flex items-start gap-3 p-3 hover:bg-muted/30 transition-all border-b border-border/40 last:border-0 animate-in fade-in slide-in-from-top-1 duration-300"
                 >
-                  <div className={`mt-0.5 p-1.5 rounded-full bg-base-200 text-base-content/60 group-hover:bg-primary/10 group-hover:text-primary transition-colors`}>
+                  <div className={`mt-0.5 p-1.5 rounded-full bg-muted text-muted-foreground group-hover:bg-primary/10 group-hover:text-primary transition-colors`}>
                     {getEventIcon(event.event_name)}
                   </div>
-                  <div className="flex-1 min-w-0 grid gap-1">
+                  <div className="flex-1 min-w-0 grid gap-0.5">
                     <div className="flex items-center justify-between gap-2">
                       <div className="flex items-center gap-2">
                         {/* Event Name Badge */}
-                        <span className={`badge badge-sm badge-outline ${getEventBadgeColor(event.event_name)} opacity-80 group-hover:opacity-100`}>
+                        <Badge variant={getEventBadgeVariant(event.event_name)} className="h-5 px-1.5 text-[10px] uppercase">
                           {event.event_name}
-                        </span>
+                        </Badge>
                         {/* Country Flag/Name */}
                         {event.country && (
-                          <span className="text-xs font-medium text-base-content/70">
+                          <span className="text-xs font-medium text-muted-foreground/80">
                             {event.country}
                           </span>
                         )}
                       </div>
-                      <span className="text-[10px] text-base-content/40 font-mono whitespace-nowrap">
+                      <span className="text-[10px] text-muted-foreground/50 font-mono whitespace-nowrap">
                         {formatDistanceToNow(new Date(event.created_at), { addSuffix: true })}
                       </span>
                     </div>
 
                     {/* URL / Path */}
                     {event.url && (
-                      <p className="text-xs font-mono text-base-content/80 truncate" title={event.url}>
+                      <p className="text-xs font-mono text-foreground/80 truncate mt-1" title={event.url}>
                         {event.url}
                       </p>
                     )}
 
-                    {/* Details (Browser/OS) - Visible by default for better scannability */}
-                    <div className="flex items-center gap-2 text-[10px] text-base-content/40">
+                    {/* Details (Browser/OS) */}
+                    <div className="flex items-center gap-2 text-[10px] text-muted-foreground/50 mt-0.5">
                       {event.browser ?? 'Unknown browser'} • {event.device_type ?? 'Unknown device'}
                     </div>
                   </div>
@@ -114,8 +116,8 @@ export function RealtimeActivityFeed({ siteId }: RealtimeActivityFeedProps) {
             </div>
           )}
         </div>
-      </div>
-    </div>
+      </CardContent>
+    </Card>
   );
 }
 

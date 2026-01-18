@@ -2,6 +2,8 @@ import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContai
 import { TimeSeriesData } from "@/hooks/useAnalytics";
 import { format, parseISO } from "date-fns";
 import { LineChart } from "lucide-react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Skeleton } from "@/components/ui/skeleton";
 
 interface VisitorChartProps {
   data: TimeSeriesData[] | undefined;
@@ -12,19 +14,19 @@ interface VisitorChartProps {
 export function VisitorChart({ data, isLoading, showComparison = true }: VisitorChartProps) {
   if (isLoading) {
     return (
-      <div className="card bg-base-100 shadow-sm border border-base-200">
-        <div className="card-body p-0">
-          <div className="flex items-center gap-2 p-4 border-b border-base-200">
+      <Card>
+        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 border-b border-border/50">
+          <div className="flex items-center gap-2">
             <div className="p-2 bg-primary/10 rounded-lg text-primary">
               <LineChart className="h-4 w-4" />
             </div>
-            <h3 className="font-semibold text-base">Traffic Overview</h3>
+            <CardTitle className="text-base font-semibold">Traffic Overview</CardTitle>
           </div>
-          <div className="p-6">
-            <div className="skeleton h-[300px] w-full rounded-xl"></div>
-          </div>
-        </div>
-      </div>
+        </CardHeader>
+        <CardContent className="p-6">
+          <Skeleton className="h-[300px] w-full rounded-xl" />
+        </CardContent>
+      </Card>
     );
   }
 
@@ -34,16 +36,18 @@ export function VisitorChart({ data, isLoading, showComparison = true }: Visitor
   })) || [];
 
   return (
-    <div className="card bg-base-100 shadow-sm border border-base-200">
-      <div className="card-body p-0">
-        <div className="flex items-center gap-2 p-4 border-b border-base-200">
+    <Card>
+      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 border-b border-border/50">
+        <div className="flex items-center gap-2">
           <div className="p-2 bg-primary/10 rounded-lg text-primary">
             <LineChart className="h-4 w-4" />
           </div>
-          <h3 className="font-semibold text-base">Traffic Overview</h3>
+          <CardTitle className="text-base font-semibold">Traffic Overview</CardTitle>
         </div>
+      </CardHeader>
 
-        <div className="p-6 h-[350px]">
+      <CardContent className="p-6">
+        <div className="h-[350px]">
           <ResponsiveContainer width="100%" height="100%">
             <AreaChart data={chartData} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
               <defs>
@@ -136,8 +140,8 @@ export function VisitorChart({ data, isLoading, showComparison = true }: Visitor
             </AreaChart>
           </ResponsiveContainer>
         </div>
-      </div>
-    </div>
+      </CardContent>
+    </Card>
   );
 }
 

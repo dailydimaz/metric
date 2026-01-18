@@ -1,5 +1,15 @@
 import { Languages } from "lucide-react";
 import { LanguageStat } from "@/hooks/useAnalytics";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import { Skeleton } from "@/components/ui/skeleton";
 
 interface LanguageStatsProps {
   languages: LanguageStat[] | undefined;
@@ -24,66 +34,75 @@ function getLanguageName(code: string): string {
 
 export function LanguageStats({ languages, isLoading }: LanguageStatsProps) {
   return (
-    <div className="card bg-base-100 shadow-sm border border-base-200 h-full">
-      <div className="card-body p-0">
-        <div className="flex items-center gap-2 p-4 border-b border-base-200">
-          <div className="p-2 bg-success/10 rounded-lg text-success">
+    <Card className="h-full">
+      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 border-b border-border/50">
+        <div className="flex items-center gap-2">
+          <div className="p-2 bg-primary/10 rounded-lg text-primary">
             <Languages className="h-4 w-4" />
           </div>
-          <h3 className="font-semibold text-base">Languages</h3>
+          <CardTitle className="text-base font-semibold">Languages</CardTitle>
         </div>
+      </CardHeader>
 
-        {isLoading ? (
-          <div className="p-4 space-y-4">
-            {[...Array(5)].map((_, i) => (
-              <div key={i} className="flex justify-between items-center">
-                <div className="flex items-center gap-2">
-                  <div className="skeleton h-4 w-24"></div>
+      <CardContent className="p-0">
+        <div className="overflow-hidden">
+          {isLoading ? (
+            <div className="p-4 space-y-4">
+              {[...Array(5)].map((_, i) => (
+                <div key={i} className="flex justify-between items-center">
+                  <div className="flex items-center gap-2">
+                    <Skeleton className="h-4 w-24" />
+                  </div>
+                  <Skeleton className="h-4 w-12" />
                 </div>
-                <div className="skeleton h-4 w-12"></div>
-              </div>
-            ))}
-          </div>
-        ) : languages && languages.length > 0 ? (
-          <div className="overflow-x-auto p-0">
-            <table className="table">
-              <tbody>
-                {languages.slice(0, 8).map((lang, index) => (
-                  <tr key={index} className="hover:bg-base-50 group border-b border-base-100 last:border-0">
-                    <td>
-                      <div className="flex items-center gap-3">
-                        <span className="font-mono text-xs bg-base-200 px-1.5 py-0.5 rounded uppercase text-base-content/60 group-hover:bg-base-300 transition-colors">
+              ))}
+            </div>
+          ) : languages && languages.length > 0 ? (
+            <div className="overflow-x-auto">
+              <Table>
+                <TableHeader>
+                  <TableRow className="bg-muted/50 hover:bg-muted/50">
+                    <TableHead className="w-full pl-4">Language</TableHead>
+                    <TableHead className="text-right">Visits</TableHead>
+                    <TableHead className="text-right pr-4">%</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {languages.slice(0, 8).map((lang, index) => (
+                    <TableRow key={index} className="hover:bg-muted/50 border-b border-border last:border-0">
+                      <TableCell className="w-full flex items-center gap-3 py-3 pl-4">
+                        <span className="font-mono text-xs bg-muted px-1.5 py-0.5 rounded uppercase text-muted-foreground group-hover:bg-muted/80 transition-colors">
                           {lang.language}
                         </span>
-                        <span className="font-medium text-sm">{getLanguageName(lang.language)}</span>
-                        <div className="relative flex-1 h-1.5 bg-base-200 rounded-full overflow-hidden max-w-[80px] ml-auto mr-4">
+                        <div className="relative flex-1 h-1.5 bg-muted rounded-full overflow-hidden max-w-[80px]">
                           <div
-                            className="absolute inset-y-0 left-0 bg-success rounded-full"
+                            className="absolute inset-y-0 left-0 bg-primary rounded-full"
                             style={{ width: `${lang.percentage}%` }}
                           />
                         </div>
-                      </div>
-                    </td>
-                    <td className="text-right font-medium">{lang.visits}</td>
-                    <td className="text-right font-mono text-xs text-base-content/60 w-16">{lang.percentage.toFixed(0)}%</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-            {languages.length > 8 && (
-              <div className="p-2 text-center text-xs text-base-content/40 border-t border-base-200 bg-base-50/50">
-                Showing top 8 of {languages.length} languages
-              </div>
-            )}
-          </div>
-        ) : (
-          <div className="flex flex-col items-center justify-center py-12 text-base-content/40">
-            <Languages className="h-10 w-10 mb-2 opacity-20" />
-            <p className="text-sm">No language data yet</p>
-          </div>
-        )}
-      </div>
-    </div>
+                        <span className="font-medium text-sm">{getLanguageName(lang.language)}</span>
+                      </TableCell>
+                      <TableCell className="text-right font-medium py-3">{lang.visits}</TableCell>
+                      <TableCell className="text-right font-mono text-xs text-muted-foreground w-16 py-3 pr-4">{lang.percentage.toFixed(0)}%</TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+              {languages.length > 8 && (
+                <div className="p-2 text-center text-xs text-muted-foreground border-t border-border bg-muted/20">
+                  Showing top 8 of {languages.length} languages
+                </div>
+              )}
+            </div>
+          ) : (
+            <div className="flex flex-col items-center justify-center py-12 text-muted-foreground/40">
+              <Languages className="h-10 w-10 mb-2 opacity-20" />
+              <p className="text-sm">No language data yet</p>
+            </div>
+          )}
+        </div>
+      </CardContent>
+    </Card>
   );
 }
 

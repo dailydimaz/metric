@@ -49,7 +49,7 @@ export function GeoStats({ countries, cities, isLoading, onBreakdown }: GeoStats
     <Card className="h-full">
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 border-b border-border/50">
         <div className="flex items-center gap-2">
-          <div className="p-2 bg-blue-500/10 rounded-lg text-blue-500">
+          <div className="p-2 bg-primary/10 rounded-lg text-primary">
             <MapIcon className="h-4 w-4" />
           </div>
           <CardTitle className="text-base font-semibold">Locations</CardTitle>
@@ -90,6 +90,13 @@ export function GeoStats({ countries, cities, isLoading, onBreakdown }: GeoStats
             countries && countries.length > 0 ? (
               <div className="overflow-x-auto">
                 <Table>
+                  <TableHeader>
+                    <TableRow className="bg-muted/50 hover:bg-muted/50">
+                      <TableHead className="w-full pl-4">Location</TableHead>
+                      <TableHead className="text-right">Visits</TableHead>
+                      <TableHead className="text-right pr-4">%</TableHead>
+                    </TableRow>
+                  </TableHeader>
                   <TableBody>
                     {countries.slice(0, 8).map((country, index) => (
                       <TableRow
@@ -97,18 +104,18 @@ export function GeoStats({ countries, cities, isLoading, onBreakdown }: GeoStats
                         className={`hover:bg-muted/50 border-b border-border last:border-0 ${onBreakdown ? 'cursor-pointer' : ''}`}
                         onClick={() => onBreakdown?.(country.country)}
                       >
-                        <TableCell className="w-full flex items-center gap-3 py-3">
+                        <TableCell className="w-full flex items-center gap-3 py-3 pl-4">
                           <span className="text-xl">{getCountryFlag(country.country)}</span>
                           <div className="relative flex-1 h-1.5 bg-muted rounded-full overflow-hidden max-w-[100px] md:max-w-[150px]">
                             <div
-                              className="absolute inset-y-0 left-0 bg-blue-500 rounded-full"
+                              className="absolute inset-y-0 left-0 bg-primary rounded-full"
                               style={{ width: `${country.percentage}%` }}
                             />
                           </div>
-                          <span className="font-medium text-sm truncate w-24 md:w-auto hover:text-blue-500 transition-colors">{getCountryName(country.country)}</span>
+                          <span className="font-medium text-sm truncate w-24 md:w-auto hover:text-primary transition-colors">{getCountryName(country.country)}</span>
                         </TableCell>
                         <TableCell className="text-right font-medium py-3">{country.visits}</TableCell>
-                        <TableCell className="text-right font-mono text-xs text-muted-foreground w-16 py-3">{country.percentage.toFixed(0)}%</TableCell>
+                        <TableCell className="text-right font-mono text-xs text-muted-foreground w-16 py-3 pr-4">{country.percentage.toFixed(0)}%</TableCell>
                       </TableRow>
                     ))}
                   </TableBody>
@@ -124,16 +131,23 @@ export function GeoStats({ countries, cities, isLoading, onBreakdown }: GeoStats
             cities && cities.length > 0 ? (
               <div className="overflow-x-auto">
                 <Table>
+                  <TableHeader>
+                    <TableRow className="bg-muted/50 hover:bg-muted/50">
+                      <TableHead className="w-full pl-4">City</TableHead>
+                      <TableHead className="text-right">Visits</TableHead>
+                      <TableHead className="text-right pr-4">%</TableHead>
+                    </TableRow>
+                  </TableHeader>
                   <TableBody>
                     {cities.slice(0, 8).map((city, index) => (
                       <TableRow key={index} className="hover:bg-muted/50 border-b border-border last:border-0">
-                        <TableCell className="w-full flex items-center gap-3 py-3">
+                        <TableCell className="w-full flex items-center gap-3 py-3 pl-4">
                           <div className="p-1 rounded bg-muted text-muted-foreground">
                             <Building2 className="h-3 w-3" />
                           </div>
                           <div className="relative flex-1 h-1.5 bg-muted rounded-full overflow-hidden max-w-[100px] md:max-w-[150px]">
                             <div
-                              className="absolute inset-y-0 left-0 bg-blue-500 rounded-full"
+                              className="absolute inset-y-0 left-0 bg-primary rounded-full"
                               style={{ width: `${city.percentage}%` }}
                             />
                           </div>
@@ -143,7 +157,7 @@ export function GeoStats({ countries, cities, isLoading, onBreakdown }: GeoStats
                           </div>
                         </TableCell>
                         <TableCell className="text-right font-medium py-3">{city.visits}</TableCell>
-                        <TableCell className="text-right font-mono text-xs text-muted-foreground w-16 py-3">{city.percentage.toFixed(0)}%</TableCell>
+                        <TableCell className="text-right font-mono text-xs text-muted-foreground w-16 py-3 pr-4">{city.percentage.toFixed(0)}%</TableCell>
                       </TableRow>
                     ))}
                   </TableBody>
