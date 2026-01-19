@@ -19,6 +19,7 @@ import {
   Lightbulb,
   LinkIcon,
   Route,
+  Target,
 } from "lucide-react";
 import {
   DropdownMenu,
@@ -42,6 +43,7 @@ const getNavItems = (siteId: string | null, billingEnabled: boolean) => {
     { icon: GitBranch, label: "Funnels", href: siteId ? `/dashboard/sites/${siteId}/funnels` : "/dashboard", siteSpecific: true },
     { icon: Users, label: "Retention", href: siteId ? `/dashboard/sites/${siteId}/retention` : "/dashboard", siteSpecific: true },
     { icon: Lightbulb, label: "Insights", href: siteId ? `/dashboard/sites/${siteId}/insights` : "/dashboard", siteSpecific: true },
+    { icon: Target, label: "Attribution", href: siteId ? `/dashboard/sites/${siteId}/attribution` : "/dashboard", siteSpecific: true },
   ];
 
   // Add cloud-only items

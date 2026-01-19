@@ -2202,6 +2202,16 @@ export type Database = {
         }[]
       }
       create_future_partitions: { Args: never; Returns: undefined }
+      get_attribution_stats: {
+        Args: {
+          _attribution_model?: string
+          _end_date: string
+          _goal_event?: string
+          _site_id: string
+          _start_date: string
+        }
+        Returns: Json
+      }
       get_city_stats:
         | {
             Args: {

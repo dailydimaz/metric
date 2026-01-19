@@ -20,6 +20,7 @@ import Cohorts from "./pages/Cohorts";
 import Insights from "./pages/Insights";
 import SharedInsight from "./pages/SharedInsight";
 import Links from "./pages/Links";
+import Attribution from "./pages/Attribution";
 
 import NotFound from "./pages/NotFound";
 import CompareGA from "./pages/CompareGA";
@@ -71,6 +72,7 @@ const App = () => (
             <Route path="/dashboard/sites/:siteId/cohorts" element={<Cohorts />} />
             <Route path="/dashboard/sites/:siteId/insights" element={<Insights />} />
             <Route path="/dashboard/sites/:siteId/links" element={<Links />} />
+            <Route path="/dashboard/sites/:siteId/attribution" element={<Attribution />} />
             <Route path="/dashboard/settings" element={<Settings />} />
             <Route path="/tools/campaign-builder" element={<CampaignBuilder />} />
             <Route path="*" element={<NotFound />} />
