@@ -26,3 +26,5 @@ export { TwitterStats } from "./TwitterStats";
 export { LinksStats } from "./LinksStats";
 export { BreakdownPanel } from "./BreakdownPanel";
 export type { BreakdownDimension } from "./BreakdownPanel";
+export { AttributionChart } from "./AttributionChart";
+export { AttributionStats } from "./AttributionStats";

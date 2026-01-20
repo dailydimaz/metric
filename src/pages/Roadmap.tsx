@@ -320,7 +320,7 @@ const features: Feature[] = [
     name: "Attribution",
     description: "See what drives conversions",
     icon: Magnet,
-    implemented: false,
+    implemented: true,
     difficulty: "hard",
     category: "insights",
   },
