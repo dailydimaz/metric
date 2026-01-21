@@ -270,7 +270,7 @@ const features: Feature[] = [
     name: "Data Import",
     description: "Import existing analytics data",
     icon: Upload,
-    implemented: false,
+    implemented: true,
     difficulty: "medium",
     category: "cloud",
   },

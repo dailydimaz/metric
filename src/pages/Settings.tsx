@@ -27,6 +27,7 @@ import { BackupCodes } from "@/components/settings/BackupCodes";
 import { SessionManagement } from "@/components/settings/SessionManagement";
 import { EmailPreferences } from "@/components/settings/EmailPreferences";
 import { DataExport } from "@/components/settings/DataExport";
+import { DataImport } from "@/components/settings/DataImport";
 import { LoginHistory } from "@/components/settings/LoginHistory";
 import { UsageCard, PlanCard } from "@/components/billing";
 import { ApiKeysCard } from "@/components/settings/ApiKeysCard";
@@ -455,6 +456,9 @@ export default function Settings() {
 
         {/* Data Export */}
         <DataExport />
+
+        {/* Data Import */}
+        <DataImport />
 
         {/* Danger Zone */}
         <Card className="border-destructive/50">

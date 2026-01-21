@@ -1658,6 +1658,65 @@ export type Database = {
           },
         ]
       }
+      import_jobs: {
+        Row: {
+          completed_at: string | null
+          created_at: string
+          error_message: string | null
+          failed_records: number | null
+          file_name: string
+          file_size: number
+          id: string
+          processed_records: number | null
+          site_id: string
+          started_at: string | null
+          status: string
+          total_records: number | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          completed_at?: string | null
+          created_at?: string
+          error_message?: string | null
+          failed_records?: number | null
+          file_name: string
+          file_size?: number
+          id?: string
+          processed_records?: number | null
+          site_id: string
+          started_at?: string | null
+          status?: string
+          total_records?: number | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          completed_at?: string | null
+          created_at?: string
+          error_message?: string | null
+          failed_records?: number | null
+          file_name?: string
+          file_size?: number
+          id?: string
+          processed_records?: number | null
+          site_id?: string
+          started_at?: string | null
+          status?: string
+          total_records?: number | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "import_jobs_site_id_fkey"
+            columns: ["site_id"]
+            isOneToOne: false
+            referencedRelation: "sites"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       insights: {
         Row: {
           created_at: string
