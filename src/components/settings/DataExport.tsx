@@ -55,12 +55,12 @@ export function DataExport() {
   const { toast } = useToast();
   const [exporting, setExporting] = useState(false);
   const [progress, setProgress] = useState(0);
+  const [currentSection, setCurrentSection] = useState("");
 
-  // Only show data export for cloud users (billing enabled)
-  if (!isBillingEnabled()) {
+  // Only show data export for self-hosted users (to migrate to cloud)
+  if (isBillingEnabled()) {
     return null;
   }
-  const [currentSection, setCurrentSection] = useState("");
 
   const exportData = async (format: ExportFormat) => {
     if (!user) return;
