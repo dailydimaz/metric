@@ -71,6 +71,18 @@ export function OpenSource() {
             </Button>
           </div>
 
+          {/* Migration CTA */}
+          <div className="mt-8 p-4 rounded-lg bg-primary/5 border border-primary/20 max-w-md mx-auto">
+            <p className="text-sm text-muted-foreground mb-3">
+              Already self-hosting? Migrate your data to the cloud seamlessly.
+            </p>
+            <Button variant="outline" size="sm" asChild>
+              <a href="/migrate">
+                Migrate to Cloud →
+              </a>
+            </Button>
+          </div>
+
           {/* Quote */}
           <div className="mt-16 p-8 rounded-2xl bg-card border border-border max-w-2xl mx-auto">
             <blockquote className="text-lg italic text-muted-foreground">

@@ -31,6 +31,7 @@ import PrivacyPolicy from "./pages/PrivacyPolicy";
 import Terms from "./pages/Terms";
 import Lightweight from "./pages/Lightweight";
 import CampaignBuilder from "./pages/CampaignBuilder";
+import Migrate from "./pages/Migrate";
 import { ThemeProvider } from "./components/ThemeProvider";
 import { CommandMenu } from "./components/dashboard/CommandMenu";
 
@@ -57,7 +58,7 @@ const App = () => (
             <Route path="/terms" element={<Terms />} />
             <Route path="/privacy-policy" element={<PrivacyPolicy />} />
             <Route path="/resources/lightweight" element={<Lightweight />} />
-
+            <Route path="/migrate" element={<Migrate />} />
             {/* Public routes */}
             <Route path="/share/:token" element={<PublicDashboard />} />
             <Route path="/insight/:token" element={<SharedInsight />} />

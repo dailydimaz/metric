@@ -190,6 +190,20 @@ export default function SelfHosting() {
                     </Button>
                 </div>
 
+                {/* Migration CTA */}
+                <div className="mt-8 bg-primary/5 border border-primary/20 rounded-2xl p-8 text-center">
+                    <h3 className="text-xl font-bold mb-2">Ready for the Cloud?</h3>
+                    <p className="text-muted-foreground mb-6 max-w-lg mx-auto">
+                        Love self-hosting but want managed infrastructure? Migrate your existing analytics data
+                        to mmmetric Cloud and get automatic backups, updates, and zero maintenance.
+                    </p>
+                    <Button size="lg" asChild>
+                        <Link to="/migrate">
+                            Migrate to Cloud <ArrowRight className="h-4 w-4 ml-2" />
+                        </Link>
+                    </Button>
+                </div>
+
             </main>
 
             <footer className="border-t border-border py-8 mt-16 bg-muted/20">
