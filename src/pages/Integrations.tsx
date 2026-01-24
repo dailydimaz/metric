@@ -53,20 +53,23 @@ export default function Integrations() {
                     </p>
                 </div>
 
-                <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-                    <IntegrationCard
-                        title="Shopify"
-                        description="Connect your Shopify store to track revenue, orders, and attribution automatically."
-                        icon={<ShoppingBag className="w-6 h-6 text-green-500" />}
-                        isConnected={isConnected("shopify")}
-                        onConnect={() => handleConnect("shopify")}
-                    />
-                </div>
-
-                {/* Coming Soon Section */}
-                <div className="mt-12">
+                {/* Coming Soon Section - All integrations require external credentials */}
+                <div className="mt-4">
                     <h2 className="text-lg font-semibold text-muted-foreground mb-4">Coming Soon</h2>
                     <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+                        <div className="relative">
+                            <div className="absolute inset-0 bg-background/60 backdrop-blur-sm rounded-lg z-10 flex items-center justify-center">
+                                <span className="text-sm font-medium text-muted-foreground bg-muted px-3 py-1 rounded-full">Coming Soon</span>
+                            </div>
+                            <IntegrationCard
+                                title="Shopify"
+                                description="Connect your Shopify store to track revenue, orders, and attribution automatically."
+                                icon={<ShoppingBag className="w-6 h-6 text-green-500 opacity-50" />}
+                                isConnected={false}
+                                onConnect={() => {}}
+                            />
+                        </div>
+
                         <div className="relative">
                             <div className="absolute inset-0 bg-background/60 backdrop-blur-sm rounded-lg z-10 flex items-center justify-center">
                                 <span className="text-sm font-medium text-muted-foreground bg-muted px-3 py-1 rounded-full">Coming Soon</span>
