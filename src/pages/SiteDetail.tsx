@@ -187,7 +187,15 @@ export default function SiteDetail() {
     setIsEditing(false);
   };
 
-  if (authLoading || sitesLoading) {
+  // Show loading while auth is loading, or while we have a user but sites are still loading
+  // Also treat sitesLoading as true when the query hasn't run yet (no user yet)
+  const isLoadingSites = sitesLoading || (!!user && sites.length === 0 && !site);
+  
+  if (authLoading || (!user && !authLoading)) {
+    // Still determining auth state or not logged in
+    if (!authLoading && !user) {
+      return null; // useEffect will redirect to /auth
+    }
     return (
       <div className="min-h-screen flex items-center justify-center">
         <Loader2 className="h-8 w-8 animate-spin text-primary" />
@@ -195,8 +203,12 @@ export default function SiteDetail() {
     );
   }
 
-  if (!user) {
-    return null;
+  if (sitesLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    );
   }
 
   if (!site) {
