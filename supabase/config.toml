@@ -11,3 +11,6 @@ verify_jwt = false
 
 [functions.slack-notify]
 verify_jwt = true
+
+[functions.send-email-report]
+verify_jwt = false
