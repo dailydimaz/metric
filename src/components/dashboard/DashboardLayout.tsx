@@ -108,9 +108,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
     <div className="flex flex-col h-full bg-sidebar border-r border-sidebar-border">
       <div className="p-6">
         <Link to="/" className="flex items-center gap-3 mb-8 px-2 group">
-          <div className="h-8 w-8 rounded-lg bg-primary/10 flex items-center justify-center text-primary group-hover:bg-primary group-hover:text-primary-foreground transition-all duration-300">
-            <LayoutDashboard className="h-5 w-5" />
-          </div>
+          <img src={mmmetricLogo} alt="mmmetric" className="h-8 w-8 rounded-lg" />
           <div className="flex flex-col">
             <span className="font-display font-bold text-lg tracking-tight text-sidebar-foreground">mmmetric</span>
             <span className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium">Analytics</span>
@@ -231,9 +229,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
       {/* Mobile Header */}
       <div className="lg:hidden flex items-center justify-between p-4 border-b border-border bg-sidebar/95 backdrop-blur-sm sticky top-0 z-50">
         <div className="flex items-center gap-2">
-          <div className="h-8 w-8 rounded-lg bg-primary/10 flex items-center justify-center text-primary">
-            <LayoutDashboard className="h-5 w-5" />
-          </div>
+          <img src={mmmetricLogo} alt="mmmetric" className="h-8 w-8 rounded-lg" />
           <span className="font-bold text-lg font-display">mmmetric</span>
         </div>
         <Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
