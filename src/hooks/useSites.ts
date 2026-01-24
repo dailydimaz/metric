@@ -23,14 +23,47 @@ export function useSites() {
     queryFn: async () => {
       if (!user) return [] as Site[];
 
-      const { data, error } = await supabase
+      // Fetch owned sites
+      const { data: ownedSites, error: ownedError } = await supabase
         .from("sites")
         .select("*")
         .eq("user_id", user.id)
         .order("created_at", { ascending: false });
 
-      if (error) throw error;
-      return data as Site[];
+      if (ownedError) throw ownedError;
+
+      // Fetch team-assigned sites (RLS policy "Team members can view assigned sites" allows this)
+      const { data: teamMemberships, error: teamError } = await supabase
+        .from("team_members")
+        .select("site_id")
+        .eq("user_id", user.id);
+
+      if (teamError) throw teamError;
+
+      // If user has team memberships, fetch those sites
+      let teamSites: Site[] = [];
+      if (teamMemberships && teamMemberships.length > 0) {
+        const teamSiteIds = teamMemberships.map((m) => m.site_id);
+        const { data: teamSitesData, error: teamSitesError } = await supabase
+          .from("sites")
+          .select("*")
+          .in("id", teamSiteIds)
+          .order("created_at", { ascending: false });
+
+        if (teamSitesError) throw teamSitesError;
+        teamSites = (teamSitesData || []) as Site[];
+      }
+
+      // Combine and deduplicate (in case user owns a site they're also a team member of)
+      const allSites = [...(ownedSites || []), ...teamSites];
+      const uniqueSites = allSites.reduce((acc, site) => {
+        if (!acc.find((s) => s.id === site.id)) {
+          acc.push(site);
+        }
+        return acc;
+      }, [] as Site[]);
+
+      return uniqueSites;
     },
     enabled: !!user,
   });
