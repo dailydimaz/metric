@@ -57,7 +57,7 @@ interface Feature {
 }
 
 const features: Feature[] = [
-  // IMPLEMENTED - Easy
+  // IMPLEMENTED - Easy (Core Analytics)
   {
     name: "Page Views",
     description: "Track which pages get the most traffic",
@@ -123,6 +123,16 @@ const features: Feature[] = [
     category: "analytics",
   },
   {
+    name: "Filtering",
+    description: "Apply filters like country, browser, URL",
+    icon: Filter,
+    implemented: true,
+    difficulty: "easy",
+    category: "analytics",
+  },
+
+  // IMPLEMENTED - Easy (Privacy)
+  {
     name: "No Cookies",
     description: "No cookie banner required",
     icon: Cookie,
@@ -133,6 +143,14 @@ const features: Feature[] = [
   {
     name: "GDPR & CCPA",
     description: "Fully compliant with privacy laws",
+    icon: Shield,
+    implemented: true,
+    difficulty: "easy",
+    category: "privacy",
+  },
+  {
+    name: "Data Anonymization",
+    description: "All visitor data anonymized",
     icon: Shield,
     implemented: true,
     difficulty: "easy",
@@ -180,56 +198,9 @@ const features: Feature[] = [
     difficulty: "medium",
     category: "cloud",
   },
-
-  // IMPLEMENTED - Hard
-  {
-    name: "Funnels",
-    description: "Understand conversion and drop-off rates",
-    icon: Workflow,
-    implemented: true,
-    difficulty: "hard",
-    category: "insights",
-  },
-  {
-    name: "Retention",
-    description: "Track how often users return",
-    icon: TrendingDown,
-    implemented: true,
-    difficulty: "hard",
-    category: "insights",
-  },
-  {
-    name: "Goals",
-    description: "Track goals for pageviews and events",
-    icon: Target,
-    implemented: true,
-    difficulty: "hard",
-    category: "insights",
-  },
-
-  // NOT IMPLEMENTED - Easy
-  {
-    name: "Filtering",
-    description: "Apply filters like country, browser, URL",
-    icon: Filter,
-    implemented: true,
-    difficulty: "easy",
-    category: "analytics",
-  },
-  {
-    name: "Data Anonymization",
-    description: "All visitor data anonymized",
-    icon: Shield,
-    implemented: true,
-    difficulty: "easy",
-    category: "privacy",
-  },
-
-  // NOT IMPLEMENTED - Medium
-
   {
     name: "Public Dashboards",
-    description: "Share stats via secure unique URL",
+    description: "Share stats via secure unique URL with password protection",
     icon: Share2,
     implemented: true,
     difficulty: "medium",
@@ -253,7 +224,7 @@ const features: Feature[] = [
   },
   {
     name: "Links",
-    description: "Monitor clicks on specific URLs",
+    description: "Monitor clicks on specific URLs with redirect tracking",
     icon: Link2,
     implemented: true,
     difficulty: "medium",
@@ -269,93 +240,11 @@ const features: Feature[] = [
   },
   {
     name: "Data Import",
-    description: "Import existing analytics data",
+    description: "Import existing analytics data via CSV/JSON",
     icon: Upload,
     implemented: true,
     difficulty: "medium",
     category: "cloud",
-  },
-
-  // NOT IMPLEMENTED - Hard
-  {
-    name: "Insights",
-    description: "Build custom insights for specific sites",
-    icon: Lightbulb,
-    implemented: true,
-    difficulty: "hard",
-    category: "insights",
-  },
-  {
-    name: "Cohorts",
-    description: "Group users based on specific actions",
-    icon: Users,
-    implemented: true,
-    difficulty: "hard",
-    category: "insights",
-  },
-  {
-    name: "Breakdown",
-    description: "Dive deeper with segments and filters",
-    icon: Database,
-    implemented: true,
-    difficulty: "hard",
-    category: "insights",
-  },
-  {
-    name: "Journey",
-    description: "Visualize how users navigate your site",
-    icon: Route,
-    implemented: true,
-    difficulty: "hard",
-    category: "insights",
-  },
-  {
-    name: "Revenue",
-    description: "Track ecommerce and spending data",
-    icon: DollarSign,
-    implemented: true,
-    difficulty: "hard",
-    category: "insights",
-  },
-  {
-    name: "Attribution",
-    description: "See what drives conversions",
-    icon: Magnet,
-    implemented: true,
-    difficulty: "hard",
-    category: "insights",
-  },
-  {
-    name: "Email Reports",
-    description: "Send scheduled email summaries",
-    icon: Mail,
-    implemented: true,
-    difficulty: "hard",
-    category: "cloud",
-  },
-  {
-    name: "High Performance",
-    description: "Optimized for billions of records",
-    icon: Gauge,
-    implemented: true,
-    difficulty: "hard",
-    category: "cloud",
-  },
-  {
-    name: "Shopify Integration",
-    description: "Connect Shopify for automatic revenue tracking",
-    icon: ShoppingBag,
-    implemented: false,
-    difficulty: "hard",
-    category: "cloud",
-  },
-  {
-    name: "Google Search Console",
-    description: "Visualize SEO keywords and organic traffic",
-    icon: Search,
-    implemented: false,
-    difficulty: "medium",
-    category: "insights",
   },
   {
     name: "X (Twitter) Analytics",
@@ -367,25 +256,9 @@ const features: Feature[] = [
   },
   {
     name: "Public API",
-    description: "Access your data programmatically",
+    description: "Access your data programmatically with API keys",
     icon: Code2,
     implemented: true,
-    difficulty: "medium",
-    category: "cloud",
-  },
-  {
-    name: "Cross-domain Tracking",
-    description: "Unified analytics across multiple domains",
-    icon: Globe2,
-    implemented: true,
-    difficulty: "hard",
-    category: "analytics",
-  },
-  {
-    name: "White Labeling",
-    description: "Custom branding and logo for your dashboard",
-    icon: LayoutTemplate,
-    implemented: false,
     difficulty: "medium",
     category: "cloud",
   },
@@ -404,6 +277,132 @@ const features: Feature[] = [
     implemented: true,
     difficulty: "medium",
     category: "analytics",
+  },
+
+  // IMPLEMENTED - Hard
+  {
+    name: "Funnels",
+    description: "Understand conversion and drop-off rates",
+    icon: Workflow,
+    implemented: true,
+    difficulty: "hard",
+    category: "insights",
+  },
+  {
+    name: "Retention",
+    description: "Track how often users return with cohort matrix",
+    icon: TrendingDown,
+    implemented: true,
+    difficulty: "hard",
+    category: "insights",
+  },
+  {
+    name: "Goals",
+    description: "Track goals with revenue properties and AOV",
+    icon: Target,
+    implemented: true,
+    difficulty: "hard",
+    category: "insights",
+  },
+  {
+    name: "Insights",
+    description: "Build and share custom reports with filters",
+    icon: Lightbulb,
+    implemented: true,
+    difficulty: "hard",
+    category: "insights",
+  },
+  {
+    name: "Cohorts",
+    description: "Group users based on specific actions",
+    icon: Users,
+    implemented: true,
+    difficulty: "hard",
+    category: "insights",
+  },
+  {
+    name: "Breakdown",
+    description: "Dive deeper with multi-dimensional analysis",
+    icon: Database,
+    implemented: true,
+    difficulty: "hard",
+    category: "insights",
+  },
+  {
+    name: "Journey",
+    description: "Visualize how users navigate your site",
+    icon: Route,
+    implemented: true,
+    difficulty: "hard",
+    category: "insights",
+  },
+  {
+    name: "Revenue",
+    description: "Track ecommerce revenue via goal properties",
+    icon: DollarSign,
+    implemented: true,
+    difficulty: "hard",
+    category: "insights",
+  },
+  {
+    name: "Attribution",
+    description: "First-touch, last-touch, and linear models",
+    icon: Magnet,
+    implemented: true,
+    difficulty: "hard",
+    category: "insights",
+  },
+  {
+    name: "Email Reports",
+    description: "Send scheduled email summaries via Resend",
+    icon: Mail,
+    implemented: true,
+    difficulty: "hard",
+    category: "cloud",
+  },
+  {
+    name: "High Performance",
+    description: "Optimized rollups for billions of records",
+    icon: Gauge,
+    implemented: true,
+    difficulty: "hard",
+    category: "cloud",
+  },
+  {
+    name: "Cross-domain Tracking",
+    description: "Unified analytics across multiple domains",
+    icon: Globe2,
+    implemented: true,
+    difficulty: "hard",
+    category: "analytics",
+  },
+
+  // NOT IMPLEMENTED - Medium
+  {
+    name: "Google Search Console",
+    description: "Visualize SEO keywords and organic traffic",
+    icon: Search,
+    implemented: false,
+    difficulty: "medium",
+    category: "insights",
+  },
+  {
+    name: "White Labeling",
+    description: "Custom branding and logo for your dashboard",
+    icon: LayoutTemplate,
+    implemented: false,
+    difficulty: "medium",
+    category: "cloud",
+  },
+
+  // NOT IMPLEMENTED - Hard
+  {
+    name: "Shopify Integration",
+    description: "Connect Shopify for automatic revenue tracking",
+    icon: ShoppingBag,
+    implemented: false,
+    difficulty: "hard",
+    category: "cloud",
   },
   {
     name: "GA Import",
