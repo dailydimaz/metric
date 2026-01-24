@@ -53,21 +53,24 @@ function StatList({
             </div>
           ))}
         </div>
-      ) : items && items.length > 0 ? (
+      ) : Array.isArray(items) && items.length > 0 ? (
         <div className="space-y-4">
-          {items.slice(0, 5).map((item, index) => (
-            <div
-              key={index}
-              className={`group space-y-1.5 ${onBreakdown ? 'cursor-pointer' : ''}`}
-              onClick={() => onBreakdown?.(type, item.name)}
-            >
-              <div className="flex justify-between items-center text-sm">
-                <span className="font-medium text-foreground/80 group-hover:text-primary transition-colors">{item.name}</span>
-                <span className="text-xs text-muted-foreground font-mono">{item.percentage.toFixed(1)}%</span>
+          {items.slice(0, 5).map((item, index) => {
+            if (!item) return null;
+            return (
+              <div
+                key={index}
+                className={`group space-y-1.5 ${onBreakdown ? 'cursor-pointer' : ''}`}
+                onClick={() => onBreakdown?.(type, item.name)}
+              >
+                <div className="flex justify-between items-center text-sm">
+                  <span className="font-medium text-foreground/80 group-hover:text-primary transition-colors">{item.name || "Unknown"}</span>
+                  <span className="text-xs text-muted-foreground font-mono">{(item.percentage || 0).toFixed(1)}%</span>
+                </div>
+                <Progress value={item.percentage || 0} className="h-1.5" />
               </div>
-              <Progress value={item.percentage} className="h-1.5" />
-            </div>
-          ))}
+            );
+          })}
         </div>
       ) : (
         <p className="text-sm text-muted-foreground/50 italic py-4">No data available</p>
