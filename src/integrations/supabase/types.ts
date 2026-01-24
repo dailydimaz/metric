@@ -1658,6 +1658,53 @@ export type Database = {
           },
         ]
       }
+      gsc_stats: {
+        Row: {
+          clicks: number
+          created_at: string
+          ctr: number | null
+          date: string
+          id: string
+          impressions: number
+          keyword: string
+          position: number | null
+          site_id: string
+          url: string | null
+        }
+        Insert: {
+          clicks?: number
+          created_at?: string
+          ctr?: number | null
+          date: string
+          id?: string
+          impressions?: number
+          keyword: string
+          position?: number | null
+          site_id: string
+          url?: string | null
+        }
+        Update: {
+          clicks?: number
+          created_at?: string
+          ctr?: number | null
+          date?: string
+          id?: string
+          impressions?: number
+          keyword?: string
+          position?: number | null
+          site_id?: string
+          url?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "gsc_stats_site_id_fkey"
+            columns: ["site_id"]
+            isOneToOne: false
+            referencedRelation: "sites"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       import_jobs: {
         Row: {
           completed_at: string | null
@@ -1763,6 +1810,56 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "insights_site_id_fkey"
+            columns: ["site_id"]
+            isOneToOne: false
+            referencedRelation: "sites"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      integrations: {
+        Row: {
+          access_token: string | null
+          created_at: string
+          expires_at: string | null
+          id: string
+          is_active: boolean
+          last_sync_at: string | null
+          metadata: Json | null
+          provider: Database["public"]["Enums"]["integration_provider"]
+          refresh_token: string | null
+          site_id: string
+          updated_at: string
+        }
+        Insert: {
+          access_token?: string | null
+          created_at?: string
+          expires_at?: string | null
+          id?: string
+          is_active?: boolean
+          last_sync_at?: string | null
+          metadata?: Json | null
+          provider: Database["public"]["Enums"]["integration_provider"]
+          refresh_token?: string | null
+          site_id: string
+          updated_at?: string
+        }
+        Update: {
+          access_token?: string | null
+          created_at?: string
+          expires_at?: string | null
+          id?: string
+          is_active?: boolean
+          last_sync_at?: string | null
+          metadata?: Json | null
+          provider?: Database["public"]["Enums"]["integration_provider"]
+          refresh_token?: string | null
+          site_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "integrations_site_id_fkey"
             columns: ["site_id"]
             isOneToOne: false
             referencedRelation: "sites"
@@ -2009,6 +2106,68 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "segments_site_id_fkey"
+            columns: ["site_id"]
+            isOneToOne: false
+            referencedRelation: "sites"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      shopify_orders: {
+        Row: {
+          amount: number
+          created_at: string
+          currency: string
+          customer_email: string | null
+          discount_codes: Json | null
+          id: string
+          line_items: Json | null
+          order_created_at: string | null
+          order_number: string | null
+          shipping_total: number | null
+          shopify_order_id: string
+          site_id: string
+          status: string
+          tax_total: number | null
+          updated_at: string
+        }
+        Insert: {
+          amount: number
+          created_at?: string
+          currency?: string
+          customer_email?: string | null
+          discount_codes?: Json | null
+          id?: string
+          line_items?: Json | null
+          order_created_at?: string | null
+          order_number?: string | null
+          shipping_total?: number | null
+          shopify_order_id: string
+          site_id: string
+          status?: string
+          tax_total?: number | null
+          updated_at?: string
+        }
+        Update: {
+          amount?: number
+          created_at?: string
+          currency?: string
+          customer_email?: string | null
+          discount_codes?: Json | null
+          id?: string
+          line_items?: Json | null
+          order_created_at?: string | null
+          order_number?: string | null
+          shipping_total?: number | null
+          shopify_order_id?: string
+          site_id?: string
+          status?: string
+          tax_total?: number | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "shopify_orders_site_id_fkey"
             columns: ["site_id"]
             isOneToOne: false
             referencedRelation: "sites"
@@ -2615,7 +2774,10 @@ export type Database = {
       }
     }
     Enums: {
-      [_ in never]: never
+      integration_provider:
+        | "google_analytics"
+        | "shopify"
+        | "google_search_console"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -2742,6 +2904,12 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      integration_provider: [
+        "google_analytics",
+        "shopify",
+        "google_search_console",
+      ],
+    },
   },
 } as const
