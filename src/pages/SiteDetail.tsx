@@ -190,7 +190,7 @@ export default function SiteDetail() {
   // Show loading while auth is loading, or while we have a user but sites are still loading
   // Also treat sitesLoading as true when the query hasn't run yet (no user yet)
   const isLoadingSites = sitesLoading || (!!user && sites.length === 0 && !site);
-  
+
   if (authLoading || (!user && !authLoading)) {
     // Still determining auth state or not logged in
     if (!authLoading && !user) {
@@ -304,6 +304,7 @@ export default function SiteDetail() {
 
       {breakdown && site && (
         <BreakdownPanel
+          key={breakdown.dimension}
           siteId={site.id}
           dateRange={dateRange}
           dimension={breakdown.dimension}
