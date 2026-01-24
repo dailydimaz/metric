@@ -63,24 +63,6 @@
   --animate-pulse-glow: pulse-glow 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
   --animate-slide-in: slide-in 0.3s ease-out;
 
-  /* Glassmorphism 2.0 */
-  .bg-glass {
-    @apply backdrop-blur-xl bg-background/60 border border-white/10 shadow-sm supports-[backdrop-filter]:bg-background/60;
-  }
-  
-  .dark .bg-glass {
-    @apply border-white/5 bg-black/40;
-  }
-
-  .bg-mesh {
-    background-color: hsla(var(--background));
-    background-image: 
-      radial-gradient(at 0% 0%, hsla(var(--primary) / 0.1) 0px, transparent 50%),
-      radial-gradient(at 100% 0%, hsla(var(--secondary) / 0.1) 0px, transparent 50%),
-      radial-gradient(at 100% 100%, hsla(var(--accent) / 0.1) 0px, transparent 50%),
-      radial-gradient(at 0% 100%, hsla(var(--primary) / 0.05) 0px, transparent 50%);
-  }
-
   @keyframes accordion-down {
     from {
       height: 0;
@@ -275,5 +257,25 @@
 
   body {
     @apply bg-background text-foreground antialiased selection:bg-primary/20 selection:text-primary;
+  }
+}
+
+/* Glassmorphism 2.0 - moved outside @theme */
+@layer utilities {
+  .bg-glass {
+    @apply backdrop-blur-xl bg-background/60 border border-white/10 shadow-sm supports-[backdrop-filter]:bg-background/60;
+  }
+  
+  .dark .bg-glass {
+    @apply border-white/5 bg-black/40;
+  }
+
+  .bg-mesh {
+    background-color: hsla(var(--background));
+    background-image: 
+      radial-gradient(at 0% 0%, hsla(var(--primary) / 0.1) 0px, transparent 50%),
+      radial-gradient(at 100% 0%, hsla(var(--secondary) / 0.1) 0px, transparent 50%),
+      radial-gradient(at 100% 100%, hsla(var(--accent) / 0.1) 0px, transparent 50%),
+      radial-gradient(at 0% 100%, hsla(var(--primary) / 0.05) 0px, transparent 50%);
   }
 }
