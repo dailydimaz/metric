@@ -1,4 +1,4 @@
-# Metric - Development Plan
+# mmmetric - Development Plan
 
 > Privacy-first, open-source web analytics platform
 
@@ -6,13 +6,13 @@
 
 **Tech Stack:** React, Vite, TypeScript, Tailwind CSS, Supabase (Lovable Cloud)
 
-**Current Progress:** 17/32 features implemented (53%)
+**Current Progress:** 38/42 features implemented (90%)
 
 ---
 
 ## MVP Feature Checklist
 
-### ✅ Implemented Features (17)
+### ✅ Implemented Features (38)
 
 | Feature | Difficulty | Category | Description |
 |---------|------------|----------|-------------|
@@ -24,269 +24,46 @@
 | Devices | Easy | Analytics | Browser, OS, and device type detection |
 | Languages | Easy | Analytics | Browser language preferences |
 | Realtime Data | Easy | Analytics | Live visitor activity feed |
+| Filtering | Easy | Analytics | Filter by country, browser, URL |
 | No Cookies | Easy | Privacy | Cookie-free tracking by default |
 | GDPR & CCPA | Easy | Privacy | Built-in compliance features |
+| Data Anonymization | Easy | Privacy | IP hashing, data anonymization |
 | Custom Events | Medium | Analytics | Track custom user actions |
+| Insight Properties | Medium | Analytics | Deep dive into event properties |
 | UTM Tracking | Medium | Analytics | Campaign parameter tracking |
-| Teams | Medium | Analytics | Multi-user collaboration |
+| Teams | Medium | Analytics | Multi-user collaboration with roles |
 | Data Export | Medium | Cloud | Export analytics as CSV/JSON |
+| Public Dashboards | Medium | Insights | Share via secure URL with password protection |
+| Segments | Medium | Insights | Saved filter presets |
+| Compare | Medium | Insights | Period-over-period comparison |
+| Links | Medium | Analytics | Redirect-based link tracking |
+| Pixels | Medium | Analytics | Embeddable tracking pixels |
+| Data Import | Medium | Cloud | CSV/JSON file import |
+| X (Twitter) Analytics | Medium | Analytics | Track mentions from X |
+| Public API | Medium | Cloud | Programmatic access with API keys |
+| Webhooks | Medium | Cloud | Slack notifications for events |
+| Command Menu | Medium | Analytics | Keyboard navigation (Cmd+K) |
 | Funnels | Hard | Insights | Multi-step conversion tracking |
-| Retention | Hard | Insights | User retention cohort analysis |
-| Goals | Hard | Insights | Conversion goal tracking |
+| Retention | Hard | Insights | User retention cohort matrix |
+| Goals | Hard | Insights | Conversion goals with revenue tracking & AOV |
+| Insights | Hard | Insights | Custom shareable reports |
+| Cohorts | Hard | Insights | Behavioral user grouping |
+| Breakdown | Hard | Insights | Multi-dimensional analysis |
+| Journey | Hard | Insights | User flow visualization |
+| Revenue | Hard | Insights | Ecommerce tracking via goal properties |
+| Attribution | Hard | Insights | First-touch, last-touch, linear models |
+| Email Reports | Hard | Cloud | Scheduled email digests via Resend |
+| High Performance | Hard | Cloud | Rollups optimized for scale |
+| Cross-domain Tracking | Hard | Analytics | Unified multi-domain analytics |
 
-### ⬜ Not Implemented Features (15)
+### ⬜ Not Implemented Features (4)
 
-| Feature | Difficulty | Category | Description | Phase |
-|---------|------------|----------|-------------|-------|
-| Filtering | Easy | Analytics | Filter by country, browser, URL | 1 |
-| Data Anonymization | Easy | Privacy | IP hashing, data purging options | 1 |
-| Sharing | Medium | Analytics | Public dashboard URLs | 3 |
-| Segments | Medium | Insights | Saved filter presets | 3 |
-| Compare | Medium | Insights | Period-over-period comparison | 2 |
-| Links | Medium | Analytics | Outbound link click tracking | 2 |
-| Pixels | Medium | Analytics | Embeddable tracking pixels | 2 |
-| Data Import | Medium | Cloud | CSV/JSON import, GA migration | 5 |
-| Insights | Hard | Insights | AI-powered anomaly detection | 4 |
-| Cohorts | Hard | Insights | Behavioral user grouping | 4 |
-| Breakdown | Hard | Insights | Multi-dimensional analysis | 4 |
-| Journey | Hard | Insights | User flow visualization | 4 |
-| Revenue | Hard | Insights | Ecommerce tracking | 5 |
-| Attribution | Hard | Insights | Multi-touch attribution models | 5 |
-| Email Reports | Hard | Cloud | Scheduled digest emails | 5 |
-
----
-
-## Development Phases
-
-### Phase 1: Core Foundation Enhancement (DETAILED)
-
-**Priority:** Quick wins & security hardening  
-**Estimated Effort:** 1-2 weeks  
-**Status:** 🔄 In Progress
-
-#### Features
-
-- [x] **Security Hardening** ✅
-  - RLS policies on all tables
-  - API key authentication for public API
-  - MFA support with backup codes
-  - Session management
-
-- [ ] **Filtering**
-  - Add filter dropdowns to analytics dashboard
-  - Filter by: Country, Browser, OS, Device, URL path, Referrer
-  - Persist filters in URL query params
-  - Files to modify:
-    - `src/pages/SiteDetail.tsx` - Add filter state
-    - `src/components/analytics/FilterBar.tsx` - New component
-    - `src/hooks/useAnalytics.ts` - Add filter params to queries
-
-- [ ] **Data Anonymization**
-  - IP address hashing before storage
-  - Configurable data retention periods
-  - Bulk data purge functionality
-  - Files to modify:
-    - `supabase/functions/track/index.ts` - Hash IPs
-    - `src/pages/Settings.tsx` - Add retention settings
-    - Database: Add `data_retention_days` to sites table
-
-#### Phase 1 Deliverables
-1. FilterBar component with multi-select filters
-2. URL-based filter persistence
-3. IP anonymization in tracking endpoint
-4. Data retention configuration UI
-
----
-
-### Phase 2: Analytics Expansion
-
-**Priority:** Extend core analytics capabilities  
-**Estimated Effort:** 2-3 weeks  
-**Status:** ⬜ Not Started
-
-#### Features
-
-- [ ] **Compare**
-  - Period-over-period comparison (this week vs last week)
-  - Visual diff indicators on all metrics
-  - Comparison toggle in date picker
-  - Files to create:
-    - `src/hooks/useComparisonData.ts`
-    - `src/components/analytics/ComparisonIndicator.tsx`
-
-- [ ] **Links**
-  - Track outbound link clicks
-  - Automatic link interception via tracking script
-  - Top outbound links table
-  - Files to modify:
-    - `public/track.js` - Add click listener
-    - `src/components/analytics/OutboundLinks.tsx` - New component
-
-- [ ] **Pixels**
-  - Generate embeddable 1x1 tracking pixels
-  - Email open tracking support
-  - Pixel management UI
-  - Files to create:
-    - `supabase/functions/pixel/index.ts`
-    - `src/components/settings/PixelManager.tsx`
-
----
-
-### Phase 3: Collaboration & Sharing
-
-**Priority:** Team and sharing features  
-**Estimated Effort:** 1-2 weeks  
-**Status:** ⬜ Not Started
-
-#### Features
-
-- [ ] **Sharing**
-  - Generate public dashboard URLs
-  - Password protection option
-  - Expiring share links
-  - Embed code generation
-  - Files to create:
-    - `src/pages/PublicDashboard.tsx`
-    - `src/components/settings/ShareSettings.tsx`
-    - Database: `shared_dashboards` table
-
-- [ ] **Segments**
-  - Save filter combinations as named segments
-  - Quick segment switcher
-  - Segment-based alerts
-  - Files to create:
-    - `src/hooks/useSegments.ts`
-    - `src/components/analytics/SegmentSelector.tsx`
-    - Database: `segments` table
-
----
-
-### Phase 4: Advanced Insights
-
-**Priority:** Deep analytics and behavior tracking  
-**Estimated Effort:** 4-6 weeks  
-**Status:** ⬜ Not Started
-
-#### Features
-
-- [ ] **Insights**
-  - AI-powered anomaly detection
-  - Automatic trend identification
-  - Weekly insight summaries
-  - Uses Lovable AI gateway (no API key needed)
-  - Files to create:
-    - `supabase/functions/generate-insights/index.ts`
-    - `src/components/analytics/InsightsPanel.tsx`
-
-- [ ] **Cohorts**
-  - Group users by behavior patterns
-  - First-touch vs returning visitor analysis
-  - Custom cohort definitions
-  - Files to create:
-    - `src/hooks/useCohorts.ts`
-    - `src/components/analytics/CohortAnalysis.tsx`
-
-- [ ] **Breakdown**
-  - Multi-dimensional data slicing
-  - Pivot table interface
-  - Custom dimension combinations
-  - Files to create:
-    - `src/components/analytics/BreakdownTable.tsx`
-    - `src/hooks/useBreakdown.ts`
-
-- [ ] **Journey**
-  - User flow visualization
-  - Sankey diagram for page paths
-  - Drop-off analysis
-  - Files to create:
-    - `src/components/analytics/JourneyFlow.tsx`
-    - `src/hooks/useJourneyData.ts`
-
----
-
-### Phase 5: Enterprise & Scale (DETAILED)
-
-**Priority:** Revenue features and enterprise readiness  
-**Estimated Effort:** 6-8 weeks  
-**Status:** ⬜ Not Started
-
-#### Features
-
-- [ ] **Revenue Tracking**
-  - Ecommerce event tracking (purchase, add_to_cart, checkout)
-  - Revenue attribution to sources
-  - Integration options:
-    - Stripe webhook integration
-    - Shopify app integration
-    - Manual revenue events
-  - Files to create:
-    - `supabase/functions/stripe-webhook/index.ts`
-    - `src/components/analytics/RevenueStats.tsx`
-    - `src/hooks/useRevenue.ts`
-  - Database changes:
-    - Add `revenue` and `currency` columns to events table
-    - Create `revenue_summary` materialized view
-
-- [ ] **Attribution**
-  - Multi-touch attribution models:
-    - First-touch
-    - Last-touch
-    - Linear
-    - Time-decay
-    - Position-based
-  - Attribution reports per campaign
-  - Files to create:
-    - `src/components/analytics/AttributionReport.tsx`
-    - `src/hooks/useAttribution.ts`
-    - `supabase/functions/calculate-attribution/index.ts`
-
-- [ ] **Email Reports**
-  - Scheduled weekly/monthly digests
-  - Customizable report content
-  - Multiple recipient support
-  - Implementation:
-    - Use Resend for email delivery
-    - Supabase pg_cron for scheduling
-  - Files to create:
-    - `supabase/functions/send-report/index.ts`
-    - `src/components/settings/EmailReportSettings.tsx`
-  - Required secrets: `RESEND_API_KEY`
-
-- [ ] **Data Import**
-  - CSV/JSON file upload
-  - Google Analytics import wizard
-  - Data validation and preview
-  - Files to create:
-    - `src/components/settings/DataImport.tsx`
-    - `supabase/functions/import-data/index.ts`
-
-- [ ] **High Performance**
-  - Query optimization with proper indexing
-  - Data partitioning by date
-  - Redis caching layer for hot data
-  - Materialized views for aggregations
-  - Database changes:
-    - Add indexes on `created_at`, `site_id`
-    - Create partitioned events table
-    - Add caching edge function
-
-#### Phase 5 Architecture Notes
-
-```
-┌─────────────────┐     ┌──────────────────┐
-│  Stripe/Shopify │────▶│ Webhook Handler  │
-└─────────────────┘     └────────┬─────────┘
-                                 │
-                                 ▼
-┌─────────────────┐     ┌──────────────────┐
-│  Revenue Events │◀────│   Events Table   │
-└─────────────────┘     └────────┬─────────┘
-                                 │
-                                 ▼
-┌─────────────────┐     ┌──────────────────┐
-│ Attribution Calc│◀────│ Materialized View│
-└─────────────────┘     └──────────────────┘
-```
+| Feature | Difficulty | Category | Description | Status |
+|---------|------------|----------|-------------|--------|
+| Google Search Console | Medium | Insights | SEO keywords and organic traffic | Requires Google Cloud credentials |
+| White Labeling | Medium | Cloud | Custom branding for dashboards | Planned |
+| Shopify Integration | Hard | Cloud | Automatic revenue tracking | Requires Shopify webhook secret |
+| GA Import | Hard | Cloud | Import from Google Analytics | Requires Google Cloud credentials |
 
 ---
 
@@ -294,10 +71,10 @@
 
 | Category | Implemented | Total | Progress |
 |----------|-------------|-------|----------|
-| Analytics | 11 | 13 | 85% |
-| Insights | 3 | 10 | 30% |
-| Privacy | 2 | 3 | 67% |
-| Cloud | 1 | 5 | 20% |
+| Analytics | 16 | 16 | 100% |
+| Insights | 13 | 14 | 93% |
+| Privacy | 3 | 3 | 100% |
+| Cloud | 6 | 9 | 67% |
 
 ---
 
@@ -310,8 +87,36 @@
 - [x] Session management and login history
 - [x] No exposed private keys in codebase
 - [x] Proper storage bucket policies
-- [ ] Rate limiting on tracking endpoint
+- [x] Rate limiting on tracking endpoint
 - [ ] CAPTCHA on auth forms
+
+---
+
+## Architecture Highlights
+
+### Data Pipeline
+```
+┌─────────────────┐     ┌──────────────────┐
+│  track.js       │────▶│ /track endpoint  │
+└─────────────────┘     └────────┬─────────┘
+                                 │
+                                 ▼
+┌─────────────────┐     ┌──────────────────┐
+│ events_partitioned│◀──│   Raw Events     │
+└─────────────────┘     └────────┬─────────┘
+                                 │
+                                 ▼
+┌─────────────────┐     ┌──────────────────┐
+│ Hourly Rollups  │◀────│  Aggregation Job │
+└─────────────────┘     └──────────────────┘
+```
+
+### Key RPCs
+- `get_site_stats` - Core metrics with rollup optimization
+- `get_attribution_stats` - Multi-touch attribution models
+- `get_goal_stats` - Revenue and conversion tracking
+- `get_user_journeys` - Navigation path analysis
+- `get_shared_insight` - Public insights (SECURITY DEFINER)
 
 ---
 
@@ -341,13 +146,14 @@ npm run typecheck
 
 ---
 
-## Next Steps
+## Pending External Credentials
 
-1. **Phase 1 Priority:** Implement Filtering feature
-2. **Phase 1 Priority:** Add Data Anonymization
-3. **Phase 2 Quick Win:** Add Compare functionality
-4. Continue iterating based on user feedback
+The following features are hidden behind "Coming Soon" until credentials are provided:
+
+1. **Shopify Integration** - Requires `SHOPIFY_WEBHOOK_SECRET`
+2. **Google Analytics Import** - Requires Google Cloud OAuth
+3. **Google Search Console** - Requires Google Cloud OAuth
 
 ---
 
-*Last Updated: December 2024*
+*Last Updated: January 2025*
