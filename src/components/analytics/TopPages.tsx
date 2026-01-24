@@ -1,4 +1,5 @@
 import { FileText, ArrowRight, Layers } from "lucide-react";
+import { motion } from "framer-motion";
 import { TopPage } from "@/hooks/useAnalytics";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
@@ -17,97 +18,140 @@ interface TopPagesProps {
   onBreakdown?: (url: string) => void;
 }
 
+const rowVariants = {
+  hidden: { opacity: 0, x: -20 },
+  visible: (i: number) => ({
+    opacity: 1,
+    x: 0,
+    transition: {
+      delay: i * 0.05,
+      duration: 0.3,
+      ease: "easeOut" as const,
+    },
+  }),
+};
+
 export function TopPages({ pages, isLoading, onBreakdown }: TopPagesProps) {
-  // Calculate max views for progress bars
   const maxViews = pages && pages.length > 0 ? Math.max(...pages.map(p => p.pageviews)) : 0;
 
   return (
-    <Card className="h-full">
-      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 border-b border-border/50">
-        <div className="flex items-center gap-2">
-          <div className="p-2 bg-primary/10 rounded-lg text-primary">
-            <FileText className="h-4 w-4" />
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.4, delay: 0.2 }}
+    >
+      <Card className="h-full hover:shadow-lg transition-shadow duration-300">
+        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 border-b border-border/50">
+          <div className="flex items-center gap-2">
+            <motion.div 
+              className="p-2 bg-primary/10 rounded-lg text-primary"
+              whileHover={{ scale: 1.1, rotate: 5 }}
+              transition={{ type: "spring", stiffness: 400 }}
+            >
+              <FileText className="h-4 w-4" />
+            </motion.div>
+            <CardTitle className="text-base font-semibold">Top Pages</CardTitle>
           </div>
-          <CardTitle className="text-base font-semibold">Top Pages</CardTitle>
-        </div>
-        {onBreakdown && (
-          <span className="text-xs text-muted-foreground flex items-center gap-1">
-            <Layers className="h-3 w-3" />
-            <span className="hidden sm:inline">Click to drill down</span>
-          </span>
-        )}
-      </CardHeader>
-
-      <CardContent className="p-0">
-        <div className="overflow-hidden">
-          {isLoading ? (
-            <div className="p-4 space-y-4">
-              {[...Array(5)].map((_, i) => (
-                <div key={i} className="flex items-center gap-4">
-                  <Skeleton className="h-4 w-2/3" />
-                  <Skeleton className="h-4 w-12 ml-auto" />
-                </div>
-              ))}
-            </div>
-          ) : pages && pages.length > 0 ? (
-            <div className="overflow-x-auto">
-              <Table>
-                <TableHeader>
-                  <TableRow className="bg-muted/50 hover:bg-muted/50">
-                    <TableHead className="w-full pl-4">Page Path</TableHead>
-                    <TableHead className="text-right">Unique</TableHead>
-                    <TableHead className="text-right pr-4">Views</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {pages.map((page, index) => {
-                    const percentage = maxViews > 0 ? (page.pageviews / maxViews) * 100 : 0;
-                    return (
-                      <TableRow
-                        key={index}
-                        className={`group cursor-pointer hover:bg-muted/50 transition-colors border-b border-border last:border-0`}
-                        onClick={() => onBreakdown?.(page.url)}
-                      >
-                        <TableCell className="pl-4 relative max-w-[200px] md:max-w-xs">
-                          {/* Background progress bar */}
-                          <div
-                            className="absolute inset-y-0 left-0 bg-primary/5 opacity-0 group-hover:opacity-100 transition-opacity"
-                            style={{ width: `${percentage}%` }}
-                          />
-                          <div className="flex items-center gap-3 relative z-10">
-                            <span className="text-xs text-muted-foreground font-mono w-4">{index + 1}</span>
-                            <div className="flex items-center gap-2 min-w-0" title={page.url}>
-                              <span className="truncate font-medium text-sm text-foreground/90 group-hover:text-primary transition-colors">
-                                {page.url}
-                              </span>
-                              <a
-                                href={`${page.url.startsWith('http') ? '' : 'https://'}${page.url}`}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="opacity-0 group-hover:opacity-100 text-muted-foreground hover:text-primary transition-all"
-                                onClick={(e) => e.stopPropagation()}
-                              >
-                                <ArrowRight className="h-3 w-3" />
-                              </a>
-                            </div>
-                          </div>
-                        </TableCell>
-                        <TableCell className="text-right font-mono text-sm text-muted-foreground">{page.uniqueVisitors}</TableCell>
-                        <TableCell className="text-right pr-4 font-bold text-sm">{page.pageviews}</TableCell>
-                      </TableRow>
-                    );
-                  })}
-                </TableBody>
-              </Table>
-            </div>
-          ) : (
-            <div className="flex flex-col items-center justify-center py-12 text-muted-foreground/40">
-              <FileText className="h-10 w-10 mb-2 opacity-20" />
-              <p className="text-sm">No page data recorded yet</p>
-            </div>
+          {onBreakdown && (
+            <span className="text-xs text-muted-foreground flex items-center gap-1">
+              <Layers className="h-3 w-3" />
+              <span className="hidden sm:inline">Click to drill down</span>
+            </span>
           )}
-        </div>
-      </CardContent>
-    </Card>
+        </CardHeader>
+
+        <CardContent className="p-0">
+          <div className="overflow-hidden">
+            {isLoading ? (
+              <div className="p-4 space-y-4">
+                {[...Array(5)].map((_, i) => (
+                  <motion.div 
+                    key={i} 
+                    className="flex items-center gap-4"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ delay: i * 0.1 }}
+                  >
+                    <Skeleton className="h-4 w-2/3" />
+                    <Skeleton className="h-4 w-12 ml-auto" />
+                  </motion.div>
+                ))}
+              </div>
+            ) : pages && pages.length > 0 ? (
+              <div className="overflow-x-auto">
+                <Table>
+                  <TableHeader>
+                    <TableRow className="bg-muted/50 hover:bg-muted/50">
+                      <TableHead className="w-full pl-4">Page Path</TableHead>
+                      <TableHead className="text-right">Unique</TableHead>
+                      <TableHead className="text-right pr-4">Views</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {pages.map((page, index) => {
+                      const percentage = maxViews > 0 ? (page.pageviews / maxViews) * 100 : 0;
+                      return (
+                        <motion.tr
+                          key={index}
+                          custom={index}
+                          variants={rowVariants}
+                          initial="hidden"
+                          animate="visible"
+                          whileHover={{ 
+                            backgroundColor: "hsl(var(--muted) / 0.5)",
+                            transition: { duration: 0.15 }
+                          }}
+                          className="group cursor-pointer border-b border-border last:border-0"
+                          onClick={() => onBreakdown?.(page.url)}
+                        >
+                          <TableCell className="pl-4 relative max-w-[200px] md:max-w-xs">
+                            <motion.div
+                              className="absolute inset-y-0 left-0 bg-primary/10"
+                              initial={{ width: 0 }}
+                              animate={{ width: `${percentage}%` }}
+                              transition={{ duration: 0.6, delay: index * 0.05 + 0.2 }}
+                            />
+                            <div className="flex items-center gap-3 relative z-10">
+                              <span className="text-xs text-muted-foreground font-mono w-4">{index + 1}</span>
+                              <div className="flex items-center gap-2 min-w-0" title={page.url}>
+                                <span className="truncate font-medium text-sm text-foreground/90 group-hover:text-primary transition-colors">
+                                  {page.url}
+                                </span>
+                                <motion.a
+                                  href={`${page.url.startsWith('http') ? '' : 'https://'}${page.url}`}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="opacity-0 group-hover:opacity-100 text-muted-foreground hover:text-primary"
+                                  onClick={(e) => e.stopPropagation()}
+                                  whileHover={{ x: 3 }}
+                                >
+                                  <ArrowRight className="h-3 w-3" />
+                                </motion.a>
+                              </div>
+                            </div>
+                          </TableCell>
+                          <TableCell className="text-right font-mono text-sm text-muted-foreground">{page.uniqueVisitors}</TableCell>
+                          <TableCell className="text-right pr-4 font-bold text-sm">{page.pageviews}</TableCell>
+                        </motion.tr>
+                      );
+                    })}
+                  </TableBody>
+                </Table>
+              </div>
+            ) : (
+              <motion.div 
+                className="flex flex-col items-center justify-center py-12 text-muted-foreground/40"
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ duration: 0.3 }}
+              >
+                <FileText className="h-10 w-10 mb-2 opacity-20" />
+                <p className="text-sm">No page data recorded yet</p>
+              </motion.div>
+            )}
+          </div>
+        </CardContent>
+      </Card>
+    </motion.div>
   );
 }
