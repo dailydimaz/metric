@@ -10,7 +10,7 @@ const footerLinks = {
     { label: "Roadmap", href: "/roadmap" },
     { label: "Live Demo", href: "/live" },
     { label: "vs Google Analytics", href: "/compare/google-analytics" },
-    { label: "Changelog", href: "#" },
+    { label: "Changelog", href: "/changelog" },
   ],
   resources: [
     { label: "Self-Hosting", href: "/resources/self-hosting" },
