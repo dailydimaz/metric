@@ -141,7 +141,7 @@ mmmetric.track('form_submit', { form_name: 'newsletter' });
 ## 🏗️ Tech Stack
 
 - **Frontend**: React, TypeScript, Vite
-- **Styling**: Tailwind CSS, DaisyUI, shadcn/ui
+- **Styling**: Tailwind CSS v4, shadcn/ui
 - **Backend**: Supabase (PostgreSQL + Auth + Edge Functions)
 - **State Management**: TanStack Query
 

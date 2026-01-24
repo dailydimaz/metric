@@ -517,7 +517,7 @@ export default function Roadmap() {
             <div className="w-3 h-3 rounded-full bg-red-500"></div>
             <span>Hard</span>
           </div>
-          <div className="divider divider-horizontal"></div>
+          <div className="h-4 w-px bg-border mx-2"></div>
           <div className="flex items-center gap-2 text-sm">
             <Check className="h-4 w-4 text-green-500" />
             <span>Implemented</span>

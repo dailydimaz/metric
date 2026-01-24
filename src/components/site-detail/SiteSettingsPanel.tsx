@@ -101,10 +101,10 @@ export function SiteSettingsPanel({ site, onEdit, onDelete, deletePending }: Sit
     };
 
     return (
-        <div className="card bg-muted/30 border border-border animate-in fade-in slide-in-from-top-2 rounded-xl">
-            <div className="card-body p-6">
+        <div className="bg-muted/30 border border-border animate-in fade-in slide-in-from-top-2 rounded-xl">
+            <div className="p-6">
                 <div className="flex items-center justify-between">
-                    <h3 className="card-title text-base font-semibold">Site Settings</h3>
+                    <h3 className="text-base font-semibold">Site Settings</h3>
                     <div className="flex gap-2">
                         <div className="flex gap-2">
                             <Button variant="ghost" size="sm" onClick={onEdit}>

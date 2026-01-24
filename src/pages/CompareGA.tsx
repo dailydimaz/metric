@@ -56,12 +56,12 @@ export default function CompareGA() {
 
                 {/* Comparison Table */}
                 <div className="overflow-x-auto bg-muted/30 rounded-3xl p-8 mb-24 border border-border">
-                    <table className="table w-full text-lg">
+                    <table className="w-full text-lg">
                         <thead>
                             <tr className="border-b-2 border-border/50">
-                                <th className="bg-transparent text-muted-foreground w-1/3 pb-6">Feature</th>
-                                <th className="bg-transparent text-primary text-xl font-bold pb-6 w-1/3">mmmetric</th>
-                                <th className="bg-transparent text-muted-foreground text-xl pb-6 w-1/3">Google Analytics</th>
+                                <th className="text-left bg-transparent text-muted-foreground w-1/3 pb-6 font-semibold">Feature</th>
+                                <th className="text-left bg-transparent text-primary text-xl font-bold pb-6 w-1/3">mmmetric</th>
+                                <th className="text-left bg-transparent text-muted-foreground text-xl pb-6 w-1/3">Google Analytics</th>
                             </tr>
                         </thead>
                         <tbody>
