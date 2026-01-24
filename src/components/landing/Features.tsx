@@ -17,6 +17,25 @@ import {
   Check,
   Search,
   ArrowRight,
+  TrendingDown,
+  Smartphone,
+  Languages,
+  Filter,
+  Database,
+  Share2,
+  Lightbulb,
+  Link2,
+  Image,
+  GitCompare,
+  DollarSign,
+  Workflow,
+  Magnet,
+  Cookie,
+  Upload,
+  Mail,
+  Twitter,
+  Bell,
+  Globe2,
 } from "lucide-react";
 import { motion } from "framer-motion";
 import { Card, CardContent } from "@/components/ui/card";
@@ -214,7 +233,7 @@ export function Features() {
           <BentoCard
             className="md:col-span-2 md:row-span-2"
             icon={BarChart3}
-            title="Real-time Analytics"
+            title="Real-time Traffic Insights"
             description="Watch your traffic spike in real-time. See exactly how many people are on your site right now, what pages they're viewing, and where they're coming from."
             illustration={RealtimeIllustration}
           />
@@ -354,16 +373,210 @@ export function Features() {
             className="md:col-span-1"
             icon={Download}
             title="Data Ownership"
-            description="It's your data. Export it to CSV anytime you want."
+            description="It's your data. Export it to CSV or import from other tools anytime."
             illustration={() => (
-              <div className="absolute inset-0 flex items-center justify-center">
+              <div className="absolute inset-0 flex items-center justify-center gap-2">
                 <Button variant="outline" size="sm" className="pointer-events-none">
                   <Download className="w-4 h-4 mr-2" />
-                  Export.csv
+                  Export
+                </Button>
+                <Button variant="outline" size="sm" className="pointer-events-none">
+                  <Upload className="w-4 h-4 mr-2" />
+                  Import
                 </Button>
               </div>
             )}
             delay={0.6}
+          />
+
+          {/* --- NEWLY ADDED FEATURES FROM ROADMAP --- */}
+
+          {/* Card: Public Dashboards */}
+          <BentoCard
+            className="md:col-span-1"
+            icon={Share2}
+            title="Public Dashboards"
+            description="Share your stats via a secure, password-protected public URL."
+            illustration={() => (
+              <div className="absolute inset-x-8 top-16 h-10 bg-background rounded-lg border border-border shadow-lg flex items-center px-3 gap-2">
+                <Globe className="h-4 w-4 text-primary" />
+                <div className="h-3 w-20 bg-muted rounded-full"></div>
+                <div className="ml-auto">
+                  <Badge variant="outline" className="text-[10px] h-5 px-1">Public</Badge>
+                </div>
+              </div>
+            )}
+            delay={0.2}
+          />
+
+          {/* Card: Comparison */}
+          <BentoCard
+            className="md:col-span-1"
+            icon={GitCompare}
+            title="Comparison Mode"
+            description="Compare traffic and metrics against previous periods effortlessly."
+            illustration={() => (
+              <div className="absolute inset-0 flex items-center justify-center">
+                <div className="relative w-24 h-12">
+                  <div className="absolute inset-0 border-b-2 border-muted-foreground/30 transform skew-y-6"></div>
+                  <div className="absolute inset-0 border-b-2 border-primary transform -skew-y-6 translate-y-2"></div>
+                </div>
+              </div>
+            )}
+            delay={0.3}
+          />
+
+          {/* Card: Filter & Segments */}
+          <BentoCard
+            className="md:col-span-1"
+            icon={Filter}
+            title="Advanced Filtering"
+            description="Deep dive with filters and save them as Segments for quick access."
+            illustration={() => (
+              <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 opacity-60">
+                <div className="w-32 h-6 bg-background rounded-md border border-border flex items-center px-2">
+                  <div className="w-4 h-4 rounded-full bg-primary/20"></div>
+                </div>
+                <div className="w-32 h-6 bg-background rounded-md border border-border flex items-center px-2">
+                  <div className="w-4 h-4 rounded-full bg-secondary/20"></div>
+                </div>
+              </div>
+            )}
+            delay={0.4}
+          />
+
+          {/* Card: Tracking */}
+          <BentoCard
+            className="md:col-span-1"
+            icon={Link2}
+            title="Links & UTMs"
+            description="Track outbound clicks, UTM campaigns, and marketing effectiveness."
+            illustration={() => (
+              <div className="absolute inset-0 flex items-center justify-center">
+                <Link2 className="w-16 h-16 text-primary/10" />
+                <Target className="w-8 h-8 text-primary absolute bottom-1/3 right-1/3" />
+              </div>
+            )}
+            delay={0.5}
+          />
+
+          {/* Card: Revenue */}
+          <BentoCard
+            className="md:col-span-1"
+            icon={DollarSign}
+            title="Revenue Tracking"
+            description="Track ecommerce revenue, average order value, and conversion goals."
+            illustration={() => (
+              <div className="absolute inset-0 flex items-center justify-center">
+                <span className="text-5xl font-bold text-green-500/20">$</span>
+                <TrendingDown className="w-8 h-8 text-green-500 absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 rotate-180" />
+              </div>
+            )}
+            delay={0.2}
+          />
+
+          {/* Card: Attribution */}
+          <BentoCard
+            className="md:col-span-1"
+            icon={Magnet}
+            title="Attribution Models"
+            description="Understand the customer journey with First-touch and Linear models."
+            illustration={() => (
+              <div className="absolute inset-0 flex items-center justify-center gap-1">
+                <div className="w-2 h-12 bg-muted rounded-full"></div>
+                <div className="w-2 h-12 bg-muted rounded-full"></div>
+                <div className="w-2 h-12 bg-primary rounded-full"></div>
+              </div>
+            )}
+            delay={0.3}
+          />
+
+          {/* Card: Devices */}
+          <BentoCard
+            className="md:col-span-1"
+            icon={Smartphone}
+            title="Device & OS"
+            description="Granular breakdown of what devices, browsers, and OS your users use."
+            illustration={() => (
+              <div className="absolute inset-0 flex items-center justify-center gap-3 opacity-50">
+                <Smartphone className="w-8 h-8" />
+                <div className="w-12 h-8 border border-foreground rounded" />
+              </div>
+            )}
+            delay={0.4}
+          />
+
+          {/* Card: Social */}
+          <BentoCard
+            className="md:col-span-1"
+            icon={Twitter}
+            title="Social Analytics"
+            description="Track mentions and link clicks from social platforms like X (Twitter)."
+            illustration={() => (
+              <div className="absolute inset-0 flex items-center justify-center">
+                <Twitter className="w-16 h-16 text-blue-400/20" fill="currentColor" />
+              </div>
+            )}
+            delay={0.5}
+          />
+
+          {/* Card: API */}
+          <BentoCard
+            className="md:col-span-1"
+            icon={Code2}
+            title="API & Webhooks"
+            description="Programmatic access to data and Slack/Discord alerts via webhooks."
+            illustration={() => (
+              <div className="absolute inset-0 flex items-center justify-center font-mono text-xs opacity-60">
+                {'{ "data": [...] }'}
+              </div>
+            )}
+            delay={0.2}
+          />
+
+          {/* Card: Email Reports */}
+          <BentoCard
+            className="md:col-span-1"
+            icon={Mail}
+            title="Email Reports"
+            description="Get weekly or monthly summaries delivered straight to your inbox."
+            illustration={() => (
+              <div className="absolute inset-0 flex items-center justify-center">
+                <Mail className="w-12 h-12 text-primary/20" />
+                <div className="absolute top-1/2 right-1/3 w-3 h-3 bg-red-500 rounded-full border-2 border-background"></div>
+              </div>
+            )}
+            delay={0.3}
+          />
+
+          {/* Card: Cross Domain */}
+          <BentoCard
+            className="md:col-span-1"
+            icon={Globe2}
+            title="Cross-domain"
+            description="Unified analytics across multiple domains and subdomains."
+            illustration={() => (
+              <div className="absolute inset-0 flex items-center justify-center gap-4">
+                <Globe className="w-8 h-8 text-primary/40" />
+                <Link2 className="w-4 h-4 text-muted-foreground" />
+                <Globe className="w-8 h-8 text-secondary/40" />
+              </div>
+            )}
+            delay={0.4}
+          />
+
+          {/* Card: Insight Drilldown */}
+          <BentoCard
+            className="md:col-span-1"
+            icon={Lightbulb}
+            title="Insight Drilldown"
+            description="Deep dive into custom event properties and parameters."
+            illustration={() => (
+              <div className="absolute inset-0 flex items-center justify-center">
+                <Search className="w-10 h-10 text-primary/20" />
+              </div>
+            )}
+            delay={0.5}
           />
         </div>
       </div>
