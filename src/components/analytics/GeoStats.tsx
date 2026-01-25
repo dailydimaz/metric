@@ -100,7 +100,12 @@ export function GeoStats({ countries, cities, isLoading, onBreakdown }: GeoStats
             </div>
           ) : viewMode === "map" && activeTab === "countries" ? (
             <div className="p-4">
-              <GeoMap data={countries} isLoading={isLoading} onCountryClick={onBreakdown} />
+              <GeoMap
+                data={countries}
+                cities={cities}
+                isLoading={isLoading}
+                onCountryClick={onBreakdown}
+              />
             </div>
           ) : activeTab === "countries" ? (
             countries && countries.length > 0 ? (
