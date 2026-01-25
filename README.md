@@ -45,12 +45,12 @@
 
 ### Self-Hosting
 
-mmmetric can be self-hosted using Supabase as the backend.
+mmmetric can be fully self-hosted using Supabase as the backend. No vendor lock-in — Supabase itself can also be [self-hosted](https://supabase.com/docs/guides/self-hosting).
 
 #### Prerequisites
 
 - Node.js 18+
-- A [Supabase](https://supabase.com) account (free tier works)
+- A [Supabase](https://supabase.com) account (free tier works) or self-hosted Supabase instance
 
 #### Installation
 
@@ -65,17 +65,48 @@ npm install
 # Copy environment variables
 cp .env.example .env
 
-# Configure your Supabase credentials in .env
-# VITE_SUPABASE_PROJECT_ID=your-project-id
-# VITE_SUPABASE_PUBLISHABLE_KEY=your-anon-key
-# VITE_SUPABASE_URL=https://your-project-id.supabase.co
+# Configure your Supabase credentials in .env (see Environment Variables below)
 
 # Run database migrations
-# (Apply the SQL files in supabase/migrations/ to your Supabase project)
+# Apply the SQL files in supabase/migrations/ to your Supabase project
+# via the Supabase dashboard SQL editor or CLI
 
 # Start development server
 npm run dev
 ```
+
+#### Environment Variables
+
+| Variable | Required | Description |
+|----------|----------|-------------|
+| `VITE_SUPABASE_URL` | ✅ | Your Supabase instance URL |
+| `VITE_SUPABASE_PUBLISHABLE_KEY` | ✅ | Supabase anon/public key |
+| `VITE_SUPABASE_PROJECT_ID` | Optional | Project ID (derived from URL if omitted) |
+| `VITE_APP_URL` | Optional | Your app URL (defaults to `window.location.origin`) |
+| `VITE_APP_NAME` | Optional | Custom branding name (defaults to "mmmetric") |
+| `VITE_STRIPE_PUBLISHABLE_KEY` | Optional | **Leave empty** for self-hosted (unlocks all features) |
+
+#### Edge Function Secrets
+
+Configure these in your Supabase dashboard under **Edge Functions → Secrets** or via CLI:
+
+```bash
+supabase secrets set RESEND_API_KEY=your-resend-key
+supabase secrets set APP_URL=https://analytics.yourdomain.com
+supabase secrets set APP_NAME=YourAnalytics
+supabase secrets set EMAIL_FROM="Analytics <reports@yourdomain.com>"
+supabase secrets set CRON_SECRET=your-random-secret
+supabase secrets set ALLOWED_DEV_ORIGINS=localhost,staging.yourdomain.com
+```
+
+| Secret | Required | Description |
+|--------|----------|-------------|
+| `RESEND_API_KEY` | For emails | [Resend.com](https://resend.com) API key for email reports |
+| `APP_URL` | For emails | Your application URL for links in emails |
+| `APP_NAME` | Optional | Application name in emails (default: mmmetric) |
+| `EMAIL_FROM` | Optional | Email sender address |
+| `CRON_SECRET` | For scheduled jobs | Secret to authenticate cron requests |
+| `ALLOWED_DEV_ORIGINS` | Optional | Comma-separated domains to allow for development |
 
 #### Production Deployment
 
@@ -93,6 +124,28 @@ Deploy the `dist/` folder to any static hosting provider:
 - Cloudflare Pages
 - GitHub Pages
 - Your own server
+
+#### Edge Functions Deployment
+
+Deploy edge functions to your Supabase project:
+
+```bash
+# Link to your Supabase project
+supabase link --project-ref your-project-id
+
+# Deploy all functions
+supabase functions deploy
+```
+
+#### Supabase Configuration
+
+For self-hosted Supabase instances, regenerate `supabase/config.toml`:
+
+```bash
+supabase init
+```
+
+Then apply all migrations from `supabase/migrations/` to your database.
 
 #### GeoIP Setup (Optional)
 
@@ -125,7 +178,22 @@ See [docs/geoip-import.md](docs/geoip-import.md) for detailed instructions.
 Add this script to your website's `<head>` tag:
 
 ```html
-<script defer src="https://mmmetric.lovable.app/track.js" data-site="YOUR_TRACKING_ID"></script>
+<script defer 
+  src="https://your-analytics-domain.com/track.js" 
+  data-site="YOUR_TRACKING_ID"
+  data-api="https://your-supabase-url.supabase.co/functions/v1/track">
+</script>
+```
+
+**Important:** The `data-api` attribute is required and should point to your Supabase Edge Functions URL.
+
+For cloud users:
+```html
+<script defer 
+  src="https://mmmetric.lovable.app/track.js" 
+  data-site="YOUR_TRACKING_ID"
+  data-api="https://lckjlefupqlblfcwhbom.supabase.co/functions/v1/track">
+</script>
 ```
 
 ### Tracking Custom Events
@@ -136,6 +204,14 @@ mmmetric.track('button_click', { button_id: 'cta-hero' });
 
 // Track a form submission
 mmmetric.track('form_submit', { form_name: 'newsletter' });
+```
+
+### Tracking Pixel (Email/No-JS)
+
+For environments without JavaScript:
+
+```html
+<img src="https://your-supabase-url.supabase.co/functions/v1/pixel?site_id=YOUR_TRACKING_ID" alt="" />
 ```
 
 ## 🏗️ Tech Stack
