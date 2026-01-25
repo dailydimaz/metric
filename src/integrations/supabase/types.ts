@@ -2610,6 +2610,26 @@ export type Database = {
           widgets: Json
         }[]
       }
+      get_shopify_orders_for_site: {
+        Args: { p_site_id: string }
+        Returns: {
+          amount: number
+          created_at: string
+          currency: string
+          customer_email: string
+          discount_codes: Json
+          id: string
+          line_items: Json
+          order_created_at: string
+          order_number: string
+          shipping_total: number
+          shopify_order_id: string
+          site_id: string
+          status: string
+          tax_total: number
+          updated_at: string
+        }[]
+      }
       get_site_stats: {
         Args: {
           _end_date: string
