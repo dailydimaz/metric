@@ -340,11 +340,18 @@
 
   // Handle SPA navigation
   var lastPath = window.location.pathname;
+  var engagementStartTime = Date.now();
 
   function handleNavigation() {
     var currentPath = window.location.pathname;
     if (currentPath !== lastPath) {
+      // Track engagement for previous page
+      if (typeof sendEngagement === 'function') {
+        sendEngagement();
+      }
+
       lastPath = currentPath;
+      engagementStartTime = Date.now();
       trackPageview();
     }
   }
@@ -364,6 +371,97 @@
     };
 
     window.addEventListener('popstate', handleNavigation);
+  }
+
+  // Track Engagement
+  function sendEngagement(url) {
+    var duration = Math.round((Date.now() - engagementStartTime) / 1000);
+    // Only track if reasonable duration (e.g. > 1s and < 24h)
+    if (duration > 1 && duration < 86400) {
+      track('engagement', {
+        duration_seconds: duration,
+        url: url || lastPath
+      });
+    }
+  }
+
+  function setupEngagementTracking() {
+    // Send on visibility hidden (tab switch/close)
+    document.addEventListener('visibilitychange', function () {
+      if (document.hidden) {
+        sendEngagement();
+      } else {
+        engagementStartTime = Date.now();
+      }
+    });
+
+    // Send on unload
+    window.addEventListener('pagehide', function () {
+      sendEngagement();
+    });
+  }
+
+  // Track Forms
+  function setupFormTracking() {
+    var activeForms = new Set();
+    var lastFocusedField = null;
+
+    // Track form start (first focus)
+    document.addEventListener('focusin', function (e) {
+      var target = e.target;
+      if (target && (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.tagName === 'SELECT')) {
+        var form = target.form;
+        if (form && !activeForms.has(form)) {
+          activeForms.add(form);
+          track('form_start', {
+            form_id: form.id || form.getAttribute('name') || 'unknown'
+          });
+        }
+        if (form) {
+          lastFocusedField = target.name || target.id || target.type;
+        }
+      }
+    }, true);
+
+    // Track submissions
+    document.addEventListener('submit', function (e) {
+      var form = e.target;
+      if (!form || form.tagName !== 'FORM') return;
+
+      activeForms.delete(form);
+
+      // Count fields
+      var filled = 0;
+      var total = 0;
+      try {
+        var formData = new FormData(form);
+        for (var pair of formData.entries()) {
+          total++;
+          if (pair[1]) filled++;
+        }
+      } catch (e) {
+        total = form.elements.length;
+      }
+
+      track('form_submit', {
+        form_id: form.id || form.getAttribute('name') || 'unknown',
+        form_action: form.action,
+        fields_filled: filled
+      });
+    }, true);
+
+    // Track abandonment
+    function checkAbandonment() {
+      activeForms.forEach(function (form) {
+        track('form_abandon', {
+          form_id: form.id || form.getAttribute('name') || 'unknown',
+          last_field: lastFocusedField
+        });
+      });
+      activeForms.clear();
+    }
+
+    window.addEventListener('pagehide', checkAbandonment);
   }
 
   // Track Core Web Vitals

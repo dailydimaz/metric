@@ -6,13 +6,13 @@
 
 **Tech Stack:** React, Vite, TypeScript, Tailwind CSS, Supabase (Lovable Cloud)
 
-**Current Progress:** 38/60 features implemented (63%)
+**Current Progress:** 45/60 features implemented (75%)
 
 ---
 
 ## MVP Feature Checklist
 
-### ✅ Implemented Features (38)
+### ✅ Implemented Features (45)
 
 | Feature | Difficulty | Category | Description |
 |---------|------------|----------|-------------|
@@ -55,20 +55,20 @@
 | Email Reports | Hard | Cloud | Scheduled email digests via Resend |
 | High Performance | Hard | Cloud | Rollups optimized for scale |
 | Cross-domain Tracking | Hard | Analytics | Unified multi-domain analytics |
+| Outbound Link Clicks | Easy | Analytics | Auto-track clicks on external links |
+| File Downloads | Easy | Analytics | Track PDF, docx, zip downloads |
+| Bot Detection | Easy | Privacy | Auto-exclude bots and spam traffic |
+| Scroll Depth | Medium | Analytics | Track scroll percentage (0-100%) |
+| Time on Page | Medium | Analytics | Engagement-based time tracking |
+| Entry/Exit Pages | Medium | Analytics | Landing and exit page tracking |
+| Form Analytics | Medium | Analytics | Track form submissions & drop-offs |
 
-### ⬜ Not Implemented Features (22)
+### ⬜ Not Implemented Features (15)
 
 | Feature | Difficulty | Category | Description | Status |
 |---------|------------|----------|-------------|--------|
-| Outbound Link Clicks | Easy | Analytics | Auto-track clicks on external links | Planned |
-| File Downloads | Easy | Analytics | Track PDF, docx, zip downloads | Planned |
-| Bot Detection | Easy | Privacy | Auto-exclude bots and spam traffic | Planned |
 | Google Search Console | Medium | Insights | SEO keywords and organic traffic | Requires Google Cloud credentials |
 | White Labeling | Medium | Cloud | Custom branding for dashboards | Planned |
-| Form Analytics | Medium | Analytics | Track form submissions & drop-offs | Planned |
-| Scroll Depth | Medium | Analytics | Track scroll percentage (0-100%) | Planned |
-| Time on Page | Medium | Analytics | Engagement-based time tracking | Planned |
-| Entry/Exit Pages | Medium | Analytics | Landing and exit page tracking | Planned |
 | Custom Alerts | Medium | Cloud | Traffic spike/drop notifications | Planned |
 | Roll-up Reporting | Medium | Insights | Aggregate data across sites | Planned |
 | Tag Manager | Medium | Cloud | Built-in tag management | Planned |
@@ -89,9 +89,9 @@
 
 | Category | Implemented | Total | Progress |
 |----------|-------------|-------|----------|
-| Analytics | 16 | 22 | 73% |
+| Analytics | 22 | 22 | 100% |
 | Insights | 13 | 21 | 62% |
-| Privacy | 3 | 4 | 75% |
+| Privacy | 4 | 4 | 100% |
 | Cloud | 6 | 13 | 46% |
 
 ---
