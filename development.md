@@ -6,7 +6,7 @@
 
 **Tech Stack:** React, Vite, TypeScript, Tailwind CSS, Supabase (Lovable Cloud)
 
-**Current Progress:** 38/42 features implemented (90%)
+**Current Progress:** 38/60 features implemented (63%)
 
 ---
 
@@ -56,14 +56,32 @@
 | High Performance | Hard | Cloud | Rollups optimized for scale |
 | Cross-domain Tracking | Hard | Analytics | Unified multi-domain analytics |
 
-### ⬜ Not Implemented Features (4)
+### ⬜ Not Implemented Features (22)
 
 | Feature | Difficulty | Category | Description | Status |
 |---------|------------|----------|-------------|--------|
+| Outbound Link Clicks | Easy | Analytics | Auto-track clicks on external links | Planned |
+| File Downloads | Easy | Analytics | Track PDF, docx, zip downloads | Planned |
+| Bot Detection | Easy | Privacy | Auto-exclude bots and spam traffic | Planned |
 | Google Search Console | Medium | Insights | SEO keywords and organic traffic | Requires Google Cloud credentials |
 | White Labeling | Medium | Cloud | Custom branding for dashboards | Planned |
+| Form Analytics | Medium | Analytics | Track form submissions & drop-offs | Planned |
+| Scroll Depth | Medium | Analytics | Track scroll percentage (0-100%) | Planned |
+| Time on Page | Medium | Analytics | Engagement-based time tracking | Planned |
+| Entry/Exit Pages | Medium | Analytics | Landing and exit page tracking | Planned |
+| Custom Alerts | Medium | Cloud | Traffic spike/drop notifications | Planned |
+| Roll-up Reporting | Medium | Insights | Aggregate data across sites | Planned |
+| Tag Manager | Medium | Cloud | Built-in tag management | Planned |
+| Log Analytics | Medium | Cloud | Import Apache/Nginx/IIS logs | Planned |
+| Looker Studio Connector | Medium | Cloud | BI tool integration | Planned |
 | Shopify Integration | Hard | Cloud | Automatic revenue tracking | Requires Shopify webhook secret |
 | GA Import | Hard | Cloud | Import from Google Analytics | Requires Google Cloud credentials |
+| Heatmaps | Hard | Insights | Click & scroll visualization | Planned |
+| Session Recordings | Hard | Insights | Video replays of user sessions | Planned |
+| A/B Testing | Hard | Insights | Built-in split testing | Planned |
+| Visitor Profiles | Hard | Insights | Individual user history | Planned |
+| SSO/SAML | Hard | Cloud | Enterprise single sign-on | Planned |
+| Page Overlay | Hard | Insights | On-site stats visualization | Planned |
 
 ---
 
@@ -71,10 +89,10 @@
 
 | Category | Implemented | Total | Progress |
 |----------|-------------|-------|----------|
-| Analytics | 16 | 16 | 100% |
-| Insights | 13 | 14 | 93% |
-| Privacy | 3 | 3 | 100% |
-| Cloud | 6 | 9 | 67% |
+| Analytics | 16 | 22 | 73% |
+| Insights | 13 | 21 | 62% |
+| Privacy | 3 | 4 | 75% |
+| Cloud | 6 | 13 | 46% |
 
 ---
 
