@@ -14,7 +14,12 @@ import {
     GoalsCard,
     RetentionCard,
     FunnelList,
-    LinksStats,
+    OutboundLinksStats,
+    FileDownloadsStats,
+    ScrollDepthStats,
+    EngagementStats,
+    EntryExitStats,
+    FormStats,
     TwitterStats
 } from "@/components/analytics";
 import {
@@ -188,7 +193,22 @@ export function SiteAnalytics({
                 </div>
 
                 {/* Outbound Links */}
-                {shouldShow('links') && <LinksStats siteId={site.id} dateRange={dateRange} />}
+                {shouldShow('links') && <OutboundLinksStats siteId={site.id} dateRange={dateRange} />}
+
+                {/* File Downloads */}
+                {shouldShow('downloads') && <FileDownloadsStats siteId={site.id} dateRange={dateRange} />}
+
+                {/* Scroll Depth */}
+                {shouldShow('scroll_depth') && <ScrollDepthStats siteId={site.id} dateRange={dateRange} />}
+
+                {/* Engagement */}
+                {shouldShow('engagement') && <EngagementStats siteId={site.id} dateRange={dateRange} />}
+
+                {/* Entry/Exit Pages */}
+                {shouldShow('entry_exit') && <EntryExitStats siteId={site.id} dateRange={dateRange} />}
+
+                {/* Form Analytics */}
+                {shouldShow('forms') && <FormStats siteId={site.id} dateRange={dateRange} />}
             </TabsContent>
 
             <TabsContent value="twitter" className="animate-fade-in-up">

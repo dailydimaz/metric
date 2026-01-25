@@ -111,6 +111,21 @@ function parseUserAgent(ua: string): { browser: string; os: string; device_type:
   return { browser, os, device_type };
 }
 
+// Bot detection patterns
+const BOT_PATTERNS = [
+  /bot/i, /crawler/i, /spider/i, /scraper/i,
+  /googlebot/i, /bingbot/i, /yandex/i, /baidu/i,
+  /facebookexternalhit/i, /twitterbot/i, /linkedinbot/i,
+  /slackbot/i, /discordbot/i, /whatsapp/i,
+  /semrush/i, /ahrefs/i, /mj12bot/i,
+  /headlesschrome/i, /phantomjs/i, /puppeteer/i
+];
+
+function isBot(userAgent: string): boolean {
+  if (!userAgent) return false;
+  return BOT_PATTERNS.some(pattern => pattern.test(userAgent));
+}
+
 // Generate a cryptographic hash for visitor fingerprinting using SHA-256
 // Rotates daily for privacy compliance (24h retention)
 async function generateVisitorId(ip: string, ua: string): Promise<string> {
@@ -318,6 +333,16 @@ serve(async (req) => {
     // Parse user agent
     const { browser, os, device_type } = parseUserAgent(userAgent);
 
+    // Bot detection
+    if (isBot(userAgent)) {
+      console.log(`Bot detected: ${userAgent} - Skipping event`);
+      // Return success to bot to avoid retries/errors
+      return new Response(JSON.stringify({ success: true, ignored: true }), {
+        status: 200,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
     // Get request origin for validation
     const reqOrigin = req.headers.get('origin');
 
@@ -374,9 +399,9 @@ serve(async (req) => {
 
         // Get allowed development origins from environment
         const allowedDevOrigins = getAllowedDevOrigins();
-        
+
         // Check if origin is an allowed dev origin
-        const isDevOrigin = allowedDevOrigins.some(domain => 
+        const isDevOrigin = allowedDevOrigins.some(domain =>
           originHost.includes(domain)
         );
 

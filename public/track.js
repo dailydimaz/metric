@@ -22,7 +22,7 @@
 
   // Get API URL from data-api attribute (required for self-hosted instances)
   var apiUrl = script && script.getAttribute('data-api');
-  
+
   // If no explicit API URL, try to derive from script source
   if (!apiUrl && script && script.src) {
     try {
@@ -235,6 +235,97 @@
     }, true);
   }
 
+  // Track file downloads
+  function setupFileDownloadTracking() {
+    var extensions = ['.pdf', '.docx', '.xlsx', '.zip', '.rar', '.csv', '.mp3', '.mp4', '.dmg', '.exe', '.pptx', '.jpg', '.png', '.gif', '.svg'];
+
+    document.addEventListener('click', function (e) {
+      var target = e.target;
+
+      // Find closest anchor element
+      while (target && target.tagName !== 'A') {
+        target = target.parentElement;
+      }
+
+      if (!target || target.tagName !== 'A') return;
+
+      var href = target.getAttribute('href');
+      if (!href) return;
+
+      // Check for extensions
+      var lowerHref = href.toLowerCase().split('?')[0]; // Remove query params for check
+      var ext = extensions.find(function (ex) { return lowerHref.endsWith(ex); });
+
+      if (ext) {
+        var filename = href.split('/').pop().split('?')[0] || 'details';
+
+        track('file_download', {
+          href: href,
+          filename: filename,
+          extension: ext.replace('.', '')
+        });
+      }
+    }, true);
+  }
+
+  // Track scroll depth
+  function setupScrollTracking() {
+    var milestones = [25, 50, 75, 90, 100];
+    var sent = {};
+    var cleanup = null;
+
+    function handleScroll() {
+      var scrollPercent = Math.round((window.scrollY + window.innerHeight) / document.body.scrollHeight * 100);
+      var url = window.location.pathname; // Store locally to check against current page
+
+      milestones.forEach(function (milestone) {
+        if (scrollPercent >= milestone && !sent[milestone]) {
+          sent[milestone] = true;
+          track('scroll_depth', {
+            percent: milestone,
+            url: url
+          });
+        }
+      });
+    }
+
+    // Debounce scroll event
+    var timeout;
+    function debouncedScroll() {
+      clearTimeout(timeout);
+      timeout = setTimeout(handleScroll, 200);
+    }
+
+    // Reset on navigation
+    function reset() {
+      sent = {};
+    }
+
+    // Hook into existing navigation handler if possible, or just observe location
+    // Since we have SPA support via pushState override above, we can piggyback or add a new listener.
+    // The verify simple way is to reset 'sent' when URL changes.
+    var lastUrl = window.location.pathname;
+
+    // We'll use a MutationObserver or just check on scroll if URL changed (simple)
+    // Or we rely on the handleNavigation we defined earlier? 
+    // Let's hook into the global navigation handling we essentially did with pushState/popstate.
+    // But since that logic is inside init() scope (or global IIFE scope), we can just add a check inside debouncedScroll
+
+    function checkUrl() {
+      if (window.location.pathname !== lastUrl) {
+        lastUrl = window.location.pathname;
+        reset();
+      }
+    }
+
+    window.addEventListener('scroll', function () {
+      checkUrl();
+      debouncedScroll();
+    });
+
+    // Also reset on initial load? No, it's empty.
+  }
+
   // Track 404 errors
   function track404() {
     // Check if page might be a 404
@@ -359,6 +450,10 @@
   function init() {
     trackPageview();
     setupOutboundTracking();
+    setupFileDownloadTracking();
+    setupScrollTracking();
+    setupEngagementTracking();
+    setupFormTracking();
     measureWebVitals();
 
     // Delay 404 check to allow page to fully load
