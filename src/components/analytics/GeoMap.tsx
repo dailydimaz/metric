@@ -1,6 +1,7 @@
 import { useMemo, useState } from "react";
-import { ComposableMap, Geographies, Geography, ZoomableGroup } from "react-simple-maps";
-import { scaleLinear } from "d3-scale";
+import { ComposableMap, Geographies, Geography, ZoomableGroup, Marker } from "react-simple-maps";
+import { scaleLinear, scaleSqrt } from "d3-scale";
+import { geoCentroid } from "d3-geo";
 import { GeoStat, CityStat } from "@/hooks/useAnalytics";
 import { Loader2, Users, Eye, MousePointerClick, TrendingUp, Plus, Minus, RotateCcw, Building2 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
@@ -43,6 +44,13 @@ function getCountryFlag(countryCode: string): string {
     return String.fromCodePoint(...[...code].map(c => c.charCodeAt(0) + offset));
 }
 
+function formatCompactNumber(number: number) {
+    return new Intl.NumberFormat('en-US', {
+        notation: "compact",
+        maximumFractionDigits: 1
+    }).format(number);
+}
+
 export function GeoMap({ data, cities, isLoading, onCountryClick }: GeoMapProps) {
     const [position, setPosition] = useState({ coordinates: [0, 20] as [number, number], zoom: 1 });
     const [hoveredCountry, setHoveredCountry] = useState<{
@@ -64,10 +72,13 @@ export function GeoMap({ data, cities, isLoading, onCountryClick }: GeoMapProps)
         }
         const maxVal = Math.max(...data.map(d => d.visits));
 
+        // Use sqrt scale for better distribution of colors
+        const scale = scaleSqrt<string>()
+            .domain([0, maxVal])
+            .range(["hsl(217, 91%, 95%)", "hsl(217, 91%, 40%)"]);
+
         return {
-            colorScale: scaleLinear<string>()
-                .domain([0, maxVal * 0.25, maxVal * 0.5, maxVal])
-                .range(["hsl(217, 91%, 95%)", "hsl(217, 91%, 80%)", "hsl(217, 91%, 60%)", "hsl(217, 91%, 40%)"]),
+            colorScale: scale,
             maxVisits: maxVal,
             hasData: true,
         };
@@ -122,7 +133,7 @@ export function GeoMap({ data, cities, isLoading, onCountryClick }: GeoMapProps)
     const topCitiesForHover = hoveredCountry ? getTopCities(hoveredCountry.code) : [];
 
     return (
-        <div className="w-full rounded-lg bg-gradient-to-br from-muted/20 to-muted/5 border border-border/50 relative overflow-hidden group">
+        <div className="w-full rounded-lg bg-gradient-to-br from-muted/20 to-muted/5 border border-border/50 relative group">
             {/* Zoom Controls */}
             <div className="absolute top-4 right-4 flex flex-col gap-1 z-10 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
                 <Button
@@ -154,7 +165,7 @@ export function GeoMap({ data, cities, isLoading, onCountryClick }: GeoMapProps)
             </div>
 
             {/* Map Container */}
-            <div className="h-[400px] relative cursor-move active:cursor-grabbing bg-[#f8fafc] dark:bg-[#0f172a]">
+            <div className="h-[400px] relative cursor-move active:cursor-grabbing bg-[#f8fafc] dark:bg-[#0f172a] rounded-t-lg overflow-hidden">
                 <ComposableMap
                     projectionConfig={{ scale: 147 }}
                     className="w-full h-full"
@@ -166,71 +177,117 @@ export function GeoMap({ data, cities, isLoading, onCountryClick }: GeoMapProps)
                         maxZoom={4}
                     >
                         <Geographies geography={GEO_URL}>
-                            {({ geographies }) =>
-                                geographies.map((geo) => {
-                                    const countryCode = geo.properties.ISO_A2?.toUpperCase();
-                                    const stat = countryDataMap.get(countryCode);
-                                    const hasVisits = !!stat && stat.visits > 0;
+                            {({ geographies }) => (
+                                <>
+                                    {geographies.map((geo) => {
+                                        const countryCode = geo.properties.ISO_A2?.toUpperCase();
+                                        const stat = countryDataMap.get(countryCode);
+                                        const hasVisits = !!stat && stat.visits > 0;
 
-                                    // Calculate fill color
-                                    const fill = hasVisits
-                                        ? colorScale(stat.visits)
-                                        : "hsl(var(--muted) / 0.5)";
+                                        // Calculate fill color
+                                        const fill = hasVisits
+                                            ? colorScale(stat.visits)
+                                            : "hsl(var(--muted) / 0.5)";
 
-                                    return (
-                                        <Geography
-                                            key={geo.rsmKey}
-                                            geography={geo}
-                                            onMouseEnter={(e) => {
-                                                const name = geo.properties.name || getCountryName(countryCode);
-                                                // Get bounding rect for safer tooltip positioning relative to viewport
-                                                setHoveredCountry({
-                                                    code: countryCode,
-                                                    name,
-                                                    visits: stat?.visits || 0,
-                                                    percentage: stat?.percentage || 0,
-                                                    x: e.clientX,
-                                                    y: e.clientY,
-                                                });
-                                            }}
-                                            onMouseLeave={() => {
-                                                setHoveredCountry(null);
-                                            }}
-                                            onClick={() => {
-                                                if (countryCode && onCountryClick && hasVisits) {
-                                                    onCountryClick(countryCode);
-                                                }
-                                            }}
-                                            style={{
-                                                default: {
-                                                    fill,
-                                                    outline: "none",
-                                                    stroke: "hsl(var(--border) / 0.5)",
-                                                    strokeWidth: 0.5,
-                                                    transition: "fill 0.2s ease",
-                                                },
-                                                hover: {
-                                                    fill: hasVisits ? "hsl(var(--primary))" : "hsl(var(--muted))",
-                                                    outline: "none",
-                                                    cursor: hasVisits ? "pointer" : "default",
-                                                    stroke: "hsl(var(--primary))",
-                                                    strokeWidth: hasVisits ? 1 : 0.5,
-                                                },
-                                                pressed: {
-                                                    fill: "hsl(var(--primary) / 0.8)",
-                                                    outline: "none",
-                                                },
-                                            }}
-                                        />
-                                    );
-                                })
-                            }
+                                        return (
+                                            <Geography
+                                                key={geo.rsmKey}
+                                                geography={geo}
+                                                onMouseEnter={(e) => {
+                                                    const name = geo.properties.name || getCountryName(countryCode);
+                                                    setHoveredCountry({
+                                                        code: countryCode,
+                                                        name,
+                                                        visits: stat?.visits || 0,
+                                                        percentage: stat?.percentage || 0,
+                                                        x: e.clientX,
+                                                        y: e.clientY,
+                                                    });
+                                                }}
+                                                onMouseLeave={() => {
+                                                    setHoveredCountry(null);
+                                                }}
+                                                onClick={() => {
+                                                    if (countryCode && onCountryClick && hasVisits) {
+                                                        onCountryClick(countryCode);
+                                                    }
+                                                }}
+                                                style={{
+                                                    default: {
+                                                        fill,
+                                                        outline: "none",
+                                                        stroke: "hsl(var(--border) / 0.5)",
+                                                        strokeWidth: 0.5,
+                                                        transition: "fill 0.2s ease",
+                                                    },
+                                                    hover: {
+                                                        fill: hasVisits ? "hsl(var(--primary))" : "hsl(var(--muted))",
+                                                        outline: "none",
+                                                        cursor: hasVisits ? "pointer" : "default",
+                                                        stroke: "hsl(var(--primary))",
+                                                        strokeWidth: hasVisits ? 1 : 0.5,
+                                                    },
+                                                    pressed: {
+                                                        fill: "hsl(var(--primary) / 0.8)",
+                                                        outline: "none",
+                                                    },
+                                                }}
+                                            />
+                                        );
+                                    })}
+                                    {/* Markers Layer */}
+                                    {geographies.map((geo) => {
+                                        const countryCode = geo.properties.ISO_A2?.toUpperCase();
+                                        const stat = countryDataMap.get(countryCode);
+                                        if (!stat || stat.visits <= 0) return null;
+
+                                        // Only show markers for countries with significant visits or if zoomed in
+                                        // or if there are few countries with data
+                                        const centroid = geoCentroid(geo);
+
+                                        return (
+                                            <Marker key={`${geo.rsmKey}-marker`} coordinates={centroid}>
+                                                <g
+                                                    onMouseEnter={(e) => {
+                                                        const name = geo.properties.name || getCountryName(countryCode);
+                                                        setHoveredCountry({
+                                                            code: countryCode,
+                                                            name,
+                                                            visits: stat.visits,
+                                                            percentage: stat.percentage,
+                                                            x: e.clientX,
+                                                            y: e.clientY,
+                                                        });
+                                                    }}
+                                                    onMouseLeave={() => setHoveredCountry(null)}
+                                                    onClick={() => onCountryClick?.(countryCode)}
+                                                    className="cursor-pointer hover:opacity-80 transition-opacity"
+                                                >
+                                                    <circle r={4 / position.zoom} fill="hsl(var(--primary))" stroke="bg-background" strokeWidth={1} />
+                                                    <text
+                                                        textAnchor="middle"
+                                                        y={-6 / position.zoom}
+                                                        style={{
+                                                            fontFamily: "system-ui",
+                                                            fill: "hsl(var(--foreground))",
+                                                            fontSize: `${Math.max(8, 10 / position.zoom)}px`,
+                                                            fontWeight: "bold",
+                                                            textShadow: "0px 0px 2px hsl(var(--background))"
+                                                        }}
+                                                    >
+                                                        {formatCompactNumber(stat.visits)}
+                                                    </text>
+                                                </g>
+                                            </Marker>
+                                        );
+                                    })}
+                                </>
+                            )}
                         </Geographies>
                     </ZoomableGroup>
                 </ComposableMap>
 
-                {/* Animated Tooltip - Fixed position following mouse but clamped to container could be hard, 
-            so we use fixed viewport positioning which is easier with clientX/Y */}
+                {/* Animated Tooltip */}
                 <AnimatePresence>
                     {hoveredCountry && (
                         <motion.div
@@ -240,14 +297,15 @@ export function GeoMap({ data, cities, isLoading, onCountryClick }: GeoMapProps)
                             transition={{ duration: 0.15 }}
                             style={{
                                 position: 'fixed',
-                                left: hoveredCountry.x + 20,
-                                top: hoveredCountry.y - 20,
+                                left: hoveredCountry.x + 10,
+                                top: hoveredCountry.y - 10,
                                 pointerEvents: 'none',
+                                zIndex: 100, // Ensure high z-index
                             }}
-                            className="z-50 min-w-[220px] max-w-[280px]"
+                            className="fixed z-50 min-w-[220px] max-w-[280px]"
                         >
                             <div className="bg-background/95 backdrop-blur-xl p-3 rounded-xl border border-border shadow-xl">
-                                <div className="flex items-center gap-2 mb-2 pb-2 border-b border-border/50">
+                                <div className="flex items-center gap-2 mb-2 pb-2 border-b border-border/50 transition-colors">
                                     <span className="text-2xl">{getCountryFlag(hoveredCountry.code)}</span>
                                     <div className="flex flex-col leading-none">
                                         <span className="font-semibold text-foreground text-sm">{hoveredCountry.name}</span>
@@ -323,8 +381,8 @@ export function GeoMap({ data, cities, isLoading, onCountryClick }: GeoMapProps)
                         <span className="text-xs text-muted-foreground font-medium">Density:</span>
                         <div className="flex items-center gap-1">
                             <div className="w-6 h-3 rounded-sm" style={{ backgroundColor: "hsl(217, 91%, 95%)" }} />
-                            <div className="w-6 h-3 rounded-sm" style={{ backgroundColor: "hsl(217, 91%, 80%)" }} />
-                            <div className="w-6 h-3 rounded-sm" style={{ backgroundColor: "hsl(217, 91%, 60%)" }} />
+                            <div className="w-6 h-3 rounded-sm" style={{ backgroundColor: "hsla(217, 91%, 70%)" }} />
+                            <div className="w-6 h-3 rounded-sm" style={{ backgroundColor: "hsl(217, 91%, 50%)" }} />
                             <div className="w-6 h-3 rounded-sm" style={{ backgroundColor: "hsl(217, 91%, 40%)" }} />
                         </div>
                     </div>
