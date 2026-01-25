@@ -50,7 +50,7 @@ export function getDateRangeFilter(dateRange: DateRange): { start: Date; end: Da
 // Convert filters to JSONB format for RPC calls
 function filtersToJsonb(filters?: AnalyticsFilter): Record<string, string> | null {
   if (!filters || Object.keys(filters).length === 0) return null;
-  
+
   const result: Record<string, string> = {};
   if (filters.country) result.country = filters.country;
   if (filters.browser) result.browser = filters.browser;
@@ -58,7 +58,7 @@ function filtersToJsonb(filters?: AnalyticsFilter): Record<string, string> | nul
   if (filters.device) result.device = filters.device;
   if (filters.url) result.url = filters.url;
   if (filters.referrerPattern) result.referrerPattern = filters.referrerPattern;
-  
+
   return Object.keys(result).length > 0 ? result : null;
 }
 
@@ -287,16 +287,26 @@ export function useDeviceStats({ siteId, dateRange, filters }: AnalyticsParams) 
 
       if (error) throw error;
 
-      const result = data as unknown as {
-        browsers: DeviceStat[];
-        operatingSystems: DeviceStat[];
-        devices: DeviceStat[];
+      const rawResult = data as unknown as {
+        browsers: { name: string; visits: number }[];
+        os: { name: string; visits: number }[];
+        devices: { name: string; visits: number }[];
       } | null;
 
+      const processStats = (items: { name: string; visits: number }[] | undefined): DeviceStat[] => {
+        if (!items || !Array.isArray(items)) return [];
+        const total = items.reduce((acc, item) => acc + (item.visits || 0), 0);
+        return items.map(item => ({
+          name: item.name,
+          value: item.visits,
+          percentage: total > 0 ? (item.visits / total) * 100 : 0
+        }));
+      };
+
       return {
-        browsers: result?.browsers || [],
-        operatingSystems: result?.operatingSystems || [],
-        devices: result?.devices || [],
+        browsers: processStats(rawResult?.browsers),
+        operatingSystems: processStats(rawResult?.os),
+        devices: processStats(rawResult?.devices),
       };
     },
     enabled: !!siteId,
