@@ -10,6 +10,7 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
+    "build:tracker": "vite build -c vite.tracker.config.ts",
     "build:dev": "vite build --mode development",
     "lint": "eslint .",
     "preview": "vite preview"
