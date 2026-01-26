@@ -14,6 +14,62 @@ export type Database = {
   }
   public: {
     Tables: {
+      alerts: {
+        Row: {
+          channel: Database["public"]["Enums"]["alert_channel"]
+          channel_config: Json | null
+          comparison: Database["public"]["Enums"]["alert_comparison"]
+          created_at: string
+          id: string
+          is_enabled: boolean | null
+          last_triggered_at: string | null
+          metric: Database["public"]["Enums"]["alert_metric"]
+          name: string
+          site_id: string
+          threshold: number
+          type: Database["public"]["Enums"]["alert_type"]
+          updated_at: string
+        }
+        Insert: {
+          channel: Database["public"]["Enums"]["alert_channel"]
+          channel_config?: Json | null
+          comparison: Database["public"]["Enums"]["alert_comparison"]
+          created_at?: string
+          id?: string
+          is_enabled?: boolean | null
+          last_triggered_at?: string | null
+          metric: Database["public"]["Enums"]["alert_metric"]
+          name: string
+          site_id: string
+          threshold: number
+          type: Database["public"]["Enums"]["alert_type"]
+          updated_at?: string
+        }
+        Update: {
+          channel?: Database["public"]["Enums"]["alert_channel"]
+          channel_config?: Json | null
+          comparison?: Database["public"]["Enums"]["alert_comparison"]
+          created_at?: string
+          id?: string
+          is_enabled?: boolean | null
+          last_triggered_at?: string | null
+          metric?: Database["public"]["Enums"]["alert_metric"]
+          name?: string
+          site_id?: string
+          threshold?: number
+          type?: Database["public"]["Enums"]["alert_type"]
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "alerts_site_id_fkey"
+            columns: ["site_id"]
+            isOneToOne: false
+            referencedRelation: "sites"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       analytics_aggregation_watermark: {
         Row: {
           last_aggregated_at: string
@@ -1532,6 +1588,145 @@ export type Database = {
         }
         Relationships: []
       }
+      experiment_assignments: {
+        Row: {
+          converted: boolean | null
+          converted_at: string | null
+          created_at: string
+          experiment_id: string
+          id: number
+          variant_id: string
+          visitor_id: string
+        }
+        Insert: {
+          converted?: boolean | null
+          converted_at?: string | null
+          created_at?: string
+          experiment_id: string
+          id?: never
+          variant_id: string
+          visitor_id: string
+        }
+        Update: {
+          converted?: boolean | null
+          converted_at?: string | null
+          created_at?: string
+          experiment_id?: string
+          id?: never
+          variant_id?: string
+          visitor_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "experiment_assignments_experiment_id_fkey"
+            columns: ["experiment_id"]
+            isOneToOne: false
+            referencedRelation: "experiments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "experiment_assignments_variant_id_fkey"
+            columns: ["variant_id"]
+            isOneToOne: false
+            referencedRelation: "experiment_variants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      experiment_variants: {
+        Row: {
+          config: Json | null
+          created_at: string
+          experiment_id: string
+          id: string
+          is_control: boolean | null
+          name: string
+          weight: number
+        }
+        Insert: {
+          config?: Json | null
+          created_at?: string
+          experiment_id: string
+          id?: string
+          is_control?: boolean | null
+          name: string
+          weight?: number
+        }
+        Update: {
+          config?: Json | null
+          created_at?: string
+          experiment_id?: string
+          id?: string
+          is_control?: boolean | null
+          name?: string
+          weight?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "experiment_variants_experiment_id_fkey"
+            columns: ["experiment_id"]
+            isOneToOne: false
+            referencedRelation: "experiments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      experiments: {
+        Row: {
+          created_at: string
+          description: string | null
+          ended_at: string | null
+          goal_event: string
+          goal_url: string | null
+          id: string
+          name: string
+          site_id: string
+          started_at: string | null
+          status: Database["public"]["Enums"]["experiment_status"]
+          target_url: string
+          traffic_percentage: number | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          ended_at?: string | null
+          goal_event?: string
+          goal_url?: string | null
+          id?: string
+          name: string
+          site_id: string
+          started_at?: string | null
+          status?: Database["public"]["Enums"]["experiment_status"]
+          target_url: string
+          traffic_percentage?: number | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          ended_at?: string | null
+          goal_event?: string
+          goal_url?: string | null
+          id?: string
+          name?: string
+          site_id?: string
+          started_at?: string | null
+          status?: Database["public"]["Enums"]["experiment_status"]
+          target_url?: string
+          traffic_percentage?: number | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "experiments_site_id_fkey"
+            columns: ["site_id"]
+            isOneToOne: false
+            referencedRelation: "sites"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       funnels: {
         Row: {
           created_at: string
@@ -1698,6 +1893,100 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "gsc_stats_site_id_fkey"
+            columns: ["site_id"]
+            isOneToOne: false
+            referencedRelation: "sites"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      heatmap_clicks: {
+        Row: {
+          created_at: string
+          element_selector: string | null
+          element_text: string | null
+          id: number
+          session_id: string | null
+          site_id: string
+          url_path: string
+          viewport_h: number
+          viewport_w: number
+          visitor_id: string | null
+          x: number
+          y: number
+        }
+        Insert: {
+          created_at?: string
+          element_selector?: string | null
+          element_text?: string | null
+          id?: never
+          session_id?: string | null
+          site_id: string
+          url_path: string
+          viewport_h: number
+          viewport_w: number
+          visitor_id?: string | null
+          x: number
+          y: number
+        }
+        Update: {
+          created_at?: string
+          element_selector?: string | null
+          element_text?: string | null
+          id?: never
+          session_id?: string | null
+          site_id?: string
+          url_path?: string
+          viewport_h?: number
+          viewport_w?: number
+          visitor_id?: string | null
+          x?: number
+          y?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "heatmap_clicks_site_id_fkey"
+            columns: ["site_id"]
+            isOneToOne: false
+            referencedRelation: "sites"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      heatmap_scrolls: {
+        Row: {
+          created_at: string
+          id: number
+          max_scroll_percentage: number
+          session_id: string | null
+          site_id: string
+          url_path: string
+          viewport_h: number | null
+          visitor_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          id?: never
+          max_scroll_percentage: number
+          session_id?: string | null
+          site_id: string
+          url_path: string
+          viewport_h?: number | null
+          visitor_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: never
+          max_scroll_percentage?: number
+          session_id?: string | null
+          site_id?: string
+          url_path?: string
+          viewport_h?: number | null
+          visitor_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "heatmap_scrolls_site_id_fkey"
             columns: ["site_id"]
             isOneToOne: false
             referencedRelation: "sites"
@@ -1898,6 +2187,65 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "links_site_id_fkey"
+            columns: ["site_id"]
+            isOneToOne: false
+            referencedRelation: "sites"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      log_imports: {
+        Row: {
+          completed_at: string | null
+          created_at: string
+          error_message: string | null
+          file_name: string
+          file_size: number | null
+          file_url: string
+          id: string
+          rows_failed: number | null
+          rows_processed: number | null
+          site_id: string
+          started_at: string | null
+          status: Database["public"]["Enums"]["log_import_status"]
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          completed_at?: string | null
+          created_at?: string
+          error_message?: string | null
+          file_name: string
+          file_size?: number | null
+          file_url: string
+          id?: string
+          rows_failed?: number | null
+          rows_processed?: number | null
+          site_id: string
+          started_at?: string | null
+          status?: Database["public"]["Enums"]["log_import_status"]
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          completed_at?: string | null
+          created_at?: string
+          error_message?: string | null
+          file_name?: string
+          file_size?: number | null
+          file_url?: string
+          id?: string
+          rows_failed?: number | null
+          rows_processed?: number | null
+          site_id?: string
+          started_at?: string | null
+          status?: Database["public"]["Enums"]["log_import_status"]
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "log_imports_site_id_fkey"
             columns: ["site_id"]
             isOneToOne: false
             referencedRelation: "sites"
@@ -2175,32 +2523,110 @@ export type Database = {
           },
         ]
       }
-      sites: {
+      site_group_members: {
         Row: {
           created_at: string
+          group_id: string
+          id: string
+          site_id: string
+        }
+        Insert: {
+          created_at?: string
+          group_id: string
+          id?: string
+          site_id: string
+        }
+        Update: {
+          created_at?: string
+          group_id?: string
+          id?: string
+          site_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "site_group_members_group_id_fkey"
+            columns: ["group_id"]
+            isOneToOne: false
+            referencedRelation: "site_groups"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "site_group_members_site_id_fkey"
+            columns: ["site_id"]
+            isOneToOne: false
+            referencedRelation: "sites"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      site_groups: {
+        Row: {
+          created_at: string
+          description: string | null
+          id: string
+          name: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          name: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          name?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      sites: {
+        Row: {
+          brand_color: string | null
+          brand_logo_url: string | null
+          created_at: string
+          custom_css: string | null
+          custom_domain: string | null
           domain: string | null
           id: string
           name: string
+          remove_branding: boolean | null
           timezone: string | null
           tracking_id: string
           updated_at: string
           user_id: string
         }
         Insert: {
+          brand_color?: string | null
+          brand_logo_url?: string | null
           created_at?: string
+          custom_css?: string | null
+          custom_domain?: string | null
           domain?: string | null
           id?: string
           name: string
+          remove_branding?: boolean | null
           timezone?: string | null
           tracking_id?: string
           updated_at?: string
           user_id: string
         }
         Update: {
+          brand_color?: string | null
+          brand_logo_url?: string | null
           created_at?: string
+          custom_css?: string | null
+          custom_domain?: string | null
           domain?: string | null
           id?: string
           name?: string
+          remove_branding?: boolean | null
           timezone?: string | null
           tracking_id?: string
           updated_at?: string
@@ -2252,6 +2678,56 @@ export type Database = {
           },
         ]
       }
+      sso_providers: {
+        Row: {
+          cert: string | null
+          created_at: string
+          domain: string
+          entry_point: string | null
+          id: string
+          is_enabled: boolean | null
+          issuer: string | null
+          metadata_xml: string | null
+          provider_type: string
+          site_id: string
+          updated_at: string
+        }
+        Insert: {
+          cert?: string | null
+          created_at?: string
+          domain: string
+          entry_point?: string | null
+          id?: string
+          is_enabled?: boolean | null
+          issuer?: string | null
+          metadata_xml?: string | null
+          provider_type?: string
+          site_id: string
+          updated_at?: string
+        }
+        Update: {
+          cert?: string | null
+          created_at?: string
+          domain?: string
+          entry_point?: string | null
+          id?: string
+          is_enabled?: boolean | null
+          issuer?: string | null
+          metadata_xml?: string | null
+          provider_type?: string
+          site_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "sso_providers_site_id_fkey"
+            columns: ["site_id"]
+            isOneToOne: false
+            referencedRelation: "sites"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       subscriptions: {
         Row: {
           cancel_at_period_end: boolean | null
@@ -2293,6 +2769,53 @@ export type Database = {
           user_id?: string
         }
         Relationships: []
+      }
+      tags: {
+        Row: {
+          config: Json | null
+          created_at: string
+          id: string
+          is_enabled: boolean | null
+          load_priority: number | null
+          name: string
+          site_id: string
+          trigger_rules: Json | null
+          type: Database["public"]["Enums"]["tag_type"]
+          updated_at: string
+        }
+        Insert: {
+          config?: Json | null
+          created_at?: string
+          id?: string
+          is_enabled?: boolean | null
+          load_priority?: number | null
+          name: string
+          site_id: string
+          trigger_rules?: Json | null
+          type: Database["public"]["Enums"]["tag_type"]
+          updated_at?: string
+        }
+        Update: {
+          config?: Json | null
+          created_at?: string
+          id?: string
+          is_enabled?: boolean | null
+          load_priority?: number | null
+          name?: string
+          site_id?: string
+          trigger_rules?: Json | null
+          type?: Database["public"]["Enums"]["tag_type"]
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tags_site_id_fkey"
+            columns: ["site_id"]
+            isOneToOne: false
+            referencedRelation: "sites"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       team_invitations: {
         Row: {
@@ -2405,6 +2928,62 @@ export type Database = {
           user_id?: string
         }
         Relationships: []
+      }
+      visitor_profiles: {
+        Row: {
+          company: string | null
+          created_at: string
+          custom_properties: Json | null
+          email: string | null
+          first_seen_at: string
+          id: string
+          last_seen_at: string
+          name: string | null
+          site_id: string
+          total_pageviews: number | null
+          total_visits: number | null
+          updated_at: string
+          visitor_id: string
+        }
+        Insert: {
+          company?: string | null
+          created_at?: string
+          custom_properties?: Json | null
+          email?: string | null
+          first_seen_at?: string
+          id?: string
+          last_seen_at?: string
+          name?: string | null
+          site_id: string
+          total_pageviews?: number | null
+          total_visits?: number | null
+          updated_at?: string
+          visitor_id: string
+        }
+        Update: {
+          company?: string | null
+          created_at?: string
+          custom_properties?: Json | null
+          email?: string | null
+          first_seen_at?: string
+          id?: string
+          last_seen_at?: string
+          name?: string | null
+          site_id?: string
+          total_pageviews?: number | null
+          total_visits?: number | null
+          updated_at?: string
+          visitor_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "visitor_profiles_site_id_fkey"
+            columns: ["site_id"]
+            isOneToOne: false
+            referencedRelation: "sites"
+            referencedColumns: ["id"]
+          },
+        ]
       }
     }
     Views: {
@@ -2807,10 +3386,22 @@ export type Database = {
       }
     }
     Enums: {
+      alert_channel: "email" | "slack" | "webhook"
+      alert_comparison: "gt" | "lt"
+      alert_metric: "visitors" | "pageviews" | "bounce_rate"
+      alert_type: "traffic_spike" | "traffic_drop" | "uptime"
+      experiment_status: "draft" | "active" | "paused" | "ended"
       integration_provider:
         | "google_analytics"
         | "shopify"
         | "google_search_console"
+      log_import_status: "pending" | "processing" | "completed" | "failed"
+      tag_type:
+        | "custom_html"
+        | "google_analytics"
+        | "facebook_pixel"
+        | "google_tag_manager"
+        | "custom_script"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -2938,10 +3529,23 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
+      alert_channel: ["email", "slack", "webhook"],
+      alert_comparison: ["gt", "lt"],
+      alert_metric: ["visitors", "pageviews", "bounce_rate"],
+      alert_type: ["traffic_spike", "traffic_drop", "uptime"],
+      experiment_status: ["draft", "active", "paused", "ended"],
       integration_provider: [
         "google_analytics",
         "shopify",
         "google_search_console",
+      ],
+      log_import_status: ["pending", "processing", "completed", "failed"],
+      tag_type: [
+        "custom_html",
+        "google_analytics",
+        "facebook_pixel",
+        "google_tag_manager",
+        "custom_script",
       ],
     },
   },
