@@ -1,5 +1,5 @@
 import { useState, useCallback } from "react";
-import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from "recharts";
+import { AreaChart, Area, XAxis, YAxis, CartesianGrid } from "recharts";
 import { motion, AnimatePresence } from "framer-motion";
 import { TimeSeriesData } from "@/hooks/useAnalytics";
 import { format, parseISO } from "date-fns";
@@ -8,6 +8,14 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import {
+  ChartContainer,
+  ChartTooltip,
+  ChartTooltipContent,
+  ChartLegend,
+  ChartLegendContent,
+  type ChartConfig,
+} from "@/components/ui/chart";
 
 interface VisitorChartProps {
   data: TimeSeriesData[] | undefined;
@@ -15,6 +23,25 @@ interface VisitorChartProps {
   showComparison?: boolean;
   onDateClick?: (date: string) => void;
 }
+
+const chartConfig = {
+  pageviews: {
+    label: "Pageviews",
+    color: "hsl(var(--primary))",
+  },
+  visitors: {
+    label: "Unique Visitors",
+    color: "hsl(var(--chart-2))",
+  },
+  prevPageviews: {
+    label: "Previous Pageviews",
+    color: "hsl(var(--primary))",
+  },
+  prevVisitors: {
+    label: "Previous Visitors",
+    color: "hsl(var(--chart-2))",
+  },
+} satisfies ChartConfig;
 
 export function VisitorChart({ data, isLoading, showComparison = true, onDateClick }: VisitorChartProps) {
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
@@ -109,130 +136,101 @@ export function VisitorChart({ data, isLoading, showComparison = true, onDateCli
         </CardHeader>
 
         <CardContent className="p-6">
-          <div className="h-[350px]">
-            <ResponsiveContainer width="100%" height="100%">
-              <AreaChart 
-                data={chartData} 
-                margin={{ top: 10, right: 10, left: 0, bottom: 0 }}
-                onClick={handleClick}
-                style={{ cursor: onDateClick ? 'pointer' : 'default' }}
-              >
-                <defs>
-                  <linearGradient id="colorPageviews" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="hsl(var(--primary))" stopOpacity={0.3} />
-                    <stop offset="95%" stopColor="hsl(var(--primary))" stopOpacity={0} />
-                  </linearGradient>
-                  <linearGradient id="colorVisitors" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="hsl(var(--chart-2))" stopOpacity={0.3} />
-                    <stop offset="95%" stopColor="hsl(var(--chart-2))" stopOpacity={0} />
-                  </linearGradient>
-                </defs>
-                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="hsl(var(--border))" opacity={0.5} />
-                <XAxis
-                  dataKey="displayDate"
-                  tick={{ fill: 'hsl(var(--foreground))', fontSize: 12, opacity: 0.6 }}
-                  tickLine={false}
-                  axisLine={false}
-                  dy={10}
-                />
-                <YAxis
-                  tick={{ fill: 'hsl(var(--foreground))', fontSize: 12, opacity: 0.6 }}
-                  tickLine={false}
-                  axisLine={false}
-                  dx={-10}
-                />
-                <Tooltip
-                  contentStyle={{
-                    backgroundColor: 'hsl(var(--card))',
-                    borderColor: 'hsl(var(--border))',
-                    borderRadius: '0.75rem',
-                    boxShadow: '0 10px 40px -10px rgb(0 0 0 / 0.2)',
-                    color: 'hsl(var(--foreground))',
-                    padding: '12px 16px',
-                  }}
-                  itemStyle={{ color: 'hsl(var(--foreground))' }}
-                  cursor={{ 
-                    stroke: 'hsl(var(--primary))', 
-                    strokeWidth: 2, 
-                    opacity: 0.3,
-                    strokeDasharray: '4 4'
-                  }}
-                  wrapperStyle={{ outline: 'none' }}
-                />
-                <Legend
-                  verticalAlign="top"
-                  height={36}
-                  iconType="circle"
-                  wrapperStyle={{ paddingBottom: '20px' }}
-                />
+          <ChartContainer config={chartConfig} className="min-h-[350px] w-full">
+            <AreaChart 
+              data={chartData} 
+              margin={{ top: 10, right: 10, left: 0, bottom: 0 }}
+              onClick={handleClick}
+              style={{ cursor: onDateClick ? 'pointer' : 'default' }}
+              accessibilityLayer
+            >
+              <defs>
+                <linearGradient id="colorPageviews" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="5%" stopColor="var(--color-pageviews)" stopOpacity={0.3} />
+                  <stop offset="95%" stopColor="var(--color-pageviews)" stopOpacity={0} />
+                </linearGradient>
+                <linearGradient id="colorVisitors" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="5%" stopColor="var(--color-visitors)" stopOpacity={0.3} />
+                  <stop offset="95%" stopColor="var(--color-visitors)" stopOpacity={0} />
+                </linearGradient>
+              </defs>
+              <CartesianGrid strokeDasharray="3 3" vertical={false} />
+              <XAxis
+                dataKey="displayDate"
+                tickLine={false}
+                axisLine={false}
+                tickMargin={10}
+              />
+              <YAxis
+                tickLine={false}
+                axisLine={false}
+                tickMargin={10}
+              />
+              <ChartTooltip
+                cursor={{ strokeDasharray: '4 4' }}
+                content={<ChartTooltipContent indicator="dot" />}
+              />
+              <ChartLegend content={<ChartLegendContent />} />
+              <Area
+                type="monotone"
+                dataKey="pageviews"
+                stroke="var(--color-pageviews)"
+                fillOpacity={1}
+                fill="url(#colorPageviews)"
+                strokeWidth={2.5}
+                animationDuration={1200}
+                animationEasing="ease-out"
+                dot={false}
+                activeDot={{ 
+                  r: 6, 
+                  strokeWidth: 2, 
+                  stroke: 'hsl(var(--background))',
+                }}
+              />
+              {showComparison && (
                 <Area
                   type="monotone"
-                  dataKey="pageviews"
-                  name="Pageviews"
-                  stroke="hsl(var(--primary))"
-                  fillOpacity={1}
-                  fill="url(#colorPageviews)"
-                  strokeWidth={2.5}
+                  dataKey="prevPageviews"
+                  stroke="var(--color-prevPageviews)"
+                  strokeDasharray="4 4"
+                  fillOpacity={0}
+                  strokeWidth={2}
+                  strokeOpacity={0.3}
                   animationDuration={1200}
-                  animationEasing="ease-out"
-                  dot={false}
-                  activeDot={{ 
-                    r: 6, 
-                    strokeWidth: 2, 
-                    stroke: 'hsl(var(--background))',
-                    fill: 'hsl(var(--primary))'
-                  }}
                 />
-                {showComparison && (
-                  <Area
-                    type="monotone"
-                    dataKey="prevPageviews"
-                    name="Previous Pageviews"
-                    stroke="hsl(var(--primary))"
-                    strokeDasharray="4 4"
-                    fillOpacity={0}
-                    strokeWidth={2}
-                    strokeOpacity={0.3}
-                    animationDuration={1200}
-                  />
-                )}
+              )}
+              <Area
+                type="monotone"
+                dataKey="visitors"
+                stroke="var(--color-visitors)"
+                fillOpacity={1}
+                fill="url(#colorVisitors)"
+                strokeWidth={2.5}
+                animationDuration={1200}
+                animationEasing="ease-out"
+                dot={false}
+                activeDot={{ 
+                  r: 6, 
+                  strokeWidth: 2, 
+                  stroke: 'hsl(var(--background))',
+                }}
+              />
+              {showComparison && (
                 <Area
                   type="monotone"
-                  dataKey="visitors"
-                  name="Unique Visitors"
-                  stroke="hsl(var(--chart-2))"
-                  fillOpacity={1}
-                  fill="url(#colorVisitors)"
-                  strokeWidth={2.5}
+                  dataKey="prevVisitors"
+                  stroke="var(--color-prevVisitors)"
+                  strokeDasharray="4 4"
+                  fillOpacity={0}
+                  strokeWidth={2}
+                  strokeOpacity={0.3}
                   animationDuration={1200}
-                  animationEasing="ease-out"
-                  dot={false}
-                  activeDot={{ 
-                    r: 6, 
-                    strokeWidth: 2, 
-                    stroke: 'hsl(var(--background))',
-                    fill: 'hsl(var(--chart-2))'
-                  }}
                 />
-                {showComparison && (
-                  <Area
-                    type="monotone"
-                    dataKey="prevVisitors"
-                    name="Previous Visitors"
-                    stroke="hsl(var(--chart-2))"
-                    strokeDasharray="4 4"
-                    fillOpacity={0}
-                    strokeWidth={2}
-                    strokeOpacity={0.3}
-                    animationDuration={1200}
-                  />
-                )}
-              </AreaChart>
-            </ResponsiveContainer>
-          </div>
+              )}
+            </AreaChart>
+          </ChartContainer>
         </CardContent>
       </Card>
     </motion.div>
   );
 }
-
