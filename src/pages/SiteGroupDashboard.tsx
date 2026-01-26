@@ -70,7 +70,7 @@ export default function SiteGroupDashboard() {
                 _end_date: dates.end,
             });
             if (error) throw error;
-            return data as GroupStats;
+            return data as unknown as GroupStats;
         },
         enabled: !!groupId,
     });

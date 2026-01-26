@@ -1,5 +1,6 @@
 import { useParams, useSearchParams } from 'react-router-dom';
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
+import { sanitizeCSS } from '@/lib/cssSanitizer';
 import { format, subDays } from 'date-fns';
 import { usePublicDashboardData } from '@/hooks/usePublicDashboard';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -91,15 +92,38 @@ export default function PublicDashboard() {
     setSubmittedPassword(password);
   };
 
-  if (data?.custom_css) {
-    try {
-      const style = document.createElement('style');
-      style.innerHTML = data.custom_css;
-      document.head.appendChild(style);
-    } catch (e) {
-      console.error('Failed to inject custom CSS', e);
+  const styleRef = useRef<HTMLStyleElement | null>(null);
+
+  useEffect(() => {
+    // Clean up any previously injected style
+    if (styleRef.current) {
+      styleRef.current.remove();
+      styleRef.current = null;
     }
-  }
+
+    if (data?.custom_css) {
+      try {
+        // Sanitize CSS before injection to prevent CSS injection attacks
+        const sanitizedCSS = sanitizeCSS(data.custom_css);
+        if (sanitizedCSS) {
+          const style = document.createElement('style');
+          style.textContent = sanitizedCSS;
+          document.head.appendChild(style);
+          styleRef.current = style;
+        }
+      } catch (e) {
+        console.error('Failed to inject custom CSS', e);
+      }
+    }
+
+    // Cleanup on unmount
+    return () => {
+      if (styleRef.current) {
+        styleRef.current.remove();
+        styleRef.current = null;
+      }
+    };
+  }, [data?.custom_css]);
 
   if (isLoading) {
     return (

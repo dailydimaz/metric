@@ -74,10 +74,16 @@ export function AlertsManager({ siteId }: AlertsManagerProps) {
         try {
             const { error } = await supabase
                 .from("alerts")
-                .insert({
+                .insert([{
                     site_id: siteId,
-                    ...newAlert
-                });
+                    name: newAlert.name || 'Untitled Alert',
+                    type: newAlert.type || 'traffic_spike',
+                    metric: newAlert.metric || 'visitors',
+                    threshold: newAlert.threshold || 100,
+                    comparison: newAlert.comparison || 'gt',
+                    channel: newAlert.channel || 'email',
+                    is_enabled: newAlert.is_enabled ?? true
+                }]);
 
             if (error) throw error;
 
