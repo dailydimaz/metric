@@ -17,3 +17,6 @@ verify_jwt = false
 
 [functions.sso-saml]
 verify_jwt = false
+
+[functions.overlay-stats]
+verify_jwt = false

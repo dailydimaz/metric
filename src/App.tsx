@@ -36,6 +36,7 @@ import PrivacyPolicy from "./pages/PrivacyPolicy";
 import Terms from "./pages/Terms";
 import Lightweight from "./pages/Lightweight";
 import CampaignBuilder from "./pages/CampaignBuilder";
+import PageOverlay from "./pages/PageOverlay";
 import Migrate from "./pages/Migrate";
 import Changelog from "./pages/Changelog";
 import { ThemeProvider } from "./components/ThemeProvider";
@@ -99,6 +100,7 @@ const AppRoutes = () => {
           <Route path="/dashboard/sites/:siteId/attribution" element={<Attribution />} />
           <Route path="/dashboard/settings" element={<Settings />} />
           <Route path="/tools/campaign-builder" element={<CampaignBuilder />} />
+          <Route path="/tools/page-overlay" element={<PageOverlay />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </motion.div>
