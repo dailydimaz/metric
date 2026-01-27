@@ -18,6 +18,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Site } from "@/hooks/useSites";
 import { getAppUrl, getTrackingApiUrl, getPixelUrl } from "@/lib/config";
 import { LogImportCard } from "@/components/settings/LogImportCard";
+import { LookerStudioCard } from "@/components/settings/LookerStudioCard";
 
 interface SiteSettingsPanelProps {
     site: Site;
@@ -258,6 +259,11 @@ export function SiteSettingsPanel({ site, onEdit, onDelete, deletePending }: Sit
                 {/* Log Analytics Import */}
                 <div className="mt-4 pt-4 border-t border-border">
                     <LogImportCard siteId={site.id} />
+                </div>
+
+                {/* BI Tools / Looker Studio Connector */}
+                <div className="mt-4 pt-4 border-t border-border">
+                    <LookerStudioCard siteId={site.id} />
                 </div>
             </div>
         </div>
