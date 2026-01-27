@@ -35,6 +35,8 @@ import { TeamCard } from "@/components/settings/TeamCard";
 import { CustomDashboardsCard } from "@/components/settings/CustomDashboardsCard";
 import { WebhookIntegrationCard } from "@/components/settings/WebhookIntegrationCard";
 import { PublicDashboardCard } from "@/components/settings/PublicDashboardCard";
+import { WhiteLabelingCard } from "@/components/settings/WhiteLabelingCard";
+import { useSites } from "@/hooks/useSites";
 
 interface Profile {
   id: string;
@@ -45,6 +47,8 @@ interface Profile {
 
 export default function Settings() {
   const { user, loading: authLoading } = useAuth();
+  const { sites } = useSites();
+  const firstSite = sites[0];
   const navigate = useNavigate();
   const { toast } = useToast();
 
@@ -450,6 +454,9 @@ export default function Settings() {
 
         {/* Public Dashboard Sharing */}
         <PublicDashboardCard />
+
+        {/* White Labeling - customize public dashboard branding */}
+        {firstSite && <WhiteLabelingCard siteId={firstSite.id} />}
 
         {/* Email Preferences */}
         <EmailPreferences />
