@@ -1,7 +1,8 @@
-
+import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { DashboardLayout } from "@/components/dashboard/DashboardLayout";
+import { CreateSiteGroupDialog } from "@/components/dashboard/CreateSiteGroupDialog";
 import { Card, CardHeader, CardTitle, CardContent, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Plus, LayoutDashboard, Loader2, ArrowRight } from "lucide-react";
@@ -11,6 +12,7 @@ import { format } from "date-fns";
 
 export default function SiteGroups() {
     const navigate = useNavigate();
+    const [createDialogOpen, setCreateDialogOpen] = useState(false);
     const { data: groups, isLoading } = useQuery({
         queryKey: ["site-groups"],
         queryFn: async () => {
@@ -63,7 +65,11 @@ export default function SiteGroups() {
                             Manage your site groups and view aggregated analytics
                         </p>
                     </div>
-                    <Button className="shadow-lg hover:shadow-xl hover:shadow-primary/20 transition-all duration-300 gap-2" size="lg">
+                    <Button 
+                        onClick={() => setCreateDialogOpen(true)}
+                        className="shadow-lg hover:shadow-xl hover:shadow-primary/20 transition-all duration-300 gap-2" 
+                        size="lg"
+                    >
                         <Plus className="mr-2 h-4 w-4" />
                         Create Group
                     </Button>
@@ -103,7 +109,11 @@ export default function SiteGroups() {
                             <p className="text-muted-foreground text-center max-w-sm mb-8 text-lg">
                                 Create a group to aggregate analytics from multiple sites.
                             </p>
-                            <Button size="lg" className="shadow-lg shadow-primary/20">
+                            <Button 
+                                size="lg" 
+                                className="shadow-lg shadow-primary/20"
+                                onClick={() => setCreateDialogOpen(true)}
+                            >
                                 <Plus className="mr-2 h-5 w-5" />
                                 Create your first group
                             </Button>
@@ -111,6 +121,11 @@ export default function SiteGroups() {
                     )}
                 </motion.div>
             </motion.div>
+
+            <CreateSiteGroupDialog 
+                open={createDialogOpen} 
+                onOpenChange={setCreateDialogOpen} 
+            />
         </DashboardLayout>
     );
 }
