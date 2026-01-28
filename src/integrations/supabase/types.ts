@@ -405,6 +405,30 @@ export type Database = {
         }
         Relationships: []
       }
+      city_coordinates: {
+        Row: {
+          city_name: string
+          country_code: string
+          latitude: number
+          longitude: number
+          updated_at: string
+        }
+        Insert: {
+          city_name: string
+          country_code: string
+          latitude: number
+          longitude: number
+          updated_at?: string
+        }
+        Update: {
+          city_name?: string
+          country_code?: string
+          latitude?: number
+          longitude?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
       custom_dashboards: {
         Row: {
           created_at: string
