@@ -29,7 +29,7 @@ export default function Experiments() {
   const navigate = useNavigate();
   const { siteId: siteIdParam } = useParams<{ siteId: string }>();
   const { toast } = useToast();
-  const { sites } = useSites();
+  const { sites, isLoading: sitesLoading } = useSites();
   
   const [experiments, setExperiments] = useState<Experiment[]>([]);
   const [loading, setLoading] = useState(true);
@@ -44,7 +44,18 @@ export default function Experiments() {
     if (siteId) fetchExperiments();
   }, [siteId]);
 
-  // Redirect if no site ID in URL
+  // Show loading while sites are being fetched
+  if (sitesLoading) {
+    return (
+      <DashboardLayout>
+        <div className="flex items-center justify-center py-12">
+          <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+        </div>
+      </DashboardLayout>
+    );
+  }
+
+  // Redirect if no site ID in URL but sites exist
   if (!siteIdParam && sites.length > 0) {
     navigate(`/dashboard/sites/${sites[0].id}/experiments`, { replace: true });
     return null;
