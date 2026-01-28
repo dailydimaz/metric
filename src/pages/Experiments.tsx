@@ -1,10 +1,10 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { DashboardLayout } from "@/components/dashboard/DashboardLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
-import { Plus, Loader2, ArrowLeft, FlaskConical, Play, Pause, CheckCircle2, FileText, Users, TrendingUp, Settings2 } from "lucide-react";
+import { Plus, Loader2, ArrowLeft, FlaskConical, Play, CheckCircle2, FileText, Users, Settings2 } from "lucide-react";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -40,46 +40,9 @@ export default function Experiments() {
   const siteId = siteIdParam || sites[0]?.id;
   const site = sites.find(s => s.id === siteId);
 
-  useEffect(() => {
-    if (siteId) fetchExperiments();
-  }, [siteId]);
-
-  // Show loading while sites are being fetched
-  if (sitesLoading) {
-    return (
-      <DashboardLayout>
-        <div className="flex items-center justify-center py-12">
-          <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
-        </div>
-      </DashboardLayout>
-    );
-  }
-
-  // Redirect if no site ID in URL but sites exist
-  if (!siteIdParam && sites.length > 0) {
-    navigate(`/dashboard/sites/${sites[0].id}/experiments`, { replace: true });
-    return null;
-  }
-
-  if (!siteId || !site) {
-    return (
-      <DashboardLayout>
-        <div className="text-center py-12">
-          <FlaskConical className="h-12 w-12 mx-auto text-muted-foreground/50 mb-4" />
-          <h2 className="text-xl font-semibold mb-2">No site selected</h2>
-          <p className="text-muted-foreground mb-4">
-            Please select a site to view A/B tests.
-          </p>
-          <Button onClick={() => navigate("/dashboard")}>
-            <ArrowLeft className="h-4 w-4 mr-2" />
-            Back to Dashboard
-          </Button>
-        </div>
-      </DashboardLayout>
-    );
-  }
-
-  const fetchExperiments = async () => {
+  // Define fetchExperiments before useEffect
+  const fetchExperiments = useCallback(async () => {
+    if (!siteId) return;
     try {
       const { data, error } = await supabase
         .from("experiments")
@@ -94,10 +57,14 @@ export default function Experiments() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [siteId]);
+
+  useEffect(() => {
+    if (siteId) fetchExperiments();
+  }, [siteId, fetchExperiments]);
 
   const handleCreate = async () => {
-    if (!newExpName) return;
+    if (!newExpName || !siteId) return;
     try {
       const { data: exp, error: expError } = await supabase
         .from("experiments")
@@ -154,6 +121,41 @@ export default function Experiments() {
   const activeExperiments = experiments.filter(e => e.status === 'active').length;
   const completedExperiments = experiments.filter(e => e.status === 'completed').length;
   const totalVariants = experiments.reduce((sum, e) => sum + (e.variants?.length || 0), 0);
+
+  // Show loading while sites are being fetched
+  if (sitesLoading) {
+    return (
+      <DashboardLayout>
+        <div className="flex items-center justify-center py-12">
+          <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+        </div>
+      </DashboardLayout>
+    );
+  }
+
+  // Redirect if no site ID in URL but sites exist
+  if (!siteIdParam && sites.length > 0) {
+    navigate(`/dashboard/sites/${sites[0].id}/experiments`, { replace: true });
+    return null;
+  }
+
+  if (!siteId || !site) {
+    return (
+      <DashboardLayout>
+        <div className="text-center py-12">
+          <FlaskConical className="h-12 w-12 mx-auto text-muted-foreground/50 mb-4" />
+          <h2 className="text-xl font-semibold mb-2">No site selected</h2>
+          <p className="text-muted-foreground mb-4">
+            Please select a site to view A/B tests.
+          </p>
+          <Button onClick={() => navigate("/dashboard")}>
+            <ArrowLeft className="h-4 w-4 mr-2" />
+            Back to Dashboard
+          </Button>
+        </div>
+      </DashboardLayout>
+    );
+  }
 
   return (
     <DashboardLayout>
