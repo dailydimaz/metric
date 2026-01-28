@@ -51,10 +51,8 @@ const getNavItems = (siteId: string | null, billingEnabled: boolean) => {
   // Add cloud-only items
   if (billingEnabled) {
     items.push({ icon: LinkIcon, label: "Links", href: siteId ? `/dashboard/sites/${siteId}/links` : "/dashboard", siteSpecific: true });
+    items.push({ icon: Link2, label: "URL Builder", href: "/tools/campaign-builder" });
   }
-
-  // URL Builder is always available
-  items.push({ icon: Link2, label: "URL Builder", href: "/tools/campaign-builder" });
 
 
 

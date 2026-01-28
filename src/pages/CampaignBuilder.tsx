@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Copy, History, RotateCcw, ArrowRight, ExternalLink, Link as LinkIcon, Check, Plus, MousePointerClick } from "lucide-react";
+import { Copy, History, RotateCcw, ArrowRight, ExternalLink, Link as LinkIcon, Check, Plus, MousePointerClick, Cloud } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -13,7 +13,7 @@ import { useUserLinks, getShortUrl } from "@/hooks/useLinks";
 import { isBillingEnabled } from "@/lib/billing";
 import { formatDistanceToNow } from "date-fns";
 import { Skeleton } from "@/components/ui/skeleton";
-
+import { getCloudUrl } from "@/lib/config";
 interface CampaignParams {
   website: string;
   source: string;
@@ -26,8 +26,9 @@ interface CampaignParams {
 export default function CampaignBuilder() {
   const { toast } = useToast();
   const { sites } = useSites();
-  const { data: userLinks, isLoading: linksLoading } = useUserLinks();
   const billingEnabled = isBillingEnabled();
+  const { data: userLinks, isLoading: linksLoading } = useUserLinks();
+  const cloudUrl = getCloudUrl();
   
   const [params, setParams] = useState<CampaignParams>({
     website: "",
@@ -127,6 +128,39 @@ export default function CampaignBuilder() {
       description: "Short link copied to clipboard.",
     });
   };
+
+  // Cloud-only feature gate
+  if (!billingEnabled) {
+    return (
+      <DashboardLayout>
+        <div className="container max-w-2xl py-16 animate-fade-in">
+          <Card className="text-center">
+            <CardHeader className="pb-4">
+              <div className="mx-auto mb-4 h-16 w-16 rounded-full bg-primary/10 flex items-center justify-center">
+                <Cloud className="h-8 w-8 text-primary" />
+              </div>
+              <CardTitle className="text-2xl">Cloud Feature</CardTitle>
+              <CardDescription className="text-base">
+                Campaign URL Builder with short link tracking is available on mmmetric Cloud.
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <p className="text-sm text-muted-foreground">
+                Create trackable campaign URLs with UTM parameters and generate short links for better analytics.
+              </p>
+              {cloudUrl && (
+                <Button asChild>
+                  <a href={cloudUrl} target="_blank" rel="noopener noreferrer">
+                    Try mmmetric Cloud
+                  </a>
+                </Button>
+              )}
+            </CardContent>
+          </Card>
+        </div>
+      </DashboardLayout>
+    );
+  }
 
   return (
     <DashboardLayout>
