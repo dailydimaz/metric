@@ -3067,6 +3067,21 @@ export type Database = {
               visits: number
             }[]
           }
+        | {
+            Args: {
+              p_end_date: string
+              p_site_id: string
+              p_start_date: string
+            }
+            Returns: {
+              city: string
+              country: string
+              latitude: number
+              longitude: number
+              unique_visitors: number
+              visits: number
+            }[]
+          }
       get_device_stats:
         | {
             Args: { _end_date: string; _site_id: string; _start_date: string }
