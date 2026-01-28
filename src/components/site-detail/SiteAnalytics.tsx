@@ -20,7 +20,8 @@ import {
     EngagementStats,
     EntryExitStats,
     FormStats,
-    TwitterStats
+    TwitterStats,
+    HeatmapView
 } from "@/components/analytics";
 import {
     AnalyticsFilter,
@@ -112,6 +113,7 @@ export function SiteAnalytics({
             <TabsList>
                 <TabsTrigger value="overview">Overview</TabsTrigger>
                 <TabsTrigger value="twitter">X / Twitter</TabsTrigger>
+                <TabsTrigger value="heatmap">Heatmap</TabsTrigger>
             </TabsList>
 
             <TabsContent value="overview" className="space-y-6 animate-fade-in-up">
@@ -213,6 +215,10 @@ export function SiteAnalytics({
 
             <TabsContent value="twitter" className="animate-fade-in-up">
                 <TwitterStats siteId={site.id} dateRange={dateRange} />
+            </TabsContent>
+
+            <TabsContent value="heatmap" className="animate-fade-in-up">
+                <HeatmapView siteId={site.id} />
             </TabsContent>
         </Tabs>
     );

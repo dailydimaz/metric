@@ -34,3 +34,5 @@ export { ScrollDepthStats } from "./ScrollDepthStats";
 export { EngagementStats } from "./EngagementStats";
 export { EntryExitStats } from "./EntryExitStats";
 export { FormStats } from "./FormStats";
+export { HeatmapView } from "./HeatmapView";
+export { GeoMap } from "./GeoMap";
