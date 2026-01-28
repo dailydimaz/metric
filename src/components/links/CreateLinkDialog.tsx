@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -31,6 +31,13 @@ export function CreateLinkDialog({
   const [slug, setSlug] = useState("");
   const [description, setDescription] = useState("");
   const { createLink } = useLinks(siteId);
+
+  // Update URL when initialUrl changes (e.g., when dialog reopens with new URL)
+  useEffect(() => {
+    if (open && initialUrl) {
+      setUrl(initialUrl);
+    }
+  }, [open, initialUrl]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

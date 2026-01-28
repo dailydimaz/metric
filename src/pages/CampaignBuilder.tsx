@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Copy, History, RotateCcw, ArrowRight, ExternalLink, Link as LinkIcon, Check, Plus, MousePointerClick, Cloud } from "lucide-react";
+import { Copy, History, RotateCcw, ArrowRight, ExternalLink, Link as LinkIcon, Check, Plus, MousePointerClick, Cloud, Loader2, Link2, Shuffle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -7,13 +7,14 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter }
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 import { DashboardLayout } from "@/components/dashboard/DashboardLayout";
-import { CreateLinkDialog } from "@/components/links/CreateLinkDialog";
 import { useSites } from "@/hooks/useSites";
-import { useUserLinks, getShortUrl } from "@/hooks/useLinks";
+import { useLinks, useUserLinks, getShortUrl, generateSlug } from "@/hooks/useLinks";
 import { isBillingEnabled } from "@/lib/billing";
 import { formatDistanceToNow } from "date-fns";
 import { Skeleton } from "@/components/ui/skeleton";
 import { getCloudUrl } from "@/lib/config";
+import { Badge } from "@/components/ui/badge";
+
 interface CampaignParams {
   website: string;
   source: string;
@@ -41,8 +42,13 @@ export default function CampaignBuilder() {
 
   const [generatedUrl, setGeneratedUrl] = useState("");
   const [copied, setCopied] = useState(false);
+  const [copiedShort, setCopiedShort] = useState(false);
   const [selectedSiteId, setSelectedSiteId] = useState<string>("");
-  const [createLinkDialogOpen, setCreateLinkDialogOpen] = useState(false);
+  const [customSlug, setCustomSlug] = useState("");
+  const [createdShortLink, setCreatedShortLink] = useState<string | null>(null);
+
+  // Use links hook for the selected site
+  const { createLink } = useLinks(selectedSiteId);
 
   // Set default site
   useEffect(() => {
@@ -73,6 +79,8 @@ export default function CampaignBuilder() {
       if (params.content) url.searchParams.set("utm_content", params.content);
 
       setGeneratedUrl(url.toString());
+      // Reset created short link when URL changes
+      setCreatedShortLink(null);
     } catch {
       // Invalid URL, just ignore
       setGeneratedUrl("");
@@ -97,6 +105,18 @@ export default function CampaignBuilder() {
     setTimeout(() => setCopied(false), 2000);
   };
 
+  const handleCopyShortLink = async () => {
+    if (!createdShortLink) return;
+    
+    await navigator.clipboard.writeText(createdShortLink);
+    setCopiedShort(true);
+    toast({
+      title: "Copied!",
+      description: "Short link copied to clipboard.",
+    });
+    setTimeout(() => setCopiedShort(false), 2000);
+  };
+
   const handleReset = () => {
     setParams({
       website: "",
@@ -106,18 +126,43 @@ export default function CampaignBuilder() {
       term: "",
       content: "",
     });
+    setCreatedShortLink(null);
+    setCustomSlug("");
   };
 
-  const handleSaveAsShortLink = () => {
-    if (!selectedSiteId) {
+  const handleCreateShortLink = async () => {
+    if (!selectedSiteId || !generatedUrl) {
       toast({
-        title: "Select a site",
-        description: "Please select a site to save the short link to.",
+        title: "Missing information",
+        description: "Please select a site and generate a URL first.",
         variant: "destructive",
       });
       return;
     }
-    setCreateLinkDialogOpen(true);
+
+    try {
+      const result = await createLink.mutateAsync({
+        siteId: selectedSiteId,
+        originalUrl: generatedUrl,
+        slug: customSlug.trim() || undefined,
+        description: params.name ? `Campaign: ${params.name}` : undefined,
+      });
+      
+      const shortUrl = getShortUrl(result.slug);
+      setCreatedShortLink(shortUrl);
+      setCustomSlug("");
+      
+      // Auto-copy to clipboard
+      await navigator.clipboard.writeText(shortUrl);
+      setCopiedShort(true);
+      setTimeout(() => setCopiedShort(false), 2000);
+    } catch {
+      // Error handled in hook
+    }
+  };
+
+  const handleRandomSlug = () => {
+    setCustomSlug(generateSlug());
   };
 
   const copyShortLink = async (slug: string) => {
@@ -168,7 +213,7 @@ export default function CampaignBuilder() {
         <div className="flex flex-col gap-2">
           <h1 className="text-3xl font-bold tracking-tight">Campaign URL Builder</h1>
           <p className="text-muted-foreground">
-            Generate custom campaign parameters for your advertising URLs.
+            Generate custom campaign parameters and create trackable short links.
           </p>
         </div>
 
@@ -270,8 +315,9 @@ export default function CampaignBuilder() {
             </Card>
           </div>
 
-          {/* Preview Section */}
+          {/* Preview & Shortener Section */}
           <div className="lg:col-span-5 space-y-6">
+            {/* Generated URL Card */}
             <Card className="overflow-hidden border-primary/20 shadow-lg transition-all duration-300">
               <CardHeader className="bg-primary/5 pb-4">
                 <CardTitle className="text-lg flex items-center gap-2">
@@ -279,140 +325,197 @@ export default function CampaignBuilder() {
                   Generated URL
                 </CardTitle>
               </CardHeader>
-              <CardContent className="pt-6 space-y-6">
+              <CardContent className="pt-6 space-y-4">
                 <div className="p-4 bg-muted rounded-lg break-all font-mono text-sm min-h-[5rem] flex items-center">
                   {generatedUrl || <span className="text-muted-foreground italic">Fill in the website URL to see the result...</span>}
                 </div>
 
-                <div className="flex gap-3">
-                  <Button
-                    className="flex-1 gap-2"
-                    onClick={handleCopy}
-                    disabled={!generatedUrl}
-                  >
-                    {copied ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
-                    {copied ? "Copied!" : "Copy URL"}
-                  </Button>
+                <Button
+                  className="w-full gap-2"
+                  variant="outline"
+                  onClick={handleCopy}
+                  disabled={!generatedUrl}
+                >
+                  {copied ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
+                  {copied ? "Copied!" : "Copy Full URL"}
+                </Button>
+              </CardContent>
+            </Card>
+
+            {/* Link Shortener Card */}
+            <Card className="border-2 border-dashed border-primary/30 bg-primary/5">
+              <CardHeader className="pb-3">
+                <CardTitle className="text-lg flex items-center gap-2">
+                  <Link2 className="h-5 w-5 text-primary" />
+                  Link Shortener
+                </CardTitle>
+                <CardDescription>
+                  Create a trackable short link for better click analytics
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                {/* Site Selector */}
+                <div className="space-y-2">
+                  <Label>Select Site</Label>
+                  <Select value={selectedSiteId} onValueChange={setSelectedSiteId}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select a site" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {sites?.map((site) => (
+                        <SelectItem key={site.id} value={site.id}>
+                          {site.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </div>
 
-                {/* Save as Short Link - Cloud only */}
-                {billingEnabled && generatedUrl && (
-                  <div className="border-t pt-4 space-y-3">
-                    <Label>Save as Short Link</Label>
-                    <div className="flex gap-2">
-                      <Select value={selectedSiteId} onValueChange={setSelectedSiteId}>
-                        <SelectTrigger className="flex-1">
-                          <SelectValue placeholder="Select a site" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {sites?.map((site) => (
-                            <SelectItem key={site.id} value={site.id}>
-                              {site.name}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
+                {/* Custom Slug Input */}
+                <div className="space-y-2">
+                  <Label>Custom Slug (optional)</Label>
+                  <div className="flex gap-2">
+                    <Input
+                      placeholder="my-campaign"
+                      value={customSlug}
+                      onChange={(e) => setCustomSlug(e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, ""))}
+                      className="flex-1"
+                    />
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="icon"
+                      onClick={handleRandomSlug}
+                      title="Generate random slug"
+                    >
+                      <Shuffle className="h-4 w-4" />
+                    </Button>
+                  </div>
+                  {customSlug && (
+                    <p className="text-xs text-muted-foreground">
+                      Preview: {getShortUrl(customSlug)}
+                    </p>
+                  )}
+                </div>
+
+                {/* Create Short Link Button */}
+                <Button
+                  className="w-full gap-2"
+                  onClick={handleCreateShortLink}
+                  disabled={!generatedUrl || !selectedSiteId || createLink.isPending}
+                >
+                  {createLink.isPending ? (
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                  ) : (
+                    <Plus className="h-4 w-4" />
+                  )}
+                  Create Short Link
+                </Button>
+
+                {/* Created Short Link Display */}
+                {createdShortLink && (
+                  <div className="p-4 bg-green-500/10 border border-green-500/20 rounded-lg space-y-3 animate-fade-in">
+                    <div className="flex items-center gap-2">
+                      <Badge variant="outline" className="bg-green-500/10 text-green-600 border-green-500/30">
+                        <Check className="h-3 w-3 mr-1" />
+                        Created
+                      </Badge>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <code className="flex-1 p-2 bg-background rounded text-sm font-mono truncate">
+                        {createdShortLink}
+                      </code>
                       <Button
                         variant="outline"
-                        onClick={handleSaveAsShortLink}
-                        disabled={!selectedSiteId}
-                        className="gap-2"
+                        size="sm"
+                        onClick={handleCopyShortLink}
+                        className="shrink-0"
                       >
-                        <Plus className="h-4 w-4" />
-                        Shorten
+                        {copiedShort ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
                       </Button>
-                    </div>
-                    <p className="text-xs text-muted-foreground">
-                      Create a trackable short link for this URL
-                    </p>
-                  </div>
-                )}
-
-                {generatedUrl && (
-                  <div className="border-t pt-6 text-center">
-                    <Label className="mb-4 block text-muted-foreground">QR Code</Label>
-                    <div className="bg-white p-4 rounded-xl inline-block shadow-sm">
-                      <img
-                        src={`https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=${encodeURIComponent(generatedUrl)}`}
-                        alt="Campaign QR Code"
-                        className="w-40 h-40"
-                      />
                     </div>
                   </div>
                 )}
               </CardContent>
             </Card>
 
-            {/* Recent Links from Database - Cloud only */}
-            {billingEnabled && (
+            {/* QR Code */}
+            {generatedUrl && (
               <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2 text-lg">
-                    <History className="h-5 w-5" />
-                    Recent Short Links
-                  </CardTitle>
-                  <CardDescription>
-                    Your recently created short links
-                  </CardDescription>
-                </CardHeader>
-                <CardContent className="p-0">
-                  {linksLoading ? (
-                    <div className="p-4 space-y-3">
-                      {[...Array(3)].map((_, i) => (
-                        <Skeleton key={i} className="h-12 w-full" />
-                      ))}
-                    </div>
-                  ) : userLinks && userLinks.length > 0 ? (
-                    <div className="divide-y max-h-[400px] overflow-y-auto">
-                      {userLinks.slice(0, 10).map((link) => (
-                        <button
-                          key={link.id}
-                          onClick={() => copyShortLink(link.slug)}
-                          className="w-full text-left p-4 hover:bg-muted/50 transition-colors group flex items-start gap-3"
-                        >
-                          <div className="flex-1 min-w-0 space-y-1">
-                            <p className="font-mono text-sm truncate">{link.slug}</p>
-                            <p className="text-xs text-muted-foreground truncate">
-                              → {link.original_url}
-                            </p>
-                            {link.description && (
-                              <p className="text-xs text-muted-foreground/70 truncate">
-                                {link.description}
-                              </p>
-                            )}
-                          </div>
-                          <div className="text-right shrink-0">
-                            <p className="text-xs text-muted-foreground">
-                              {formatDistanceToNow(new Date(link.created_at), { addSuffix: true })}
-                            </p>
-                          </div>
-                          <ArrowRight className="h-4 w-4 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity mt-1" />
-                        </button>
-                      ))}
-                    </div>
-                  ) : (
-                    <div className="p-6 text-center text-sm text-muted-foreground">
-                      <MousePointerClick className="h-8 w-8 mx-auto mb-2 opacity-30" />
-                      <p>No short links yet</p>
-                      <p className="text-xs mt-1">Create one above to get started</p>
-                    </div>
-                  )}
+                <CardContent className="pt-6 text-center">
+                  <Label className="mb-4 block text-muted-foreground">QR Code</Label>
+                  <div className="bg-white p-4 rounded-xl inline-block shadow-sm">
+                    <img
+                      src={`https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=${encodeURIComponent(createdShortLink || generatedUrl)}`}
+                      alt="Campaign QR Code"
+                      className="w-40 h-40"
+                    />
+                  </div>
+                  <p className="text-xs text-muted-foreground mt-2">
+                    {createdShortLink ? "QR code points to short link" : "QR code points to full URL"}
+                  </p>
                 </CardContent>
               </Card>
             )}
+
+            {/* Recent Links */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2 text-lg">
+                  <History className="h-5 w-5" />
+                  Recent Short Links
+                </CardTitle>
+                <CardDescription>
+                  Click to copy any link
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="p-0">
+                {linksLoading ? (
+                  <div className="p-4 space-y-3">
+                    {[...Array(3)].map((_, i) => (
+                      <Skeleton key={i} className="h-12 w-full" />
+                    ))}
+                  </div>
+                ) : userLinks && userLinks.length > 0 ? (
+                  <div className="divide-y max-h-[300px] overflow-y-auto">
+                    {userLinks.slice(0, 10).map((link) => (
+                      <button
+                        key={link.id}
+                        onClick={() => copyShortLink(link.slug)}
+                        className="w-full text-left p-4 hover:bg-muted/50 transition-colors group flex items-start gap-3"
+                      >
+                        <div className="flex-1 min-w-0 space-y-1">
+                          <p className="font-mono text-sm truncate text-primary">{getShortUrl(link.slug)}</p>
+                          <p className="text-xs text-muted-foreground truncate">
+                            → {link.original_url}
+                          </p>
+                          {link.description && (
+                            <p className="text-xs text-muted-foreground/70 truncate">
+                              {link.description}
+                            </p>
+                          )}
+                        </div>
+                        <div className="text-right shrink-0">
+                          <p className="text-xs text-muted-foreground">
+                            {formatDistanceToNow(new Date(link.created_at), { addSuffix: true })}
+                          </p>
+                        </div>
+                        <Copy className="h-4 w-4 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity mt-1" />
+                      </button>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="p-6 text-center text-sm text-muted-foreground">
+                    <MousePointerClick className="h-8 w-8 mx-auto mb-2 opacity-30" />
+                    <p>No short links yet</p>
+                    <p className="text-xs mt-1">Create one above to get started</p>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
           </div>
         </div>
       </div>
-
-      {/* Create Link Dialog */}
-      {selectedSiteId && (
-        <CreateLinkDialog
-          open={createLinkDialogOpen}
-          onOpenChange={setCreateLinkDialogOpen}
-          siteId={selectedSiteId}
-          initialUrl={generatedUrl}
-        />
-      )}
     </DashboardLayout>
   );
 }
