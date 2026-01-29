@@ -26,11 +26,31 @@ function isLovablePlatformDomain(): boolean {
 function validateOAuthUrl(url: string): boolean {
   try {
     const oauthUrl = new URL(url);
-    const allowedHosts = [
-      "accounts.google.com",
-      "appleid.apple.com",
+
+    // Only allow http(s) URLs (block javascript:, data:, etc.)
+    if (!['https:', 'http:'].includes(oauthUrl.protocol)) return false;
+
+    // Provider endpoints
+    const providerHosts = new Set(["accounts.google.com", "appleid.apple.com"]);
+    if (providerHosts.has(oauthUrl.hostname)) return true;
+
+    // OAuth initiation typically starts at our auth service endpoint (then redirects to provider).
+    // Allow only known auth infrastructure hosts + known authorize paths.
+    const allowedHostSuffixes = [
+      ".supabase.co",
+      ".supabase.com",
+      ".lovable.app",
+      ".lovableproject.com",
+      ".lovable.dev",
     ];
-    return allowedHosts.some(host => oauthUrl.hostname === host);
+    const hostOk = allowedHostSuffixes.some((suffix) => oauthUrl.hostname === suffix.slice(1) || oauthUrl.hostname.endsWith(suffix));
+    if (!hostOk) return false;
+
+    const allowedPaths = [
+      "/auth/v1/authorize",
+      "/~oauth/initiate",
+    ];
+    return allowedPaths.some((p) => oauthUrl.pathname === p || oauthUrl.pathname.startsWith(p + "/"));
   } catch {
     return false;
   }
