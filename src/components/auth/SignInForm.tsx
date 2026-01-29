@@ -4,7 +4,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { Loader2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
-import { lovable } from "@/integrations/lovable";
+import { signInWithGoogle } from "@/lib/googleAuth";
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -37,9 +37,7 @@ export function SignInForm({ onToggleMode, onForgotPassword, onSuccess }: SignIn
     const handleGoogleSignIn = async () => {
         setGoogleLoading(true);
         try {
-            const { error } = await lovable.auth.signInWithOAuth("google", {
-                redirect_uri: window.location.origin,
-            });
+            const { error } = await signInWithGoogle("/dashboard");
             if (error) {
                 toast({
                     title: "Google Sign-In Failed",
