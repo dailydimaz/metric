@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { Loader2, Link2, Unlink } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
-import { lovable } from "@/integrations/lovable";
+import { signInWithGoogle } from "@/lib/googleAuth";
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -50,9 +50,7 @@ export function ConnectedAccountsCard() {
   const handleLinkGoogle = async () => {
     setLinkingGoogle(true);
     try {
-      const { error } = await lovable.auth.signInWithOAuth("google", {
-        redirect_uri: window.location.origin + "/settings",
-      });
+      const { error } = await signInWithGoogle("/dashboard/settings");
       if (error) {
         toast({
           title: "Failed to link Google",
