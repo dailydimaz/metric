@@ -12,24 +12,43 @@ function extractDomain(url: string | null): string | null {
     }
 }
 
-// Helper to verify origin matches site domain
+// Helper to verify origin matches site domain or is a trusted platform domain
 function verifyOrigin(origin: string | null, referer: string | null, siteDomain: string): boolean {
     const normalizedSiteDomain = siteDomain.replace(/^www\./, '').toLowerCase();
     
-    // Check origin header first
     const originDomain = extractDomain(origin);
+    const refererDomain = extractDomain(referer);
+    
+    // Check origin header first
     if (originDomain && originDomain.toLowerCase() === normalizedSiteDomain) {
         return true;
     }
     
     // Fall back to referer
-    const refererDomain = extractDomain(referer);
     if (refererDomain && refererDomain.toLowerCase() === normalizedSiteDomain) {
         return true;
     }
     
     // Allow localhost for development
     if (originDomain === 'localhost' || refererDomain === 'localhost') {
+        return true;
+    }
+    
+    // Allow Lovable preview and published domains (for testing and demo purposes)
+    const trustedDomains = [
+        'lovable.app',
+        'lovableproject.com',
+        'lovable.dev'
+    ];
+    
+    const checkTrusted = (domain: string | null): boolean => {
+        if (!domain) return false;
+        return trustedDomains.some(trusted => 
+            domain === trusted || domain.endsWith('.' + trusted)
+        );
+    };
+    
+    if (checkTrusted(originDomain) || checkTrusted(refererDomain)) {
         return true;
     }
     
