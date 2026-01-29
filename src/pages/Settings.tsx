@@ -36,6 +36,7 @@ import { CustomDashboardsCard } from "@/components/settings/CustomDashboardsCard
 import { WebhookIntegrationCard } from "@/components/settings/WebhookIntegrationCard";
 import { PublicDashboardCard } from "@/components/settings/PublicDashboardCard";
 import { WhiteLabelingCard } from "@/components/settings/WhiteLabelingCard";
+import { ConnectedAccountsCard } from "@/components/settings/ConnectedAccountsCard";
 import { useSites } from "@/hooks/useSites";
 
 interface Profile {
@@ -417,10 +418,13 @@ export default function Settings() {
               disabled={changingPassword}
               variant="outline"
             >
-              {changingPassword ? "Updating..." : "Update Password"}
+            {changingPassword ? "Updating..." : "Update Password"}
             </Button>
           </CardContent>
         </Card>
+
+        {/* Connected Accounts */}
+        <ConnectedAccountsCard />
 
         {/* Two-Factor Authentication */}
         <TwoFactorSetup />
