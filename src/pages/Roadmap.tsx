@@ -61,6 +61,13 @@ import {
   UserCircle,
   PieChart,
   Layers3,
+  Activity,
+  Bug,
+  BookOpen,
+  Chrome,
+  MessageSquare,
+  TrendingUp,
+  Play,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -574,6 +581,110 @@ const features: Feature[] = [
     description: "On-site stats visualization overlay",
     icon: Layers3,
     implemented: true,
+    difficulty: "hard",
+    category: "insights",
+  },
+
+  // NEW FEATURES - Not Implemented
+
+  // High-Impact
+  {
+    name: "Core Web Vitals",
+    description: "Track LCP, CLS, FID, TTFB per page for SEO & performance",
+    icon: Activity,
+    implemented: false,
+    difficulty: "medium",
+    category: "analytics",
+  },
+  {
+    name: "Error Tracking",
+    description: "Privacy-first JavaScript error monitoring without Sentry",
+    icon: Bug,
+    implemented: false,
+    difficulty: "medium",
+    category: "analytics",
+  },
+  {
+    name: "Site Search Analytics",
+    description: "Track internal search queries and zero-results patterns",
+    icon: Search,
+    implemented: false,
+    difficulty: "medium",
+    category: "analytics",
+  },
+  {
+    name: "AI Anomaly Detection",
+    description: "Auto-detect unusual traffic spikes and drops with ML",
+    icon: Sparkles,
+    implemented: false,
+    difficulty: "hard",
+    category: "insights",
+  },
+  {
+    name: "Reading Depth",
+    description: "Track actual reading engagement vs scroll-through behavior",
+    icon: BookOpen,
+    implemented: false,
+    difficulty: "medium",
+    category: "analytics",
+  },
+  {
+    name: "Video Analytics",
+    description: "Track play, pause, and completion rates for embedded videos",
+    icon: Play,
+    implemented: false,
+    difficulty: "medium",
+    category: "analytics",
+  },
+
+  // Developer-Focused
+  {
+    name: "Mobile SDK",
+    description: "React Native and Flutter SDK for mobile app analytics",
+    icon: Smartphone,
+    implemented: false,
+    difficulty: "hard",
+    category: "cloud",
+  },
+  {
+    name: "Browser Extension",
+    description: "Quick stats overlay when visiting your tracked sites",
+    icon: Chrome,
+    implemented: false,
+    difficulty: "hard",
+    category: "cloud",
+  },
+  {
+    name: "Slack/Discord Bot",
+    description: "Daily summaries and alert notifications in team chat",
+    icon: MessageSquare,
+    implemented: false,
+    difficulty: "medium",
+    category: "cloud",
+  },
+
+  // Marketing/Growth
+  {
+    name: "Social Share Tracking",
+    description: "Track when users share your content to social platforms",
+    icon: Share2,
+    implemented: false,
+    difficulty: "medium",
+    category: "analytics",
+  },
+  {
+    name: "Content Decay Alerts",
+    description: "Get notified when high-performing pages start declining",
+    icon: TrendingDown,
+    implemented: false,
+    difficulty: "medium",
+    category: "insights",
+  },
+  {
+    name: "Predictive Forecasting",
+    description: "ML-based traffic predictions for planning and capacity",
+    icon: TrendingUp,
+    implemented: false,
     difficulty: "hard",
     category: "insights",
   },
